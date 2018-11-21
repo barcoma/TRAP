@@ -5,4 +5,4 @@
 	ignorecase = true
 	precomposeunicode = true
 [remote "origin"]
-	url = /Users/marcobalzer/Desktop/MapBox/TRAP/.git
+	url = https://github.com/barcoma/TRAP.git
