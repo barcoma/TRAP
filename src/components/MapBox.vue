@@ -17,7 +17,8 @@ export default {
     return {
       lat: Number,
       long: Number,
-      mainMapp: Object
+      mainMapp: Object,
+      marker: Object,
     }
   },
   methods: {
@@ -49,6 +50,12 @@ export default {
       accessToken: mapboxgl.accessToken
     }));; 
 
+  this.marker = new mapboxgl.Marker({
+    color: '#ffd1dc',
+    draggable: true
+  })
+        .setLngLat([this.long, this.lat])
+        .addTo(this.mainMapp)
   
   }
 }
