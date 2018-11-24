@@ -12,6 +12,7 @@
 <script>
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
+import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
 
 
 export default {
@@ -62,9 +63,13 @@ export default {
          
   this.geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken
-      });
+    });
 
-  this.mainMapp.addControl(this.geocoder);
+  this.mainMapp.addControl(this.geocoder, 'top-right');
+
+  this.mainMapp.addControl(new MapboxDirections({
+      accessToken: mapboxgl.accessToken
+    }), 'bottom-left');
 
   this.marker = new mapboxgl.Marker({
     color: '#EE0000',
@@ -92,7 +97,7 @@ export default {
  
 #map {
 	width: 100%;
-	height: 600px;
+	height: 100%;
   background-color: rgba(255, 0, 0, 0.1);
   position: relative;
 }

@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <h1>Map</h1>
     <MapBox 
     msg="Welcome to Your Vue.js App"
     />
@@ -43,6 +42,6 @@ body{
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 0px;
 }
 </style>
