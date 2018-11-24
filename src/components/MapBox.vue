@@ -5,7 +5,7 @@
   <h6>Long: {{long}} Lat:{{lat}}</h6>
   <input v-model="newlong" placeholder="long">
   <input v-model="newlat" placeholder="lat">
-  <button v-on:click="refresh(newlong, newlat)">Refresh</button>
+  <button v-on:click="refresh(newlong, newlat)">Remove</button>
 </div>
 </template>
 
@@ -25,7 +25,8 @@ export default {
       long: Number,
       mainMapp: Object,
       marker: Object,
-      geocoder: Object
+      geocoder: Object,
+      directions: Object
     }
   },
   methods: {
@@ -38,7 +39,7 @@ export default {
         ease: 0.2,
         animate: true,
         center: [this.long, this.lat],
-        zoom: 4,
+        zoom: 8,
         bearing: 0
       })
     },
@@ -47,6 +48,9 @@ export default {
       this.marker.setLngLat([newCenter[0],newCenter[1]]);
       this.long = newCenter[0];
       this.lat = newCenter[1];
+    },
+    remove: function(){
+      this.mainMapp.removeControl(this.geocoder);
     }
   },
   mounted(){
@@ -58,18 +62,24 @@ export default {
         container: 'map',
         style: 'mapbox://styles/mapbox/streets-v9',
         center: [this.long, this.lat],
-        zoom: 4
+        zoom: 8
     });
          
   this.geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken
     });
 
-  this.mainMapp.addControl(this.geocoder, 'top-right');
 
-  this.mainMapp.addControl(new MapboxDirections({
+  this.directions = new MapboxDirections({
       accessToken: mapboxgl.accessToken
-    }), 'bottom-left');
+    }
+    , 'bottom-left');
+
+
+  this.mainMapp
+    .addControl(this.geocoder, 'top-right')
+    .addControl(this.directions, 'bottom-left')
+
 
   this.marker = new mapboxgl.Marker({
     color: '#EE0000',
@@ -97,7 +107,7 @@ export default {
  
 #map {
 	width: 100%;
-	height: 100%;
+  height: 80vh;
   background-color: rgba(255, 0, 0, 0.1);
   position: relative;
 }
