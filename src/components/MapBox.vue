@@ -1,6 +1,6 @@
 <template>
 <div class="wrapper">
-  <div ref="custom-marker" class="custom-marker"></div>
+  <!-- <div ref="custom-marker" class="custom-marker"></div> -->
   <div id="map" ref="map">
   </div>
   <button class="Btn-gps" v-on:click="showPos()">GPS</button>
