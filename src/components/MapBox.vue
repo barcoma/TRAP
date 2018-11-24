@@ -23,7 +23,7 @@ export default {
       newlat:'',
       lat: Number,
       long: Number,
-      mainMapp: Object,
+      mainMap: Object,
       marker: Object,
       geocoder: Object,
       directions: Object
@@ -34,7 +34,7 @@ export default {
       this.long = newlong;
       this.lat = newlat;
       this.marker.setLngLat([this.long, this.lat])
-      this.mainMapp.easeTo({
+      this.mainMap.easeTo({
         duration: 3000,
         ease: 0.2,
         animate: true,
@@ -48,17 +48,17 @@ export default {
       this.marker.setLngLat([newCenter[0],newCenter[1]]);
       this.long = newCenter[0];
       this.lat = newCenter[1];
-    },
-    remove: function(){
-      this.mainMapp.removeControl(this.geocoder);
+      },
+      remove: function(){
+      this.mainMap.removeControl(this.geocoder);
     }
   },
   mounted(){
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
-  this. lat = 48.050094;
+  this.lat = 48.050094;
   this.long = 8.201717;
 
-  this.mainMapp = new mapboxgl.Map({
+  this.mainMap = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/streets-v9',
         center: [this.long, this.lat],
@@ -69,28 +69,22 @@ export default {
       accessToken: mapboxgl.accessToken
     });
 
-
   this.directions = new MapboxDirections({
       accessToken: mapboxgl.accessToken
-    }
-    , 'bottom-left');
+    }, 'bottom-left');
 
-
-  this.mainMapp
+  this.mainMap
     .addControl(this.geocoder, 'top-right')
     .addControl(this.directions, 'bottom-left')
-
 
   this.marker = new mapboxgl.Marker({
     color: '#EE0000',
     draggable: false
   })
     .setLngLat([this.long, this.lat])
-    .addTo(this.mainMapp);
+    .addTo(this.mainMap);
 
   this.geocoder.on('result', this.updateMarker);
-
-  
   }
 }
 
@@ -107,7 +101,7 @@ export default {
  
 #map {
 	width: 100%;
-  height: 80vh;
+	height: 600px;
   background-color: rgba(255, 0, 0, 0.1);
   position: relative;
 }
