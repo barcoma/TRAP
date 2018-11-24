@@ -11,7 +11,6 @@
 import MapBox from './components/MapBox.vue'
 import mapboxgl from 'mapbox-gl'
 
-mapboxgl.accesToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
 
 export default {
   name: 'app',

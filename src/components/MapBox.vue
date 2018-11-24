@@ -1,6 +1,8 @@
 <template>
 <div class="wrapper">
-  <div id="map" ref="map"></div>
+  <div id="map" ref="map">
+  </div>
+  <h6>Long: {{long}} Lat:{{lat}}</h6>
   <input v-model="newlong" placeholder="long">
   <input v-model="newlat" placeholder="lat">
   <button v-on:click="refresh(newlong, newlat)">Refresh</button>
@@ -72,6 +74,8 @@ export default {
     .addTo(this.mainMapp);
 
   this.geocoder.on('result', this.updateMarker);
+
+  
   }
 }
 
