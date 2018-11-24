@@ -24,6 +24,14 @@ export default {
 
 <style lang="scss">
 
+body{
+  margin: 0;
+}
+
+.mapboxgl-ctrl-geocoder input[type='text']{
+
+}  
+
 .mapboxgl-canvas-container{
   canvas{
     position: relative !important;

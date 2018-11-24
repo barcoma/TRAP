@@ -16,6 +16,8 @@ export default {
   name: 'MapBox',
   data() {
     return {
+      newlong:'',
+      newlat:'',
       lat: Number,
       long: Number,
       mainMapp: Object,
@@ -51,7 +53,7 @@ export default {
 
   this.mainMapp = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/mapbox/dark-v9',
+        style: 'mapbox://styles/mapbox/streets-v9',
         center: [this.long, this.lat],
         zoom: 4
     });
@@ -63,8 +65,8 @@ export default {
   this.mainMapp.addControl(this.geocoder);
 
   this.marker = new mapboxgl.Marker({
-    color: '#ffd1dc',
-    draggable: true
+    color: '#EE0000',
+    draggable: false
   })
     .setLngLat([this.long, this.lat])
     .addTo(this.mainMapp);
@@ -83,8 +85,7 @@ export default {
 .wrapper{
   width: 100vw;
 }
-
-
+ 
 #map {
 	width: 100%;
 	height: 600px;
