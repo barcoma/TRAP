@@ -11,6 +11,7 @@
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 
+
 export default {
   name: 'MapBox',
   data() {
@@ -19,13 +20,14 @@ export default {
       long: Number,
       mainMapp: Object,
       marker: Object,
+      geocoder: Object
     }
   },
   methods: {
     refresh: function(newlong, newlat){
-      console.log('refresh', newlong)
       this.long = newlong;
       this.lat = newlat;
+      this.marker.setLngLat([this.long, this.lat])
       this.mainMapp.easeTo({
         duration: 3000,
         ease: 0.2,
@@ -34,29 +36,40 @@ export default {
         zoom: 4,
         bearing: 0
       })
+    },
+    updateMarker: function(e){
+      var newCenter = e.result.center;
+      this.marker.setLngLat([newCenter[0],newCenter[1]]);
+      this.long = newCenter[0];
+      this.lat = newCenter[1];
     }
   },
   mounted(){
-  mapboxgl.accesToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this. lat = 48.050094;
   this.long = 8.201717;
+
   this.mainMapp = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/dark-v9',
         center: [this.long, this.lat],
         zoom: 4
-    }).addControl(new MapboxGeocoder({
+    });
+         
+  this.geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken
-    }));; 
+      });
+
+  this.mainMapp.addControl(this.geocoder);
 
   this.marker = new mapboxgl.Marker({
     color: '#ffd1dc',
     draggable: true
   })
-        .setLngLat([this.long, this.lat])
-        .addTo(this.mainMapp)
-  
+    .setLngLat([this.long, this.lat])
+    .addTo(this.mainMapp);
+
+  this.geocoder.on('result', this.updateMarker);
   }
 }
 
@@ -66,7 +79,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-@import '/Users/marcobalzer/Desktop/MapBox/hello-world/node_modules/mapbox-gl/dist/mapbox-gl.css';
 
 .wrapper{
   width: 100vw;
