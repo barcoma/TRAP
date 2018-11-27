@@ -17,7 +17,7 @@
         <ul class="menu-list">
             <li class="menu-item" v-on:click="showRoutes()">Route</li>
             <li class="menu-item">Statistiken</li>
-            <li class="menu-item">Was anderes</li>
+            <li class="menu-item">OBD</li>
         </ul>
     </div>
 
@@ -66,7 +66,7 @@ import {eventBus} from '../main.js';
     cursor: pointer;
     z-index: 1;
     position: relative;
-    top: -114.5vh;
+    top: -110vh;
     right: 47vw;
 }
 
@@ -98,7 +98,6 @@ import {eventBus} from '../main.js';
 
 .hidden{
     left: -25vw;
-    transition: 0.4s;
 
 }
 
@@ -124,6 +123,8 @@ import {eventBus} from '../main.js';
     .menu-item{
         margin-bottom: 2vh;
     }
+    transition: 0.4s;
+
   }
 
 .Btn-nav{
