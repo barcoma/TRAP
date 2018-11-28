@@ -27,7 +27,7 @@ export default {
       newlat:'',
       lat: Number,
       long: Number,
-      mainMapp: Object,
+      mainMap: Object,
       marker: Object,
       geocoder: Object,
       directions: Object,
@@ -40,7 +40,7 @@ export default {
       this.long = newlong;
       this.lat = newlat;
       this.marker.setLngLat([this.long, this.lat])
-      this.mainMapp.easeTo({
+      this.mainMap.easeTo({
         duration: 3000,
         ease: 0.2,
         animate: true,
@@ -56,15 +56,15 @@ export default {
       this.lat = newCenter[1];
     },
     remove: function(){
-      this.mainMapp.removeControl(this.directions);
+      this.mainMap.removeControl(this.directions);
     }
   },
   created(){
     eventBus.$on('toggleDirections', (isVisible) =>{
       if(isVisible == true){
-        this.mainMapp.addControl(this.directions, 'bottom-left');
+        this.mainMap.addControl(this.directions, 'bottom-left');
       } else {
-        this.mainMapp.removeControl(this.directions);
+        this.mainMap.removeControl(this.directions);
       } 
       });
   },
@@ -73,7 +73,7 @@ export default {
   this. lat = 48.218800;
   this.long = 11.624707;
 
-  this.mainMapp = new mapboxgl.Map({
+  this.mainMap = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/streets-v9',
         center: [this.long, this.lat],
@@ -83,7 +83,6 @@ export default {
   this.geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken
     });
-
 
   this.directions = new MapboxDirections({
       accessToken: mapboxgl.accessToken
@@ -96,21 +95,19 @@ export default {
     trackUserLocation: true
   });
 
-  this.mainMapp
+  this.mainMap
     .addControl(this.geocoder, 'top-right')
     .addControl(this.userLocation, 'bottom-right')
     // .addControl(this.directions, 'bottom-left')
-
 
   this.marker = new mapboxgl.Marker({
     // element: this.$refs.custom-marker,     WENN CUSTOM MARKER EINGEFÜGT IST
     draggable: false
   })
     .setLngLat([this.long, this.lat])
-    .addTo(this.mainMapp);
+    .addTo(this.mainMap);
 
   this.geocoder.on('result', this.updateMarker);
-
   }
 }
 
