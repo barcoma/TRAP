@@ -1,30 +1,36 @@
 <template>
   <div id="app">
-    <MapBox 
-    ref="MapBox"
-    msg="Welcome to Your Vue.js App"
-    class="main-map"
-    />
-    <map-nav id="map-navigation"></map-nav>
-    <button v-on:click="removeGeocode">Remove</button>
-    
+    <section class="main-content">
+      <MapBox 
+      ref="MapBox"
+      class="main-map"
+      />
+      <map-nav id="map-navigation"></map-nav>
+    </section>
+    <section class="tab-nav">
+      <tab-nav></tab-nav>
+    </section>
   </div>
 </template>
 
 <script>
 import MapBox from './components/MapBox.vue'
 import MapNav from './components/MapNav.vue'
+import TabNav from './components/TabNav.vue'
 import mapboxgl from 'mapbox-gl'
+
+
+
 
 export default {
   name: 'app',
   components: {
     MapBox,
-    MapNav
+    MapNav,
+    TabNav
   },
   methods: {
     removeGeocode: function(){
-      console.log('hey');
       this.$refs.MapBox.remove();
     }
   }
@@ -42,9 +48,13 @@ body{
   margin: 0;
 }
 
-.mapboxgl-ctrl-geocoder input[type='text']{
+.main-content{
+  height: 90%;
+}
 
-}  
+.tab-nav{
+  height: 10%;
+}
 
 .mapboxgl-canvas-container{
   canvas{
@@ -59,6 +69,7 @@ body{
   text-align: center;
   color: #2c3e50;
   margin-top: 0px;
+  height: 100vh;
 }
 
 #map-navigation{
