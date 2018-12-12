@@ -2,11 +2,12 @@ import Vue from 'vue'
 import App from './App.vue'
 import './registerServiceWorker'
 import mapboxgl from 'mapbox-gl'
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
 
-import Buefy from 'buefy'
-import 'buefy/dist/buefy.css'
 
-Vue.use(Buefy);
+import router from './router'
+
 
 
 mapboxgl.accesToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
@@ -16,5 +17,6 @@ Vue.config.productionTip = false;
 export const eventBus = new Vue();
 
 new Vue({
+  router,
   render: h => h(App)
 }).$mount('#app')

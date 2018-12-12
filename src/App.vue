@@ -1,17 +1,16 @@
 <template>
   <div id="app">
-    <section class="main-content">
-      <MapBox 
-      ref="MapBox"
-      class="main-map"
-      />
-      <map-nav id="map-navigation"></map-nav>
+
+    <section class="app-content">
+      <router-view/>
     </section>
-    <section class="tab-nav">
+
+    <section class="app-nav">
       <tab-nav></tab-nav>
     </section>
   </div>
 </template>
+
 
 <script>
 import MapBox from './components/MapBox.vue'
@@ -48,11 +47,11 @@ body{
   margin: 0;
 }
 
-.main-content{
+.app-content{
   height: 90%;
 }
 
-.tab-nav{
+.app-nav{
   height: 10%;
 }
 
