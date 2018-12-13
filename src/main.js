@@ -3,10 +3,15 @@ import App from './App.vue'
 import './registerServiceWorker'
 import mapboxgl from 'mapbox-gl'
 import VueRouter from 'vue-router'
-Vue.use(VueRouter)
-
-
 import router from './router'
+
+
+import Vuetify from 'vuetify'
+import 'vuetify/dist/vuetify.min.css'
+import '../node_modules/material-design-icons-iconfont/dist/material-design-icons.css'
+
+Vue.use(VueRouter)
+Vue.use(Vuetify)
 
 
 
