@@ -10,7 +10,7 @@
         color="blue"
         flat
         value="recent"
-        to="/"
+        to="/map"
       >
         <span>Maps</span>
         <v-icon large>directions</v-icon>
@@ -20,7 +20,7 @@
         color="blue"
         flat
         value="favorites"
-        to="/next"
+        to="/"
       >
         <span>Loading</span>
         <v-icon large>home</v-icon>

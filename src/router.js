@@ -9,13 +9,13 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/',
+      path: '/map',
       name: 'MapPage',
       component: MapPage
     },
     {
-      path: '/next',
-      name: 'next',
+      path: '/',
+      name: 'home',
       component: Home
     },
     {
