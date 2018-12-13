@@ -3,9 +3,6 @@
   <!-- <div ref="custom-marker" class="custom-marker"></div> -->
   <div id="map" ref="map">
   </div>
-  <h6>Long: {{long}} Lat:{{lat}}</h6>
-  <input v-model="newlong" placeholder="long">
-  <input v-model="newlat" placeholder="lat">
 </div>
 </template>
 
@@ -56,9 +53,6 @@ export default {
       this.long = newCenter[0];
       this.lat = newCenter[1];
     },
-    remove: function(){
-      this.mainMap.removeControl(this.directions);
-    }
   },
   created(){
     eventBus.$on('toggleDirections', (isVisible) =>{
@@ -146,11 +140,12 @@ export default {
 
 .wrapper{
   width: 100vw;
+  height: 100%;
 }
  
 #map {
 	width: 100%;
-  height: 100vh;
+  height: 100%;
   position: relative;
 }
 
