@@ -13,7 +13,7 @@
 import MapNav from './MapNav.vue';
 import {eventBus} from '../main.js';
 
-
+import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
@@ -32,7 +32,8 @@ export default {
       geocoder: Object,
       directions: Object,
       aktPos: [],
-      userLocation: Object
+      userLocation: Object,
+      foursquareResponse: Object
     }
   },
   methods: {
@@ -70,7 +71,7 @@ export default {
   },
   mounted(){
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
-  this. lat = 48.218800;
+  this.lat = 48.218800;
   this.long = 11.624707;
 
   this.mainMap = new mapboxgl.Map({
@@ -108,6 +109,31 @@ export default {
     .addTo(this.mainMap);
 
   this.geocoder.on('result', this.updateMarker);
+
+  var foursquareID = 'FPAOMYEFTC3B3L0SQKO0PTH0LAARK4NFYYZSVFRTVTAZA2NE';
+  var foursquareSecret = 'XGQPJYTUJEVDSHF1PHCGH0M5HHEOEKLJIL1D1OR1FSEBSC5B';
+  
+  axios
+      .get('https://api.foursquare.com/v2/venues/search?client_id='+foursquareID+'&client_secret='+foursquareSecret+'&v=20180323&limit=5&ll=48.218800,11.624707&query=supermarket')
+      .then(response => {
+        this.foursquareResponse = response.data.response ;
+        for(var i = 0; i< this.foursquareResponse.venues.length; i++){
+          new mapboxgl.Marker({
+            draggable: false
+          })
+          .setLngLat([this.foursquareResponse.venues[i].location.lng, this.foursquareResponse.venues[i].location.lat ])
+          .addTo(this.mainMap);
+        }
+      })
+      .catch(error => {
+        console.log(error)
+      })
+      .finally(() => console.log('done'))
+  
+ 
+   
+  
+  
   }
 }
 

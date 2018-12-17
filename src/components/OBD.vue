@@ -21,6 +21,18 @@ export default {
             .then(device => { /* ... */ })
             .catch(error => { console.log(error); });
         }
-    }
+    
+    },
+    mounted() {
+    this.$http.get('http://192.168.0.10:35000').then(response => {
+
+    // get body data
+    this.someData = response.body;
+    console.log(someData);
+
+  }, response => {
+    // error callback
+  });
+}
 }
 </script>
