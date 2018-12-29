@@ -1,8 +1,6 @@
 <template lang="html">
     <section class="OBD">
         <button v-on:click="getDevices">Request devices</button>
-        
-
     </section>
 </template>
 
@@ -18,21 +16,25 @@ export default {
             acceptAllDevices: true,
             optionalServices: ['battery_service']
             })
-            .then(device => { /* ... */ })
+            .then(device => { 
+                console.log(device.name);
+                return device.gatt.connect();
+            })
+            .then(server => { /* ... */ })
             .catch(error => { console.log(error); });
         }
     
     },
     mounted() {
-    this.$http.get('http://192.168.0.10:35000').then(response => {
+    // this.$http.get('http://192.168.0.10:35000').then(response => {
 
-    // get body data
-    this.someData = response.body;
-    console.log(someData);
+    // // get body data
+    // this.someData = response.body;
+    // console.log(someData);
 
-  }, response => {
+  //}, response => {
     // error callback
-  });
+  //});
 }
 }
 </script>

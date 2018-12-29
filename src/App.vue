@@ -7,20 +7,22 @@
     />
     <map-nav id="map-navigation"></map-nav>
     <button v-on:click="removeGeocode">Remove</button>
-    
+    <o-b-d></o-b-d>
   </div>
 </template>
 
 <script>
 import MapBox from './components/MapBox.vue'
 import MapNav from './components/MapNav.vue'
+import OBD from './components/OBD.vue'
 import mapboxgl from 'mapbox-gl'
 
 export default {
   name: 'app',
   components: {
     MapBox,
-    MapNav
+    MapNav,
+    OBD
   },
   methods: {
     removeGeocode: function(){
