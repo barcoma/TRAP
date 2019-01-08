@@ -36,6 +36,17 @@
         <span>History</span>
         <v-icon large>people</v-icon>
       </v-btn>
+
+      <v-btn
+        color= #126DFF
+        flat
+        value="nearby"
+        to="/obd"
+      >
+        <span>OBD</span>
+        <v-icon large>people</v-icon>
+      </v-btn>
+
     </v-bottom-nav>
   </v-card>
 </template>

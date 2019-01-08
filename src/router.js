@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import MapPage from './views/MapPage.vue'
 import Home from './views/Home.vue'
 import Team from './views/Team.vue'
+import ObdPage from './views/ObdPage.vue'
 
 Vue.use(Router)
 
@@ -22,6 +23,11 @@ export default new Router({
       path: '/team',
       name: 'team',
       component: Team
+    },
+    {
+      path: '/obd',
+      name: 'obd',
+      component: ObdPage
     }
   ]
 })

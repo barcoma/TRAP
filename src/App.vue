@@ -1,13 +1,13 @@
 <template>
   <div id="app">
-    <MapBox 
-    ref="MapBox"
-    msg="Welcome to Your Vue.js App"
-    class="main-map"
-    />
-    <map-nav id="map-navigation"></map-nav>
-    <button v-on:click="removeGeocode">Remove</button>
-    <o-b-d></o-b-d>
+
+    <section class="app-content">
+      <router-view/>
+    </section>
+
+    <section class="app-nav">
+      <tab-nav></tab-nav>
+    </section>
   </div>
 </template>
 
@@ -16,7 +16,6 @@
 import MapBox from './components/MapBox.vue'
 import MapNav from './components/MapNav.vue'
 import TabNav from './components/TabNav.vue'
-import OBD from './components/OBD.vue'
 import mapboxgl from 'mapbox-gl'
 
 
@@ -27,8 +26,7 @@ export default {
   components: {
     MapBox,
     MapNav,
-    TabNav,
-    OBD
+    TabNav
   },
   methods: {
     removeGeocode: function(){
