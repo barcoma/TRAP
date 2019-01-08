@@ -1,13 +1,19 @@
 {
-  "name": "PWA Tutorial From Fremer Inc",
-  "short_name": "Fremer Inc",
-  "icons": [{
-  "src": "img/favicon-32x32.png",
-  "sizes": "62x62",
-  "type": "image/webp"
-  }],
-  "scope": "/pwa/",
-  "start_url": "/pwa/start.html",
+  "name": "trap",
+  "short_name": "trap",
+  "icons": [
+    {
+      "src": "./img/icons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./img/icons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
   "display": "standalone",
   "orientation": "landscape"
   }
