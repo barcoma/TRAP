@@ -3,7 +3,7 @@
 
 
 <v-container fluid class="home-wrapper">
-  <v-layout justify-center fill-height>
+  <v-layout justify-center fill-height>    
   <v-flex xs7 align-self-center>
   <h1>Login</h1>
   <form class="home-form">
@@ -28,14 +28,14 @@
 
     <v-btn
       block      
-      color= #00B9BC
+      color= #fff
     >
       submit
     </v-btn>
     
     <v-btn
       outline
-      color = #D5F4FF
+      color = #fff
       block
     >
       clear

@@ -75,11 +75,14 @@ export default {
         zoom: 9
     });
          
+  
+         
   this.geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken
     });
 
   this.directions = new MapboxDirections({
+      unit: 'metric',
       accessToken: mapboxgl.accessToken
     }, 'bottom-left');
 
@@ -93,7 +96,7 @@ export default {
   this.mainMap
     .addControl(this.geocoder, 'top-right')
     .addControl(this.userLocation, 'bottom-right')
-    // .addControl(this.directions, 'bottom-left')
+    .addControl(this.directions, 'bottom-left')
 
   this.marker = new mapboxgl.Marker({
     // element: this.$refs.custom-marker,     WENN CUSTOM MARKER EINGEFÜGT IST
@@ -124,14 +127,8 @@ export default {
       })
       .finally(() => console.log('done'))
   
- 
-   
-  
-  
   }
 }
-
-
 </script>
 
 
