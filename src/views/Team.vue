@@ -1,4 +1,5 @@
 <template>
+    <v-card-text class="py-0">
     <v-timeline
         align-top
         dense
@@ -78,6 +79,7 @@
           </v-layout>
         </v-timeline-item>
       </v-timeline>
+    </v-card-text>
 </template>
 
 <script>

@@ -71,7 +71,6 @@ body{
   color: #2c3e50;
   margin-top: 0px;
   height: 100vh;
-  overflow: hidden;
 }
 
 #map-navigation{

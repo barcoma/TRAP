@@ -5,9 +5,10 @@
       absolute
       color="transparent"
       class="tabnav-wrapper"
+      app
     >
       <v-btn
-        color="blue"
+        color= #126DFF
         flat
         value="recent"
         to="/map"
@@ -17,22 +18,22 @@
       </v-btn>
 
       <v-btn
-        color="blue"
+        color= #126DFF
         flat
         value="favorites"
         to="/"
       >
-        <span>Loading</span>
+        <span>Home</span>
         <v-icon large>home</v-icon>
       </v-btn>
 
       <v-btn
-        color="blue"
+        color= #126DFF
         flat
         value="nearby"
         to="/team"
       >
-        <span>Team</span>
+        <span>History</span>
         <v-icon large>people</v-icon>
       </v-btn>
     </v-bottom-nav>
