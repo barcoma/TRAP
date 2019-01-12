@@ -3,9 +3,6 @@
   <!-- <div ref="custom-marker" class="custom-marker"></div> -->
   <div id="map" ref="map">
   </div>
-  <h6>Long: {{long}} Lat:{{lat}}</h6>
-  <input v-model="newlong" placeholder="long">
-  <input v-model="newlat" placeholder="lat">
 </div>
 </template>
 
@@ -56,9 +53,6 @@ export default {
       this.long = newCenter[0];
       this.lat = newCenter[1];
     },
-    remove: function(){
-      this.mainMap.removeControl(this.directions);
-    }
   },
   created(){
     eventBus.$on('toggleDirections', (isVisible) =>{
@@ -81,11 +75,14 @@ export default {
         zoom: 9
     });
          
+  
+         
   this.geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken
     });
 
   this.directions = new MapboxDirections({
+      unit: 'metric',
       accessToken: mapboxgl.accessToken
     }, 'bottom-left');
 
@@ -99,7 +96,7 @@ export default {
   this.mainMap
     .addControl(this.geocoder, 'top-right')
     .addControl(this.userLocation, 'bottom-right')
-    // .addControl(this.directions, 'bottom-left')
+    .addControl(this.directions, 'bottom-left')
 
   this.marker = new mapboxgl.Marker({
     // element: this.$refs.custom-marker,     WENN CUSTOM MARKER EINGEFÜGT IST
@@ -130,14 +127,8 @@ export default {
       })
       .finally(() => console.log('done'))
   
- 
-   
-  
-  
   }
 }
-
-
 </script>
 
 
@@ -146,11 +137,12 @@ export default {
 
 .wrapper{
   width: 100vw;
+  height: 100%;
 }
  
 #map {
 	width: 100%;
-  height: 100vh;
+  height: 100%;
   position: relative;
 }
 
