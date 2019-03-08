@@ -27,13 +27,13 @@ server.applyMiddleware({ app });
 // app.listen(process.env.PORT || 5000)
 // app.use('/', express.static('public/public'));
 
-import { ApolloEngine } from 'apollo-engine';
-const engine = new ApolloEngine();
+// import { ApolloEngine } from 'apollo-engine';
+// const engine = new ApolloEngine();
 
 // Set a default value of 3000 if we don't pass an env var
 const PORT = process.env.PORT || 3000;
 
-engine.listen({
+app.listen({
   port: PORT,
   expressApp: app
 }, () => {
