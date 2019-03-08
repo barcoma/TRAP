@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "postinstall": "./node_modules/bower/bin/bower install && npm run build",
+    "postinstall": "npm run build",
     "start": "node server/server.js"
   },
   "dependencies": {
