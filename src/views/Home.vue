@@ -41,6 +41,10 @@
         </v-flex>
 
     </v-layout> -->
+    <v-layout row class="top-area">
+      <div>
+      </div>
+    </v-layout>
 
     <v-layout row>
       <carousel>
@@ -93,6 +97,16 @@ import { Carousel, Slide } from 'vue-carousel';
 
 <style lang="scss">
 
+  .container {
+    padding: 0 !important;
+  }
+  .top-area {
+    height: 25rem;
+    background-color: dodgerblue;
+    margin-bottom: 1rem;
+    border-bottom-left-radius: 7%;
+    border-bottom-right-radius: 7%;
+  }
   .v-card {
     border-radius: 8px !important;
   }
