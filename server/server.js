@@ -13,41 +13,25 @@ const typeDefs = gql`
   }
 `;
 
-var test = yelpRequest();
+// var test = yelpRequest();
 
-const resolvers = {
-  Query: {
-    hello: () => "Hello World"
-  },
-};
+// const resolvers = {
+//   Query: {
+//     hello: () => "Hello World"
+//   },
+// };
 
+const resolvers = require('./src/resolvers');
 
-function yelpRequest() {
-  var myJSONObject = `{
-    business(id: "garaje-san-francisco") {
-        name
-        id
-        rating
-        url
-    }
-  }`
-  
-  request({
-    url: "https://api.yelp.com/v3/graphql",
-    method: "POST",
-    headers: {
-      "Content-Type": "application/graphql",
-      "Authorization": "Bearer FfLMJXvs0iVD5I5K8x5BHaz7dWbv64WzwSDOw0I_HkqNlc4aTaoUvd2KyFPAMi_Mhrqi-ABmzJbXhh-Tu44eqmeAuNwEZ6uJtDf5IyEaNlQkT_-dLnu5bwZK3_aAXHYx"
-    },
-    body: myJSONObject
-  }, function (error, response, body){
-    // console.log(body);
-    return body;
-  });
-  
-}
+const YelpAPI = require('./src/datasources/yelp')
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({ 
+    typeDefs,
+    resolvers,
+    dataSources: () => ({
+        yelpAPI: new YelpAPI()
+    }) 
+});
 server.applyMiddleware({ app });
 
 app.listen({ port: PORT }, () =>
