@@ -43,11 +43,19 @@
     </v-layout> -->
     <v-layout row class="top-area">
       <div>
+        <mobile-nav>
+          <hamburger
+              :stroke='2'
+              :gap='5'
+              color='#192a35'
+              :open.sync='open'>
+          </hamburger>
+      </mobile-nav>
       </div>
     </v-layout>
 
     <v-layout row>
-      <carousel>
+      <carousel :paginationEnabled="false">
         <slide>
           <v-flex mr-1 ml-1>
           <v-card dark tile flat color="blue">
@@ -80,17 +88,38 @@
 <script>
 
 import { Carousel, Slide } from 'vue-carousel';
+import Hamburger from 'vue-hamburger';
+import MobileNav from 'mobile-nav';
+
+// import 'vue-hamburger/index.css'
+// Vue.component('hamburger', require())
+ 
+//Example Vue component using the hamburger
+// Vue.component('mobile-nav', {
+//   data: function() {
+//     return {
+//       open: false // The open/close state of the mobile nav
+//     }
+//   }
+// })
 
   export default {
     components: {
       Carousel,
-      Slide
+      Slide,
+      Hamburger,
+      MobileNav
     },
-    data: () => ({
-      lorem: `Lorem ipsum dolor sit amet, mel at clita quando. Te sit oratio vituperatoribus, nam ad ipsum posidonium mediocritatem, explicari dissentiunt cu mea. Repudiare disputationi vim in, mollis iriure nec cu, alienum argumentum ius ad. Pri eu justo aeque torquatos.`,
-      date: new Date().toISOString().substr(0, 10), 
-      time: new Date().getHours() + ':' + new Date().getMinutes() 
-    })
+    data: function() {
+    return {
+      open: false // The open/close state of the mobile nav
+    }
+  }
+    // data: () => ({
+    //   // lorem: `Lorem ipsum dolor sit amet, mel at clita quando. Te sit oratio vituperatoribus, nam ad ipsum posidonium mediocritatem, explicari dissentiunt cu mea. Repudiare disputationi vim in, mollis iriure nec cu, alienum argumentum ius ad. Pri eu justo aeque torquatos.`,
+    //   // date: new Date().toISOString().substr(0, 10), 
+    //   // time: new Date().getHours() + ':' + new Date().getMinutes() 
+    // })
   }
 </script>
 
@@ -102,7 +131,7 @@ import { Carousel, Slide } from 'vue-carousel';
   }
   .top-area {
     height: 25rem;
-    background-color: dodgerblue;
+    background-image: linear-gradient(129deg, #4285f4, #00ebff);
     margin-bottom: 1rem;
     border-bottom-left-radius: 7%;
     border-bottom-right-radius: 7%;

@@ -64,17 +64,17 @@ import {eventBus} from '../main.js';
 .menu-icon-container {
     display: inline-block;
     cursor: pointer;
-    z-index: 1;
+    z-index: 9;
     position: relative;
-    top: -110vh;
+    top: -88vh;
     right: 47vw;
 }
 
 .bar1, .bar2, .bar3 {
-    width: 35px;
-    height: 5px;
-    background-color: #333;
-    margin: 6px 0;
+    width: 33px;
+    height: 3px;
+    background-color: white;
+    margin: 5px 0;
     transition: 0.4s;
 }
 
@@ -184,9 +184,9 @@ import {eventBus} from '../main.js';
   .menu-icon-container {
         display: inline-block;
         cursor: pointer;
-        z-index: 1;
+        z-index: 9;
         position: relative;
-        top: -114.5vh;
+        top: -88.5vh;
         right: 40vw;
     }
 }
