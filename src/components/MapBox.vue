@@ -45,8 +45,12 @@ export default {
       aktPos: [],
       userLocation: Object,
       foursquareResponse: Object,
+<<<<<<< HEAD
       isVisible: true,
       right: 13.5
+=======
+      foursquareSearch: String
+>>>>>>> 5ab9031e1d4eb6a5debdded4f6590b8974e7fe59
     }
   },
   methods: {
@@ -68,6 +72,7 @@ export default {
       this.marker.setLngLat([newCenter[0],newCenter[1]]);
       this.long = newCenter[0];
       this.lat = newCenter[1];
+<<<<<<< HEAD
     },
     showRouting: function() {
       this.isVisible = !this.isVisible;
@@ -84,15 +89,13 @@ export default {
     },
     reverseDirections: function() {
       this.directions.reverse();
+=======
+>>>>>>> 5ab9031e1d4eb6a5debdded4f6590b8974e7fe59
     }
   },
   created(){
     eventBus.$on('toggleDirections', (isVisible) =>{
-      if(isVisible == true){
-        this.mainMap.addControl(this.directions, 'bottom-left');
-      } else {
-        this.mainMap.removeControl(this.directions);
-      } 
+      console.log(isVisible)
       });
   },
   mounted(){
@@ -143,9 +146,9 @@ export default {
 
   var foursquareID = 'FPAOMYEFTC3B3L0SQKO0PTH0LAARK4NFYYZSVFRTVTAZA2NE';
   var foursquareSecret = 'XGQPJYTUJEVDSHF1PHCGH0M5HHEOEKLJIL1D1OR1FSEBSC5B';
-  
+  this.foursquareSearch = 'supermarket'
   axios
-      .get('https://api.foursquare.com/v2/venues/search?client_id='+foursquareID+'&client_secret='+foursquareSecret+'&v=20180323&limit=5&ll=48.218800,11.624707&query=supermarket')
+      .get('https://api.foursquare.com/v2/venues/search?client_id='+foursquareID+'&client_secret='+foursquareSecret+'&v=20180323&limit=5&ll=48.218800,11.624707&query='+this.foursquareSearch+'')
       .then(response => {
         this.foursquareResponse = response.data.response ;
         for(var i = 0; i< this.foursquareResponse.venues.length; i++){
@@ -160,7 +163,7 @@ export default {
         console.log(error)
       })
       .finally(() => console.log('done'))
-  
+    
   }
 }
 </script>

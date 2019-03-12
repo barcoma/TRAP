@@ -1,5 +1,5 @@
 <template>
-  <div>{{hello}}</div>
+  <div>{{search.total}}</div>
 </template>
 
 <script>
@@ -9,8 +9,17 @@ import gql from 'graphql-tag'
 export default {
   apollo: 
   {
-    hello: gql`query {
-      hello
+    search: gql`query {
+      search {
+        total,
+        business {
+          name
+          coordinates {
+            latitude
+            longitude
+          }
+        }
+      }
     }`,
   }
 };
