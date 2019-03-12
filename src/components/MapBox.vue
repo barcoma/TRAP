@@ -48,10 +48,15 @@ export default {
 <<<<<<< HEAD
       isVisible: true,
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       right: 13.5
 =======
       foursquareSearch: String
 >>>>>>> 5ab9031e1d4eb6a5debdded4f6590b8974e7fe59
+=======
+      displayNavigation: false,
+      routeReady: false
+>>>>>>> Stashed changes
 =======
       displayNavigation: false,
       routeReady: false
@@ -98,9 +103,12 @@ export default {
     reverseDirections: function() {
       this.directions.reverse();
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
 >>>>>>> 5ab9031e1d4eb6a5debdded4f6590b8974e7fe59
 =======
+=======
+>>>>>>> Stashed changes
       //this.displayNavigation = true;
     },
     startRoute: function() {
@@ -118,6 +126,9 @@ export default {
       
       //this.directions.controls.inputs = false;
       //this.isVisible = true;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     }
   },
