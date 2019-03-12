@@ -66,7 +66,7 @@ import {eventBus} from '../main.js';
     cursor: pointer;
     z-index: 1;
     position: relative;
-    top: -110vh;
+    top: -80vh;
     right: 47vw;
 }
 
@@ -97,7 +97,7 @@ import {eventBus} from '../main.js';
 // Menu Icon End
 
 .hidden{
-    left: -25vw;
+    left: -100vw;
 
 }
 
@@ -110,9 +110,9 @@ import {eventBus} from '../main.js';
     color: white;
     background-color: rgb(72, 58, 204);
     position: absolute;
-    left: -25vw;
+    left: -100vw;
     top: 0;
-    width: 25vw;
+    width: 100vw;
     height: 100vh;
     .menu-list{
         list-style-type: none;
@@ -138,56 +138,5 @@ import {eventBus} from '../main.js';
   color: #fff;
   font-weight: 900;
   border-radius: 15px;
-}
-
-/* iPhone 6+, 7+, 8+ ----------- */
-@media only screen and (max-width: 599px) {
-/* Styles */
-
-    .hidden{
-        left: -50vw;
-        transition: 0.4s;
-
-    }
-
-    .menu-background{
-    color: white;
-    background-color: rgb(130, 119, 230);
-    position: absolute;
-    left: -50vw;
-    top: 0;
-    width: 50vw;
-    height: 100vh;
-    .menu-list{
-        list-style-type: none;
-        font-size: 1.2em;
-        text-align: left;
-        margin-bottom: 50px;
-    }
-    .menu-item{
-        margin-bottom: 2vh;
-    }
-
-    .Btn-nav{
-    z-index: 1;
-    position: relative;
-    top: -114.5vh;
-    right: 47vw;
-    height: 20vw;
-    width: 20vw;
-    background-color: rgba(0, 0, 0, 0.85);
-    color: #fff;
-    font-weight: 900;
-    border-radius: 15px;
-    }
-  }
-  .menu-icon-container {
-        display: inline-block;
-        cursor: pointer;
-        z-index: 1;
-        position: relative;
-        top: -114.5vh;
-        right: 40vw;
-    }
 }
 </style>
