@@ -12,6 +12,7 @@
 import MapBox from '../components/MapBox.vue'
 import MapNav from '../components/MapNav.vue'
 import TabNav from '../components/TabNav.vue'
+import Sidebarmenu from '../components/Sidebarmenu.vue'
 import mapboxgl from 'mapbox-gl'
 
 
@@ -22,7 +23,8 @@ export default {
   components: {
     MapBox,
     MapNav,
-    TabNav
+    TabNav,
+    Sidebarmenu
   },
   methods: {
     removeGeocode: function(){

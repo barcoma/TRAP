@@ -1,13 +1,7 @@
 <template lang="html">
   <section class="Map-Nav">
-    <div class="menu-icon-container" 
-      v-on:click="showNav()"
-      v-bind:class="{ change : isVisible }"
-      >
-        <div class="bar1"></div>
-        <div class="bar2"></div>
-        <div class="bar3"></div>
-    </div>
+    <v-flex> <Sidebarmenu />
+    </v-flex>
     <div 
         v-bind:class="{ visible : isVisible }"
         class="menu-background"
@@ -26,6 +20,7 @@
  
 <script lang="js">
 import {eventBus} from '../main.js';
+import Sidebarmenu from './Sidebarmenu.vue'
 
   export default  {
     name: 'MapNav',
@@ -50,31 +45,42 @@ import {eventBus} from '../main.js';
             eventBus.$emit('toggleDirections', this.showNavigation);
         }
     },
+    components:{
+        Sidebarmenu
+    },
     computed: {
  
     }
 }
 </script>
  
-<style scoped lang="scss">
+<style  lang="scss">
 
 // Menu Icon
+.burger.v-btn{
 
+ top : 5px;
 
+}
+.flex-avatar{
+      img {
+        border: 3px solid rgb(255, 255, 255);
+      }
+}
 .menu-icon-container {
     display: inline-block;
     cursor: pointer;
-    z-index: 1;
+    z-index: 9;
     position: relative;
-    top: -80vh;
+    top: -88vh;
     right: 47vw;
 }
 
 .bar1, .bar2, .bar3 {
-    width: 35px;
-    height: 5px;
-    background-color: #333;
-    margin: 6px 0;
+    width: 33px;
+    height: 3px;
+    background-color: white;
+    margin: 5px 0;
     transition: 0.4s;
 }
 
@@ -138,5 +144,56 @@ import {eventBus} from '../main.js';
   color: #fff;
   font-weight: 900;
   border-radius: 15px;
+}
+
+/* iPhone 6+, 7+, 8+ ----------- */
+@media only screen and (max-width: 599px) {
+/* Styles */
+
+    .hidden{
+        left: -50vw;
+        transition: 0.4s;
+
+    }
+
+    .menu-background{
+    color: white;
+    background-color: rgb(130, 119, 230);
+    position: absolute;
+    left: -50vw;
+    top: 0;
+    width: 50vw;
+    height: 100vh;
+    .menu-list{
+        list-style-type: none;
+        font-size: 1.2em;
+        text-align: left;
+        margin-bottom: 50px;
+    }
+    .menu-item{
+        margin-bottom: 2vh;
+    }
+
+    .Btn-nav{
+    z-index: 1;
+    position: relative;
+    top: -114.5vh;
+    right: 47vw;
+    height: 20vw;
+    width: 20vw;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    font-weight: 900;
+    border-radius: 15px;
+    }
+  }
+  .menu-icon-container {
+        display: inline-block;
+        cursor: pointer;
+        z-index: 9;
+        position: relative;
+        top: -88.5vh;
+        right: 40vw;
+    }
 }
 </style>
