@@ -67,44 +67,143 @@
 
     <v-layout row>
       <div>
-        <mobile-nav>
-          <hamburger
-              :stroke='2'
-              :gap='5'
-              color='#192a35'
-              :open.sync='open'>
-          </hamburger>
-      </mobile-nav>
-      </div>
-    </v-layout>
+        <v-tabs
+          v-model="active"
+          color="white"
+          light
+          centered
+          grow
+          active-class="active-tab"
+        >
+          <v-tab href="#tab-1">
+            Letzte Ziele
+          </v-tab>
+          <v-tab href="#tab-2">
+            Favoriten
+          </v-tab>
+          <v-tab href="#tab-3">
+            Entdecken
+          </v-tab>
+          <v-tab-item
+                v-for="i in 3"
+                :key="i"
+                :value="'tab-' + i"
+                touchless
+                lazy
+          >
 
-    <v-layout row>
-      <carousel :paginationEnabled="false">
-        <slide>
-          <v-flex mr-1 ml-1>
-          <v-card dark tile flat color="blue">
-            <v-card-text>Reisetagebuch</v-card-text>
-            <v-img src="https://picsum.photos/510/300?random" aspect-ratio="1.7"></v-img>
-          </v-card>
-          </v-flex>
-        </slide>
-        <slide>
-          <v-flex mr-1 ml-1>
-          <v-card dark tile flat color="blue">
-            <v-card-text>Reisetagebuch</v-card-text>
-            <v-img src="https://picsum.photos/510/300?random" aspect-ratio="1.7"></v-img>
-          </v-card>
-          </v-flex>
-        </slide>
-        <slide>
-          <v-flex mr-1 ml-1>
-          <v-card dark tile flat color="blue">
-            <v-card-text>Reisetagebuch</v-card-text>
-            <v-img src="https://picsum.photos/510/300?random" aspect-ratio="1.7"></v-img>
-          </v-card>
-          </v-flex>
-        </slide>
-      </carousel>
+            <carousel v-if="i == 1"
+            :paginationEnabled="false"
+            >
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://images.unsplash.com/photo-1436637706755-81d219b36e29?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Eifelturm</div>
+                        <div class="carousel-tex-subheader">Paris, France</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://images.unsplash.com/photo-1486247496048-cc4ed929f7cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Louvre</div>
+                        <div class="carousel-tex-subheader">Paris, France</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://picsum.photos/510/300?random"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Wolfang</div>
+                        <div class="carousel-tex-subheader">Paris, France</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+            </carousel>
+
+
+
+
+            <carousel v-if="i == 2"
+            :paginationEnabled="false"
+            >
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Uhrenmuseum</div>
+                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Kebab-Treff</div>
+                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://picsum.photos/510/300?random"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Wolfang</div>
+                        <div class="carousel-tex-subheader">Paris, France</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+            </carousel>
+
+          </v-tab-item>
+        </v-tabs>
+      </div>
     </v-layout>
   </v-container>  
   </v-app>
@@ -113,38 +212,100 @@
 <script>
 
 import { Carousel, Slide } from 'vue-carousel';
-import Hamburger from 'vue-hamburger';
-import MobileNav from 'mobile-nav';
+import {eventBus} from '../main.js';
+import axios from 'axios'
 
-// import 'vue-hamburger/index.css'
-// Vue.component('hamburger', require())
- 
-//Example Vue component using the hamburger
-// Vue.component('mobile-nav', {
-//   data: function() {
-//     return {
-//       open: false // The open/close state of the mobile nav
-//     }
-//   }
-// })
 
   export default {
     components: {
       Carousel,
-      Slide,
-      Hamburger,
-      MobileNav
+      Slide
     },
-    data: function() {
-    return {
-      open: false // The open/close state of the mobile nav
+    data: () => ({
+      lorem: `Lorem ipsum dolor sit amet, mel at clita quando. Te sit oratio vituperatoribus, nam ad ipsum posidonium mediocritatem, explicari dissentiunt cu mea. Repudiare disputationi vim in, mollis iriure nec cu, alienum argumentum ius ad. Pri eu justo aeque torquatos.`,
+      date: new Date().toISOString().substr(0, 10), 
+      time: new Date().getHours() + ':' + new Date().getMinutes(),
+      active: null,
+      searchTerm: '',
+      entries: [],
+      isLoading: false,
+      model: null,
+      search: null,
+      newDestination: Object
+    }),
+    methods: {
+      locationSearch: function(event){
+        console.log('FUCK',this.newDestination);
+        // this.$router.push('map');
+        // eventBus.$emit('LocationFromHome', this.searchTerm);
+        },
+        locationSearch2: function(){
+          console.log('CUNT')
+        },
+        getDestination: function(event){
+          this.newDestination = event.geometry.coordinates;
+          console.log('CHANGE INPUT', this.newDestination)
+        }
+      },
+
+    computed: {
+      fields () {
+        if (!this.model) return []
+
+        return Object.keys(this.model).map(key => {
+          return {
+            key,
+            value: this.model[key] || 'n/a'
+          }
+        })
+      },
+      items () {
+        return this.entries.map(entry => {
+                  console.log('items()',entry)
+          const Description = entry.place_name
+
+          return Object.assign({}, entry, { Description })
+        })
+      }
+    },
+    watch: {
+      search (val) {
+        this.searchTerm = val;
+        // Items have already been requested
+        if (this.isLoading) return
+
+        this.isLoading = true
+        var apiKey = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjanQ3MWRtdTgwa3hkM3lvY3BydHd6ZG9pIn0.2Ag8iKmmWCGR3BjlPW4qEw';
+
+        // fetch('https://api.publicapis.org/entries')
+        
+        fetch('https://api.mapbox.com/geocoding/v5/mapbox.places/'+val+'.json?access_token='+apiKey+'',
+        {
+          headers:{
+          access_token: apiKey,
+          language: 'de',
+          autocomplete: false,
+          proximity: [48.20715, 8.05156],
+          types: 'address',
+          limit: 10
+          }
+        })
+        .then(res => res.json())
+        .then(res => {
+          var newProps = { 
+            count: res.features.length,
+            entries: res.features
+          }
+          const { count, entries } = newProps
+          this.count = count
+          this.entries = entries
+        })
+        .catch(error => {
+          console.log(error)
+        })
+        .finally(() => (this.isLoading = false))
+      }
     }
-  }
-    // data: () => ({
-    //   // lorem: `Lorem ipsum dolor sit amet, mel at clita quando. Te sit oratio vituperatoribus, nam ad ipsum posidonium mediocritatem, explicari dissentiunt cu mea. Repudiare disputationi vim in, mollis iriure nec cu, alienum argumentum ius ad. Pri eu justo aeque torquatos.`,
-    //   // date: new Date().toISOString().substr(0, 10), 
-    //   // time: new Date().getHours() + ':' + new Date().getMinutes() 
-    // })
   }
 </script>
 
@@ -163,8 +324,7 @@ import MobileNav from 'mobile-nav';
   }
 
   .top-area {
-    height: 25rem;
-    background-image: linear-gradient(129deg, #4285f4, #00ebff);
+    height: 20rem;
     margin-bottom: 1rem;
     border-bottom-left-radius: 7%;
     border-bottom-right-radius: 7%;
@@ -240,4 +400,3 @@ import MobileNav from 'mobile-nav';
 }
 
 </style>
-
