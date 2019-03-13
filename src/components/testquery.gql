@@ -1,0 +1,12 @@
+ {
+    search {
+        total
+        business {
+            name
+            coordinates {
+                latitude
+                longitude
+            }
+        }
+    }
+}

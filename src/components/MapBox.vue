@@ -2,6 +2,7 @@
 <div class="wrapper">
   <!-- <div ref="custom-marker" class="custom-marker"></div> -->
   <div id="map" ref="map">
+    <input type="text" v-on:change="searchPOI($event)"  placeholder="Discover.."/>
   </div>
 </div>
 </template>
@@ -9,12 +10,14 @@
 <script>
 import MapNav from './MapNav.vue';
 import {eventBus} from '../main.js';
+import gql from 'graphql-tag';
 
 import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
 
+var markers = [];
 
 export default {
   name: 'MapBox',
@@ -31,7 +34,8 @@ export default {
       aktPos: [],
       userLocation: Object,
       foursquareResponse: Object,
-      foursquareSearch: String
+      foursquareSearch: String,
+      searchTerm: String
     }
   },
   methods: {
@@ -53,27 +57,66 @@ export default {
       this.marker.setLngLat([newCenter[0],newCenter[1]]);
       this.long = newCenter[0];
       this.lat = newCenter[1];
+    },
+    searchPOI: function(event) {
+      this.clearMarkers();
+      this.$apollo.queries.search.skip = false;
+      var resultPromise = this.$apollo.queries.search.refetch({ term: event.target.value, latitude: this.lat, longitude: this.long, radius: 5000, limit: 15 })
+      resultPromise.then(result => this.addMarker(result.data.search.business));
+    },
+    addMarker: function(queryResult) {
+      for (var i = 0; i < queryResult.length; i++) {
+        var business = queryResult[i];
+        var currentMarker = new mapboxgl.Marker({
+          draggable: false
+        })
+        .setLngLat([business.coordinates.longitude, business.coordinates.latitude])
+        .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+        .setHTML('<h3 class="pop-up-text">' + business.name + '</h3>'))
+        .addTo(this.mainMap);
+        markers.push(currentMarker);
+      }
+    },
+    clearMarkers: function() {
+      for (var i  = 0; i < markers.length; i++) {
+        markers[i].remove();
+      }
     }
   },
-  created(){
-    eventBus.$on('toggleDirections', (isVisible) =>{
+  created() {
+    eventBus.$on('toggleDirections', (isVisible) => {
       console.log(isVisible)
-      });
+    });
   },
+  apollo: {
+    search: gql`{
+      search
+      {
+        total
+        business {
+          name
+          coordinates {
+            latitude
+            longitude
+          }
+        }
+      }
+    }`
+  },
+
   mounted(){
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this.lat = 48.218800;
   this.long = 11.624707;
+  this.$apollo.queries.search.skip = true;
 
   this.mainMap = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v9',
-        center: [this.long, this.lat],
-        zoom: 9
-    });
-         
-  
-         
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v9',
+      center: [this.long, this.lat],
+      zoom: 9
+  });
+                  
   this.geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken
     });
@@ -105,27 +148,6 @@ export default {
     .addTo(this.mainMap);
 
   this.geocoder.on('result', this.updateMarker);
-
-  var foursquareID = 'FPAOMYEFTC3B3L0SQKO0PTH0LAARK4NFYYZSVFRTVTAZA2NE';
-  var foursquareSecret = 'XGQPJYTUJEVDSHF1PHCGH0M5HHEOEKLJIL1D1OR1FSEBSC5B';
-  this.foursquareSearch = 'supermarket'
-  axios
-      .get('https://api.foursquare.com/v2/venues/search?client_id='+foursquareID+'&client_secret='+foursquareSecret+'&v=20180323&limit=5&ll=48.218800,11.624707&query='+this.foursquareSearch+'')
-      .then(response => {
-        this.foursquareResponse = response.data.response ;
-        for(var i = 0; i< this.foursquareResponse.venues.length; i++){
-          new mapboxgl.Marker({
-            draggable: false
-          })
-          .setLngLat([this.foursquareResponse.venues[i].location.lng, this.foursquareResponse.venues[i].location.lat ])
-          .addTo(this.mainMap);
-        }
-      })
-      .catch(error => {
-        console.log(error)
-      })
-      .finally(() => console.log('done'))
-    
   }
 }
 </script>
@@ -133,7 +155,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-
 .wrapper{
   width: 100vw;
   height: 100%;
@@ -171,7 +192,19 @@ export default {
 @media only screen and (max-width: 599px) {
   
 }
+</style>
 
+<style>
+.mapboxgl-popup {
+  max-width: 200px;
+}
 
+.mapboxgl-popup-content {
+  text-align: center;
+  font-family: 'Open Sans', sans-serif;
+}
 
+.pop-up-text {
+  color: black;
+}
 </style>
