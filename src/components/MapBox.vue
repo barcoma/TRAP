@@ -1,7 +1,7 @@
 <template>
 <div class="wrapper">
   <!-- <div ref="custom-marker" class="custom-marker"></div> -->
-  
+  <input type="text" v-on:change="searchPOI($event)"  placeholder="Discover.."/>
   <div class="map-controls-container">
     <h5>Navigieren</h5>
     <v-btn v-if="isVisible" fab dark small color="white" class="routing-button black--text"
@@ -23,15 +23,14 @@
     <v-btn v-if="routeReady" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
   </div>
   
-  <div id="map" ref="map">
-    
-  </div>
+  <div id="map" ref="map"></div>
 </div>
 </template>
 
 <script>
 import MapNav from './MapNav.vue';
 import {eventBus} from '../main.js';
+import gql from 'graphql-tag';
 
 import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
@@ -39,6 +38,7 @@ import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
 import { setTimeout } from 'timers';
 
+var markers = [];
 var userLong = 0;
 var userLat = 0;
 
@@ -87,6 +87,30 @@ export default {
       this.long = newCenter[0];
       this.lat = newCenter[1];
     },
+    searchPOI: function(event) {
+      this.clearMarkers();
+      this.$apollo.queries.search.skip = false;
+      var resultPromise = this.$apollo.queries.search.refetch({ term: event.target.value, latitude: this.lat, longitude: this.long, radius: 5000, limit: 15 })
+      resultPromise.then(result => this.addMarker(result.data.search.business));
+    },
+    addMarker: function(queryResult) {
+      for (var i = 0; i < queryResult.length; i++) {
+        var business = queryResult[i];
+        var currentMarker = new mapboxgl.Marker({
+          draggable: false
+        })
+        .setLngLat([business.coordinates.longitude, business.coordinates.latitude])
+        .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+        .setHTML('<h3 class="pop-up-text">' + business.name + '</h3>'))
+        .addTo(this.mainMap);
+        markers.push(currentMarker);
+      }
+    },
+    clearMarkers: function() {
+      for (var i  = 0; i < markers.length; i++) {
+        markers[i].remove();
+      }
+    },
     showRouting: function() {
       this.setUserLocation();
       this.isVisible = !this.isVisible;
@@ -126,30 +150,46 @@ export default {
       this.inputStart.value = "Aktueller Standpunkt";
     }
   },
+  apollo: {
+    search: gql`{
+      search
+      {
+        total
+        business {
+          name
+          coordinates {
+            latitude
+            longitude
+          }
+        }
+      }
+    }`
+  },
   created(){
-    eventBus.$on('toggleDirections', (isVisible) =>{
+    eventBus.$on('toggleDirections', (isVisible) => {
       if(isVisible == true){
         this.mainMap.addControl(this.directions, 'bottom-left');
       } else {
         this.mainMap.removeControl(this.directions);
       }
-      });
+    });
   },
   mounted(){
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this.lat = 48.218800;
   this.long = 11.624707;
+  this.$apollo.queries.search.skip = true;
 
   this.mainMap = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v9',
-        center: [this.long, this.lat],
-        zoom: 9
-    });
-
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v9',
+      center: [this.long, this.lat],
+      zoom: 9
+  });
+                  
   this.geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken
-    });
+  });
 
   this.directions = new MapboxDirections({
       unit: 'metric',
@@ -211,32 +251,6 @@ export default {
     .addTo(this.mainMap);
 
   this.geocoder.on('result', this.updateMarker);
-
-
-
-  // var foursquareID = 'FPAOMYEFTC3B3L0SQKO0PTH0LAARK4NFYYZSVFRTVTAZA2NE';
-  // var foursquareSecret = 'XGQPJYTUJEVDSHF1PHCGH0M5HHEOEKLJIL1D1OR1FSEBSC5B';
-
-  // axios
-  //     //.get('https://api.foursquare.com/v2/venues/search?client_id='+foursquareID+'&client_secret='+foursquareSecret+'&v=20180323&limit=5&ll=48.218800,11.624707&query=supermarket')
-  //      .get('http://api.wikilocation.org/articles?lat=51.500688&lng=-0.124411&limit=3&offset=10&format=xml')
-  //     .then(response => {
-  //       // this.foursquareResponse = response.data.response ;
-  //       // for(var i = 0; i< this.foursquareResponse.venues.length; i++){
-  //       //   new mapboxgl.Marker({
-  //       //     draggable: false
-  //       //   })
-  //       //   .setLngLat([this.foursquareResponse.venues[i].location.lng, this.foursquareResponse.venues[i].location.lat ])
-  //       //   .addTo(this.mainMap);
-  //       // }
-  //       console.log(response);
-  //     })
-  //     .catch(error => {
-  //       console.log(error)
-  //     })
-  //     .finally(() => console.log('done'))
-
-
   }
 }
 </script>
@@ -554,14 +568,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 //   box-shadow:none;
 //   }
 
-
-
-
-
-
 /* Profile */
-
-
   .mapbox-directions-profile {
   display: none;
   margin:7px 0 0;
@@ -646,38 +653,48 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
       }
 
 /* Instructions */
-.mapbox-directions-instructions {
-  display: none;
-}
+  .mapbox-directions-instructions {
+    display: none;
+  }
+</style>
 
-.mapbox-directions-instructions .directions-icon {
-  position:absolute;
-  left:12px;
-  top:20px;
-  margin:auto;
+<style lang="scss">
+  .mapboxgl-popup {
+    max-width: 200px;
+  }
+
+  .mapboxgl-popup-content {
+    text-align: center;
+    font-family: 'Open Sans', sans-serif;
+  }
+  .mapbox-directions-instructions .directions-icon {
+    position:absolute;
+    left:12px;
+    top:20px;
+    margin:auto;
   }
   .mapbox-directions-instructions .directions-icon:before {
     vertical-align:top;
     }
 
-.mapbox-directions-error {
-  padding:20px;
-  font-size:20px;
-  line-height:25px;
+  .mapbox-directions-error {
+    padding:20px;
+    font-size:20px;
+    line-height:25px;
   }
-.mapbox-directions-step-distance {
-  color:rgba(255,255,255,.5);
-  position:absolute;
-  padding:5px 10px;
-  font-size:12px;
-  left:30px;
-  bottom:-10px;
+  .mapbox-directions-step-distance {
+    color:rgba(255,255,255,.5);
+    position:absolute;
+    padding:5px 10px;
+    font-size:12px;
+    left:30px;
+    bottom:-10px;
   }
-.mapbox-directions-steps {
-  position:relative;
-  list-style:none;
-  margin:0;
-  padding:0;
+  .mapbox-directions-steps {
+    position:relative;
+    list-style:none;
+    margin:0;
+    padding:0;
   }
   .mapbox-directions-step {
     position:relative;
@@ -689,46 +706,48 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     font-weight: 300;
     letter-spacing:0.1em;
     }
-    .mapbox-directions-step * { pointer-events:none; }
-    .mapbox-directions-step:hover {
-      color:white;
-      }
-    .mapbox-directions-step:after {
-      content:'';
-      position:absolute;
-      top:45px;
-      bottom:-10px;
-      border-left:2px dotted rgba(255,255,255,.2);
-      left:20px;
-      }
-    .mapbox-directions-step:last-child:after,
-    .mapbox-directions-step:last-child .mapbox-directions-step-distance {
-      display:none;
-      }
+  .mapbox-directions-step * { pointer-events:none; }
+  .mapbox-directions-step:hover {
+    color:white;
+  }
+  .mapbox-directions-step:after {
+    content:'';
+    position:absolute;
+    top:45px;
+    bottom:-10px;
+    border-left:2px dotted rgba(255,255,255,.2);
+    left:20px;
+  }
+  .mapbox-directions-step:last-child:after,
+  .mapbox-directions-step:last-child .mapbox-directions-step-distance {
+    display:none;
+  }
 
-.mapbox-marker-drag-icon {
-  display:block;
-  background-color:#444;
-  border-radius:50%;
-  box-shadow:0 0 5px 0 rgba(0,0,0,0.5);
+  .mapbox-marker-drag-icon {
+    display:block;
+    background-color:#444;
+    border-radius:50%;
+    box-shadow:0 0 5px 0 rgba(0,0,0,0.5);
   }
   .mapbox-marker-drag-icon-step {
     background-color:#3BB2D0;
-    }
+  }
 
-.mapbox-directions-clearfix:after {
-  content:'';
-  display:block;
-  height:0;
-  clear:both;
-  visibility:hidden;
+  .mapbox-directions-clearfix:after {
+    content:'';
+    display:block;
+    height:0;
+    clear:both;
+    visibility:hidden;
   }
 
 /* Mobile */
-// @media only screen and (max-width:640px) {
+ @media only screen and (max-width:640px)  {
+
+}
 
 // /* Containers */
-// .directions-control.directions-control { width:100%; max-width:100%; }
+ .directions-control.directions-control { width:100%; max-width:100%; }
 
 // /* Input container */
 // .directions-control.directions-control-inputs { top:0;left:0; }
@@ -798,4 +817,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMjAgMjAiPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0zMjAwLC05OTIuMzYyMTgpIj48ZyB0cmFuc2Zvcm09Im1hdHJpeCgxLDAsMCwtMSwxLDIwMDQuNzI0NCkiIG9wYWNpdHk9IjAuNSIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEsLTIpIi8+PGcgdHJhbnNmb3JtPSJtYXRyaXgoMSwwLDAsLTEsMSwyMDI0LjcyNDQpIiBmaWxsPSIjZmZmIi8+PHBhdGggZD0ibTMyMTUgMTAwMS40YzAgMi44LTUgOC01IDggMCAwLTUtNS4yLTUtOCAwLTIuOCAyLjItNSA1LTUgMi44IDAgNSAyLjIgNSA1eiIgZmlsbD0iI0ZGRiIvPjwvZz48L3N2Zz4=);
   }
 
+.pop-up-text {
+  color: black;
+}
 </style>
