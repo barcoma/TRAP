@@ -28,7 +28,10 @@ import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
+import { setTimeout } from 'timers';
 
+var userLong = 0;
+var userLat = 0;
 
 export default {
   name: 'MapBox',
@@ -45,22 +48,9 @@ export default {
       aktPos: [],
       userLocation: Object,
       foursquareResponse: Object,
-<<<<<<< HEAD
       isVisible: true,
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-      right: 13.5
-=======
-      foursquareSearch: String
->>>>>>> 5ab9031e1d4eb6a5debdded4f6590b8974e7fe59
-=======
       displayNavigation: false,
       routeReady: false
->>>>>>> Stashed changes
-=======
-      displayNavigation: false,
-      routeReady: false
->>>>>>> Stashed changes
     }
   },
   methods: {
@@ -82,14 +72,16 @@ export default {
       this.marker.setLngLat([newCenter[0],newCenter[1]]);
       this.long = newCenter[0];
       this.lat = newCenter[1];
-<<<<<<< HEAD
     },
     showRouting: function() {
+      this.setUserLocation();
       this.isVisible = !this.isVisible;
       this.displayNavigation =!this.displayNavigation;
       var destination = document.getElementsByClassName("mapbox-directions-destination")[0];
       var directionsProfile = document.getElementsByClassName("mapbox-directions-profile")[0];
       var inputs = document.getElementsByClassName("directions-control-inputs")[0];
+      // var instructions = document.getElementsByClassName('mapbox-directions-instructions')[0];
+      // instructions.style.cssText = "display: none;";
       if (destination.style.display == "block") {
         destination.style.display = "none";
         directionsProfile.style.display = "none";
@@ -102,39 +94,41 @@ export default {
     },
     reverseDirections: function() {
       this.directions.reverse();
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
->>>>>>> 5ab9031e1d4eb6a5debdded4f6590b8974e7fe59
-=======
-=======
->>>>>>> Stashed changes
       //this.displayNavigation = true;
     },
     startRoute: function() {
-      var instructions = document.getElementsByClassName("mapbox-directions-steps")[0];
+      // var blur = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[1].childNodes[1];
+      // blur.blur();
+      // var focus = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[0].childNodes[1];
+      // focus.focus();
+      // console.log(focus);
+      var instructions = document.getElementsByClassName('mapbox-directions-instructions')[0];
       var inputs = document.getElementsByClassName("directions-control-inputs")[0];
       var startButton = document.getElementsByClassName("start-navigation-button")[0];
+
       var altRoutes = document.getElementsByClassName("mapbox-directions-routes mapbox-directions-clearfix")[0];
       var navigation = document.getElementsByClassName("mapboxgl-ctrl-top-left")[0];
       altRoutes.style.display = "none";
       instructions.style.display = "block";
       startButton.style.display = "none";
       inputs.style.display = "none";
-      console.log(instructions);
-      //this.displayNavigation = false;
-      
-      //this.directions.controls.inputs = false;
-      //this.isVisible = true;
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+    },
+    setUserLocation: function() {
+      var inputStart = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[0].childNodes[1];
+      var inputDestination = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[1].childNodes[1];
+
+      this.directions.setDestination(inputStart.value);
+      this.directions.setOrigin([userLong, userLat]);
+      inputStart.value = "Aktueller Standpunkt";
     }
   },
   created(){
     eventBus.$on('toggleDirections', (isVisible) =>{
-      console.log(isVisible)
+      if(isVisible == true){
+        this.mainMap.addControl(this.directions, 'bottom-left');
+      } else {
+        this.mainMap.removeControl(this.directions);
+      }
       });
   },
   mounted(){
@@ -148,7 +142,7 @@ export default {
         center: [this.long, this.lat],
         zoom: 9
     });
-      
+
   this.geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken
     });
@@ -180,6 +174,25 @@ export default {
     .addControl(this.userLocation, 'bottom-right')
     .addControl(this.directions, 'top-left')
 
+
+  this.mainMap.on("load", e => {
+    this.userLocation.trigger();
+  })
+
+  //this.userLocation.trigger();
+
+  this.userLocation.on('geolocate', function(e) {
+      userLong = e.coords.longitude;
+      userLat = e.coords.latitude;
+      // console.log(userLong);
+      // console.log(userLat);
+  });
+
+
+
+
+
+
   this.marker = new mapboxgl.Marker({
     // element: this.$refs.custom-marker,     WENN CUSTOM MARKER EINGEFÜGT IST
     draggable: false
@@ -191,26 +204,29 @@ export default {
 
 
 
-  var foursquareID = 'FPAOMYEFTC3B3L0SQKO0PTH0LAARK4NFYYZSVFRTVTAZA2NE';
-  var foursquareSecret = 'XGQPJYTUJEVDSHF1PHCGH0M5HHEOEKLJIL1D1OR1FSEBSC5B';
-  this.foursquareSearch = 'supermarket'
-  axios
-      .get('https://api.foursquare.com/v2/venues/search?client_id='+foursquareID+'&client_secret='+foursquareSecret+'&v=20180323&limit=5&ll=48.218800,11.624707&query='+this.foursquareSearch+'')
-      .then(response => {
-        this.foursquareResponse = response.data.response ;
-        for(var i = 0; i< this.foursquareResponse.venues.length; i++){
-          new mapboxgl.Marker({
-            draggable: false
-          })
-          .setLngLat([this.foursquareResponse.venues[i].location.lng, this.foursquareResponse.venues[i].location.lat ])
-          .addTo(this.mainMap);
-        }
-      })
-      .catch(error => {
-        console.log(error)
-      })
-      .finally(() => console.log('done'))
-    
+  // var foursquareID = 'FPAOMYEFTC3B3L0SQKO0PTH0LAARK4NFYYZSVFRTVTAZA2NE';
+  // var foursquareSecret = 'XGQPJYTUJEVDSHF1PHCGH0M5HHEOEKLJIL1D1OR1FSEBSC5B';
+
+  // axios
+  //     //.get('https://api.foursquare.com/v2/venues/search?client_id='+foursquareID+'&client_secret='+foursquareSecret+'&v=20180323&limit=5&ll=48.218800,11.624707&query=supermarket')
+  //      .get('http://api.wikilocation.org/articles?lat=51.500688&lng=-0.124411&limit=3&offset=10&format=xml')
+  //     .then(response => {
+  //       // this.foursquareResponse = response.data.response ;
+  //       // for(var i = 0; i< this.foursquareResponse.venues.length; i++){
+  //       //   new mapboxgl.Marker({
+  //       //     draggable: false
+  //       //   })
+  //       //   .setLngLat([this.foursquareResponse.venues[i].location.lng, this.foursquareResponse.venues[i].location.lat ])
+  //       //   .addTo(this.mainMap);
+  //       // }
+  //       console.log(response);
+  //     })
+  //     .catch(error => {
+  //       console.log(error)
+  //     })
+  //     .finally(() => console.log('done'))
+
+
   }
 }
 </script>
@@ -225,7 +241,7 @@ export default {
   width: 100vw;
   height: 100%;
 }
- 
+
 #map {
 	width: 100%;
   height: 100%;
@@ -251,12 +267,12 @@ export default {
 //     top:20px;
 // }
 
-// .mapboxgl-ctrl-geocoder { 
-//     min-width:100%; 
+// .mapboxgl-ctrl-geocoder {
+//     min-width:100%;
 // }
 
 @media only screen and (max-width: 599px) {
-  
+
 }
 
 /* Map Navigation */
@@ -307,7 +323,7 @@ h3 {
   margin-top: -1rem;
 }
 
-.mapboxgl-ctrl-geocoder input::placeholder { 
+.mapboxgl-ctrl-geocoder input::placeholder {
   color: black;
   font-size: 10pt;
 }
@@ -468,7 +484,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   text-overflow:ellipsis;
   white-space:nowrap;
   overflow:hidden;
-    
+
   }
   .mapbox-directions-origin input[type='text'] {
     // box-shadow:0 1px 0 0 #ddd;
@@ -609,9 +625,9 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
       }
 
 /* Instructions */
-// .mapbox-directions-instructions {
-//   display: none;
-// }
+.mapbox-directions-instructions {
+  display: none;
+}
 
 .mapbox-directions-instructions .directions-icon {
   position:absolute;

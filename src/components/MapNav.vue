@@ -66,11 +66,7 @@ import {eventBus} from '../main.js';
     cursor: pointer;
     z-index: 9;
     position: relative;
-<<<<<<< HEAD
     top: -88vh;
-=======
-    top: -80vh;
->>>>>>> 5ab9031e1d4eb6a5debdded4f6590b8974e7fe59
     right: 47vw;
 }
 
@@ -143,7 +139,6 @@ import {eventBus} from '../main.js';
   font-weight: 900;
   border-radius: 15px;
 }
-<<<<<<< HEAD
 
 /* iPhone 6+, 7+, 8+ ----------- */
 @media only screen and (max-width: 599px) {
@@ -195,6 +190,4 @@ import {eventBus} from '../main.js';
         right: 40vw;
     }
 }
-=======
->>>>>>> 5ab9031e1d4eb6a5debdded4f6590b8974e7fe59
 </style>
