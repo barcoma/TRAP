@@ -146,13 +146,10 @@ export default {
 
       this.directions.setDestination(inputStart.value);
       this.directions.setOrigin([userLong, userLat]);
+      this.lat = userLat;
+      this.long = userLong;
       inputStart.value = "Aktueller Standpunkt";
     }
-  },
-  created() {
-    eventBus.$on('toggleDirections', (isVisible) => {
-      console.log(isVisible)
-    });
   },
   apollo: {
     search: gql`{
@@ -170,13 +167,13 @@ export default {
     }`
   },
   created(){
-    eventBus.$on('toggleDirections', (isVisible) =>{
+    eventBus.$on('toggleDirections', (isVisible) => {
       if(isVisible == true){
         this.mainMap.addControl(this.directions, 'bottom-left');
       } else {
         this.mainMap.removeControl(this.directions);
       }
-      });
+    });
   },
   mounted(){
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
@@ -193,7 +190,7 @@ export default {
                   
   this.geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken
-    });
+  });
 
   this.directions = new MapboxDirections({
       unit: 'metric',
