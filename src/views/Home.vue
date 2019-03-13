@@ -1,4 +1,5 @@
 <template>
+<v-app>
   <v-container >
 
     <v-layout align-center row wrap class="top-area">
@@ -32,21 +33,35 @@
      </v-layout>
 
       <v-flex mt-1 xs10 offset-xs1>
-            <v-text-field 
-            class="main-input"
+            <!-- <v-text-field 
+            class="main-input-autocomplete"
             id="testFeld"
             label="Solo"
             placeholder="Los geht's!"
             solo
             v-model="searchTerm"
+            v-on:keyup="locationSearch()"
+          > -->
+          <v-autocomplete
+            :items="items"
+            :loading="isLoading"
+            :search-input.sync="search"
+            @change="getDestination"
+            color="white"
+            hide-no-data
+            hide-selected
+            item-text="Description"
+            item-value="API"
+            placeholder="Los geht's!"
+            return-object
+            solo
           >
             <template slot="append">
                 <v-icon v-on:click="locationSearch()">check</v-icon>
-                <v-icon>directions</v-icon>
+                <v-icon v-on:click="locationSearch2()">directions</v-icon>
             </template>
-          </v-text-field>
-          
-      </v-flex>
+          </v-autocomplete>      
+          </v-flex>
 
     </v-layout>
 
@@ -92,6 +107,7 @@
       </carousel>
     </v-layout>
   </v-container>  
+  </v-app>
 </template>
 
 <script>
@@ -161,6 +177,17 @@ import MobileNav from 'mobile-nav';
         border: 3px solid rgb(255, 255, 255);
       }
     }
+  }
+
+  .main-input-autocomplete:after{
+    top: 100%;
+    left: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 50px;
+    width: 50px;
+    position: absolute;
+    pointer-events: none;
   }
 
   .v-input__slot{
