@@ -383,9 +383,10 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
 } 
 
 
-.theme--light.v-list .v-list__tile__mask{
+.v-list__tile__title, .theme--light.v-list .v-list__tile__mask{
   color: black !important;
   background: none !important;
+  font-size: 1rem !important;
 }
 
 </style>
