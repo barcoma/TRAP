@@ -4,13 +4,19 @@
   
   <div class="map-controls-container">
     <h5>Navigieren</h5>
-    <v-btn fab dark small color="white" class="routing-button black--text"
+    <v-btn v-if="isVisible" fab dark small color="white" class="routing-button black--text"
     v-on:click="showRouting()"
     v-bind:class="{ change : isVisible }"
     >
-      <v-icon v-if="isVisible" dark>subdirectory_arrow_right</v-icon>
-      <v-icon v-else dark>close</v-icon>
+      <v-icon dark>subdirectory_arrow_right</v-icon>
     </v-btn>
+    <v-btn v-else fab dark small color="white" class="routing-button black--text"
+    v-on:click="closeRouting()"
+    v-bind:class="{ change : isVisible }"
+    >
+      <v-icon dark>close</v-icon>
+    </v-btn>
+
     <v-btn v-if="displayNavigation" v-on:click="reverseDirections" fab dark small color="white" class="route-switch-button black--text">
       <v-icon dark>compare_arrows</v-icon>
     </v-btn>
@@ -53,7 +59,12 @@ export default {
       foursquareResponse: Object,
       isVisible: true,
       displayNavigation: false,
-      routeReady: false
+      routeReady: false,
+      destination: Object,
+      inputs: Object,
+      inputStart: Object,
+      inputDestination: Object,
+      directionsProfile: Object
     }
   },
   methods: {
@@ -80,49 +91,39 @@ export default {
       this.setUserLocation();
       this.isVisible = !this.isVisible;
       this.displayNavigation =!this.displayNavigation;
-      var destination = document.getElementsByClassName("mapbox-directions-destination")[0];
-      var directionsProfile = document.getElementsByClassName("mapbox-directions-profile")[0];
-      var inputs = document.getElementsByClassName("directions-control-inputs")[0];
-      // var instructions = document.getElementsByClassName('mapbox-directions-instructions')[0];
-      // instructions.style.cssText = "display: none;";
-      if (destination.style.display == "block") {
-        destination.style.display = "none";
-        directionsProfile.style.display = "none";
-        this.directions.removeRoutes();
-        inputs.style.display = "block";
-      } else {
-        destination.style.display = "block";
-        directionsProfile.style.display = "block";
-      }
+      this.destination.style.display = "block";
+      this.directionsProfile.style.display = "block";
+    },
+    closeRouting: function() {
+      this.isVisible = !this.isVisible;
+      this.displayNavigation =!this.displayNavigation;
+      this.directions.removeRoutes();
+      this.routeReady = false;
+      this.inputs.style.display = "block";
+      this.destination.style.display = "none";
+      this.directionsProfile.style.display = "none";
+      this.inputStart.value = null;
+      this.inputDestination.value = null;
+      var startButton = document.getElementsByClassName("start-navigation-button")[0].style.display = "block";
     },
     reverseDirections: function() {
       this.directions.reverse();
-      //this.displayNavigation = true;
     },
     startRoute: function() {
-      // var blur = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[1].childNodes[1];
-      // blur.blur();
-      // var focus = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[0].childNodes[1];
-      // focus.focus();
-      // console.log(focus);
       var instructions = document.getElementsByClassName('mapbox-directions-instructions')[0];
-      var inputs = document.getElementsByClassName("directions-control-inputs")[0];
       var startButton = document.getElementsByClassName("start-navigation-button")[0];
-
-      //var altRoutes = document.getElementsByClassName("mapbox-directions-routes")[0];
-      var navigation = document.getElementsByClassName("mapboxgl-ctrl-top-left")[0];
-      //altRoutes.style.display = "none";
+      var altRoutes = document.getElementsByClassName("mapbox-directions-routes")[0];
+      if (altRoutes) {
+        altRoutes.style.display = "none";
+      }
       instructions.style.display = "block";
       startButton.style.display = "none";
-      inputs.style.display = "none";
+      this.inputs.style.display = "none";
     },
     setUserLocation: function() {
-      var inputStart = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[0].childNodes[1];
-      var inputDestination = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[1].childNodes[1];
-
-      this.directions.setDestination(inputStart.value);
+      this.directions.setDestination(this.inputStart.value);
       this.directions.setOrigin([userLong, userLat]);
-      inputStart.value = "Aktueller Standpunkt";
+      this.inputStart.value = "Aktueller Standpunkt";
     }
   },
   created(){
@@ -192,6 +193,12 @@ export default {
   });
 
 
+  this.destination = document.getElementsByClassName("mapbox-directions-destination")[0];
+  //this.instructions = document.getElementsByClassName('mapbox-directions-instructions')[0];
+  this.inputs = document.getElementsByClassName("directions-control-inputs")[0];
+  this.directionsProfile = document.getElementsByClassName("mapbox-directions-profile")[0];
+  this.inputStart = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[0].childNodes[1];
+  this.inputDestination = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[1].childNodes[1];
 
 
 
