@@ -3,6 +3,15 @@ module.exports = {
   configureWebpack: {
     devtool: 'source-map'
   },
+  chainWebpack: config => {
+    // GraphQL Loader
+    config.module
+      .rule('graphql')
+      .test(/\.graphql$/)
+      .use('graphql-tag/loader')
+        .loader('graphql-tag/loader')
+        .end()
+  },
   pwa: {
     name: 'trap',
     themeColor: '#4DBA87',

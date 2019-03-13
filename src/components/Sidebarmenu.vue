@@ -1,0 +1,168 @@
+<template>
+  <v-layout >
+    
+    <v-container>
+      <v-layout justify-center>
+          
+        <v-btn
+         
+          @click.stop="drawer = !drawer"
+          class="burger"
+          fab dark
+          left absolute depressed
+          >
+        
+      <v-icon large>dehaze</v-icon>
+        
+        </v-btn>
+      </v-layout>
+     
+    </v-container>
+   
+    <v-navigation-drawer
+      v-model="drawer"
+      width="414"
+      absolute
+      temporary
+      dark
+    > 
+    
+     <div class="menulist">
+    <v-list >
+        <v-list-tile>
+          <v-btn
+          @click.stop="drawer = !drawer"
+          fab  color="none"
+          left absolute flat depressed
+          >
+        
+      <v-icon large color="white">clear</v-icon>
+        
+        </v-btn>
+        </v-list-tile>
+        </v-list>
+
+        <v-list  >
+        
+        <v-list-tile >
+          
+        <v-list-tile-content >
+            <v-list-tile-title >Hi, Wolfgang</v-list-tile-title>
+          </v-list-tile-content>
+           <v-flex row class="flex-avatar">
+            <v-avatar
+          :size="64"
+          color="grey lighten-4"
+        >
+          <img src="https://i1.rgstatic.net/ii/profile.image/390911189110788-1470211898704_Q512/Wolfgang_Taube2.jpg" alt="avatar">
+        </v-avatar>
+        </v-flex>
+         
+            </v-list-tile>
+       
+       
+      </v-list>
+
+      <v-list class="pt-0" >
+        <v-divider></v-divider>
+
+        <v-list-tile
+          v-for="item in items"
+          :key="item.title"
+          @click=""
+        >
+          <v-list-tile-action>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-tile-action>
+
+          <v-list-tile-content>
+            <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+        </div>
+
+    </v-navigation-drawer>
+  </v-layout>
+  
+</template>
+
+<script>
+
+  export default {
+    data () {
+      return {
+        drawer: null,
+        items: [
+          { title: 'Aktueller Standort', icon: 'my_location' },
+          { title: 'Letzte Ziele', icon: 'access_time' },
+          { title: 'Favoriten', icon: 'star' },
+          { title: 'In der Nähe', icon: 'near_me' },
+          { title: 'Routenplanung', icon: 'navigation' },
+          { title: 'Offline Karten', icon: 'map' },
+          { title: 'Fahrzeug Diagnose', icon: 'directions_car' },
+          { title: 'Hilfe und Feedback', icon: 'message' },
+          { title: 'Info', icon: 'info' },
+          { title: 'Einstellungen', icon: 'settings' },
+        ]
+      }
+    },
+    
+  }
+</script>
+
+<style lang="scss">
+div.v-list__tile__title {
+   font-family: 'Roboto Slab', serif;
+   font-weight: 300;
+   font-size: 20px;
+   opacity: 1 !important;
+   color:white;
+}
+.burger.v-btn{
+ top : 20px;
+}
+button.burger.v-btn.v-btn.theme--dark{
+
+  background-color:unset;
+}
+.v-navigation-drawer{
+   
+    position: absolute;
+}
+aside.v-navigation-drawer.v-navigation-drawer--temporary.theme--dark{
+  background-color: black;
+   background: -webkit-linear-gradient(to right, #2980b9, #2c3e50); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #2980b9, #2c3e50); 
+  height:100%;
+}
+aside.v-navigation-drawer.bg-image--absolute{
+  z-index:1 ;
+}
+aside.v-navigation-drawer.v-navigation-drawer--absolute{
+ z-index: 100;
+}
+.menulist{
+  background-color: unset;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+  .bg-image {
+ background-image: linear-gradient(129deg, #4285f4, var(--neon-blue));
+ position: absolute;
+  
+  filter: blur(20px);
+  -webkit-filter: blur(20px);
+
+  /* Full height */
+  width:100%;
+  height: 100%; 
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.v-list__tile__title{
+    height:30px;
+}
+</style>
