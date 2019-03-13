@@ -33,27 +33,15 @@
      </v-layout>
 
       <v-flex mt-1 xs10 offset-xs1>
-            <!-- <v-text-field 
-            class="main-input-autocomplete"
-            id="testFeld"
-            label="Solo"
-            placeholder="Los geht's!"
-            solo
-            v-model="searchTerm"
-            v-on:keyup="locationSearch()"
-          > -->
           <v-autocomplete
             :items="items"
             :loading="isLoading"
             :search-input.sync="search"
+            :filter="v => v"
             @change="getDestination"
-            color="white"
-            hide-no-data
-            hide-selected
-            item-text="Description"
-            item-value="API"
+            item-text="place_name_de"
+            item-value="id"
             placeholder="Los geht's!"
-            return-object
             solo
           >
             <template slot="append">
@@ -235,61 +223,48 @@ import axios from 'axios'
     }),
     methods: {
       locationSearch: function(event){
-        console.log('FUCK',this.newDestination);
+        //console.log('FUCK',this.newDestination);
         // this.$router.push('map');
         // eventBus.$emit('LocationFromHome', this.searchTerm);
         },
         locationSearch2: function(){
-          console.log('CUNT')
+         // console.log('CUNT')
         },
         getDestination: function(event){
           this.newDestination = event.geometry.coordinates;
-          console.log('CHANGE INPUT', this.newDestination)
+          //console.log('CHANGE INPUT', this.newDestination)
         }
       },
 
     computed: {
-      fields () {
-        if (!this.model) return []
-
-        return Object.keys(this.model).map(key => {
-          return {
-            key,
-            value: this.model[key] || 'n/a'
-          }
-        })
-      },
       items () {
         return this.entries.map(entry => {
-                  console.log('items()',entry)
-          const Description = entry.place_name
-
-          return Object.assign({}, entry, { Description })
+          if(entry.relevance > .5){
+          return  Object.assign({}, entry);
+          }
         })
       }
     },
     watch: {
       search (val) {
         this.searchTerm = val;
-        // Items have already been requested
+
         if (this.isLoading) return
 
         this.isLoading = true
-        var apiKey = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjanQ3MWRtdTgwa3hkM3lvY3BydHd6ZG9pIn0.2Ag8iKmmWCGR3BjlPW4qEw';
+        var apiKey = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjanQ3MWRtdTgwa3hkM3lvY3BydHd6ZG9pIn0.2Ag8iKmmWCGR3BjlPW4qEw';        
+        var url = new URL("https://api.mapbox.com/geocoding/v5/mapbox.places/"+val+".json"),
+                  params = {
+                    access_token: apiKey,
+                    language: 'de',
+                    limit: 10,
+                    autocomplete: true,
+                    fuzzyMatch: true
+                  }
 
-        // fetch('https://api.publicapis.org/entries')
+        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
         
-        fetch('https://api.mapbox.com/geocoding/v5/mapbox.places/'+val+'.json?access_token='+apiKey+'',
-        {
-          headers:{
-          access_token: apiKey,
-          language: 'de',
-          autocomplete: false,
-          proximity: [48.20715, 8.05156],
-          types: 'address',
-          limit: 10
-          }
-        })
+        fetch(url)
         .then(res => res.json())
         .then(res => {
           var newProps = { 
@@ -299,6 +274,7 @@ import axios from 'axios'
           const { count, entries } = newProps
           this.count = count
           this.entries = entries
+          console.log('items()', this.items)
         })
         .catch(error => {
           console.log(error)
@@ -397,6 +373,11 @@ import axios from 'axios'
   .carousel-tex-subheader{
     font-size: .75rem
   }
+}
+
+.theme--light.v-list .v-list__tile__mask{
+  color: black !important;
+  background: none !important;
 }
 
 </style>
