@@ -1,13 +1,7 @@
 <template lang="html">
   <section class="Map-Nav">
-    <div class="menu-icon-container" 
-      v-on:click="showNav()"
-      v-bind:class="{ change : isVisible }"
-      >
-        <div class="bar1"></div>
-        <div class="bar2"></div>
-        <div class="bar3"></div>
-    </div>
+    <v-flex> <Sidebarmenu />
+    </v-flex>
     <div 
         v-bind:class="{ visible : isVisible }"
         class="menu-background"
@@ -26,6 +20,7 @@
  
 <script lang="js">
 import {eventBus} from '../main.js';
+import Sidebarmenu from './Sidebarmenu.vue'
 
   export default  {
     name: 'MapNav',
@@ -50,17 +45,28 @@ import {eventBus} from '../main.js';
             eventBus.$emit('toggleDirections', this.showNavigation);
         }
     },
+    components:{
+        Sidebarmenu
+    },
     computed: {
  
     }
 }
 </script>
  
-<style scoped lang="scss">
+<style  lang="scss">
 
 // Menu Icon
+.burger.v-btn{
 
+ top : 5px;
 
+}
+.flex-avatar{
+      img {
+        border: 3px solid rgb(255, 255, 255);
+      }
+}
 .menu-icon-container {
     display: inline-block;
     cursor: pointer;
