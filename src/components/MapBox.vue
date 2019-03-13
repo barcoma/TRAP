@@ -377,6 +377,10 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   z-index: 9;
 }
 
+.mapboxgl-user-location-dot::before {
+  left: 0;
+}
+
 /* Mapbox CSS */
 
 /* Suggestions */
