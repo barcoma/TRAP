@@ -1,7 +1,7 @@
 <template>
 <div class="wrapper">
   <!-- <div ref="custom-marker" class="custom-marker"></div> -->
-  <h3>Navigieren</h3>
+  <h7>Navigieren</h7>
   <div id="map" ref="map">
     <div>
     <v-btn fab dark small color="white" class="routing-button black--text"
@@ -277,7 +277,7 @@ export default {
 
 /* Map Navigation */
 
-h3 {
+h7 {
   z-index: 9;
   position: absolute;
   right: 2rem;
