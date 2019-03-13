@@ -1,9 +1,9 @@
 <template>
 <div class="wrapper">
   <!-- <div ref="custom-marker" class="custom-marker"></div> -->
-  <h5>Navigieren</h5>
-  <div id="map" ref="map">
-    <div>
+  
+  <div class="map-controls-container">
+    <h5>Navigieren</h5>
     <v-btn fab dark small color="white" class="routing-button black--text"
     v-on:click="showRouting()"
     v-bind:class="{ change : isVisible }"
@@ -14,8 +14,11 @@
     <v-btn v-if="displayNavigation" v-on:click="reverseDirections" fab dark small color="white" class="route-switch-button black--text">
       <v-icon dark>compare_arrows</v-icon>
     </v-btn>
-    </div>
     <v-btn v-if="routeReady" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
+  </div>
+  
+  <div id="map" ref="map">
+    
   </div>
 </div>
 </template>
@@ -106,9 +109,9 @@ export default {
       var inputs = document.getElementsByClassName("directions-control-inputs")[0];
       var startButton = document.getElementsByClassName("start-navigation-button")[0];
 
-      var altRoutes = document.getElementsByClassName("mapbox-directions-routes mapbox-directions-clearfix")[0];
+      //var altRoutes = document.getElementsByClassName("mapbox-directions-routes")[0];
       var navigation = document.getElementsByClassName("mapboxgl-ctrl-top-left")[0];
-      altRoutes.style.display = "none";
+      //altRoutes.style.display = "none";
       instructions.style.display = "block";
       startButton.style.display = "none";
       inputs.style.display = "none";
@@ -248,6 +251,12 @@ export default {
   position: relative;
 }
 
+.map-controls-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
 //custom-marker
 .custom-marker {
   background-image: url('');
@@ -357,13 +366,14 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   z-index: 9;
   top: 6.5rem;
   position: absolute;
-  right: -13.3rem;
+  right: -11.4rem;
   display: none;
 }
 
 .start-navigation-button {
-  float: right;
-  top: 8.7rem;
+  top: 12.5rem;
+  right: -4rem;
+  z-index: 9;
   z-index: 9;
 }
 
