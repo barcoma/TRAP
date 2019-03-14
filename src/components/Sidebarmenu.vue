@@ -47,14 +47,14 @@
         <v-list-tile >
           
         <v-list-tile-content >
-            <v-list-tile-title >Hi, Wolfgang</v-list-tile-title>
+            <v-list-tile-title >Hi, Laura</v-list-tile-title>
           </v-list-tile-content>
            <v-flex row class="flex-avatar">
             <v-avatar
           :size="64"
           color="grey lighten-4"
         >
-          <img src="https://i1.rgstatic.net/ii/profile.image/390911189110788-1470211898704_Q512/Wolfgang_Taube2.jpg" alt="avatar">
+          <img src="https://cdn.pixabay.com/photo/2017/06/05/11/01/airport-2373727_1280.jpg" alt="avatar">
         </v-avatar>
         </v-flex>
          
@@ -69,7 +69,6 @@
         <v-list-tile
           v-for="item in items"
           :key="item.title"
-          @click=""
         >
           <v-list-tile-action>
             <v-icon>{{ item.icon }}</v-icon>

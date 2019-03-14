@@ -13,11 +13,11 @@
           :size="64"
           color="grey lighten-4"
         >
-          <img src="https://i1.rgstatic.net/ii/profile.image/390911189110788-1470211898704_Q512/Wolfgang_Taube2.jpg" alt="avatar">
+          <img src="https://cdn.pixabay.com/photo/2017/06/05/11/01/airport-2373727_1280.jpg" alt="avatar">
         </v-avatar>
       </v-flex>
       <v-flex class="text-xs-left" xs12 offset-xs1>
-        <h1>Hi, Wolfang!</h1>
+        <h1>Hi, Laura!</h1>
         <h3>Wo soll deine Reise hingehen?</h3>
       </v-flex>
 
@@ -77,7 +77,6 @@
                 v-for="i in 3"
                 :key="i"
                 :value="'tab-' + i"
-                touchless
                 lazy
           >
 
@@ -229,12 +228,12 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
     }),
     methods: {
       locationSearch: function(event){
-        //console.log('FUCK',this.newDestination);
+        //console.log('A',this.newDestination);
         // this.$router.push('map');
         // eventBus.$emit('LocationFromHome', this.searchTerm);
         },
         locationSearch2: function(){
-         // console.log('CUNT')
+         // console.log('B')
         },
         getDestination: function(event){
           this.newDestination = event.geometry.coordinates;
