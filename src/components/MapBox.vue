@@ -195,9 +195,6 @@ export default {
       unit: 'metric',
       alternatives: true,
       congestion: true,
-      // controls: {
-      //     instructions: false
-      //   },
       accessToken: mapboxgl.accessToken
     }, 'bottom-left');
 
