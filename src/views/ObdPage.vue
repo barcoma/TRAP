@@ -38,10 +38,10 @@ export default {
                 commands.push(encoder.encode("ATD\r\n"))
                 commands.push(encoder.encode("ATZ\r\n"))
                 commands.push(encoder.encode("ATE0\r\n"))
-                commands.push(encoder.encode("ATL0\r\n"))
-                commands.push(encoder.encode("ATS0\r\n"))
-                commands.push(encoder.encode("ATH0\r\n"))
-                commands.push(encoder.encode("ATSP0\r\n"))
+                commands.push(encoder.encode("ATL0\r\n"));
+                commands.push(encoder.encode("ATS0\r\n"));
+                commands.push(encoder.encode("ATH0\r\n"));
+                commands.push(encoder.encode("ATSP0\r\n"));
 
                 var i = 0;
                 while(i < commands.length)
@@ -53,6 +53,15 @@ export default {
                 characteristic.addEventListener('characteristicvaluechanged',
                 this.handleCharacteristicValueChanged);
 
+                var x = "010C\r";
+                var zero = x.charCodeAt(0);
+                var one = x.charCodeAt(1);
+                var two = x.charCodeAt(2);
+                var three = x.charCodeAt(3);
+                var four = x.charCodeAt(4);
+
+                var testArray = new Uint8Array([zero, one, two, three, four]);
+
                 console.log(characteristic);
                 var data = new Uint8Array([0x02, 0x01, 0x0C, 0x55, 0x55, 0x55, 0x55, 0x55, 0x0D]);
                 let message = encoder.encode("010C\r");
@@ -63,7 +72,7 @@ export default {
                 // uint8.set([01, 00, 13]);
 
                 //characteristic.writeValue(message2);
-                return characteristic.writeValue(data);
+                return characteristic.writeValue(testArray);
             })
             .then(value => {
                 console.log(value);
@@ -75,15 +84,14 @@ export default {
 
         handleCharacteristicValueChanged: function(event) {
             let test = event.target.value;
-            console.log('Received ' + test);
+            console.log('Received ' + test.buffer);
             // TODO: Parse Heart Rate Measurement value.
             // See https://github.com/WebBluetoothCG/demos/blob/gh-pages/heart-rate-sensor/heartRateSensor.js
         },
         sleep: function(delay) {
             var start = new Date().getTime();
             while (new Date().getTime() < start + delay);
-        }
-    
+        },    
     },
     mounted() {
     // this.$http.get('http://192.168.0.10:35000').then(response => {
