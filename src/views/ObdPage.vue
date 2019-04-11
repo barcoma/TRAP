@@ -9,6 +9,16 @@ var serviceUUID = "e7810a71-73ae-499d-8c15-faa9aef0c3f2";
 var charUUID = "bef8d6c9-9c21-4c9e-b632-bd58c1009f9f";
 var byteA;
 var byteB;
+var currentCommand;
+var correctReply = false;
+var commandAccepted = false;
+var numberOfBytes;
+var twoBytes = false;
+
+var obdCommandInfo = [
+    {pid: "0C", bytes: 2, name: "rpm", unit: "rev/min", convertFunction: this.convertRPM},
+]
+
 export default {
     name: "OBD",
     data: {
@@ -65,8 +75,49 @@ export default {
             });
         },
         handleCharacteristicValueChanged: function(event) {
-            let test = event.target.value;
-            console.log('Received ' + test.buffer);
+            let value = event.target.value;
+            console.log('Received ' + value.buffer);
+            var firstByte = value.buffer.getUint8(0);
+            try {
+                var secondByte = value.buffer.getUint8(1);
+            } catch {
+                var secondByte = null;
+            }
+            if (secondByte != null) {
+                var reply = parseInt(firstByte + secondByte);
+            } else {
+                var reply = parseInt(firstByte);
+            }
+
+            if (twoBytes) {
+                byteB = reply;
+                this.parseCommand();
+            }
+
+            if (commandAccepted) {
+                numberOfBytes = obdCommandInfo.find(function(element) {
+                    return element.pid == currentCommand;
+                });
+                if (numberOfBytes == 1) {
+                    byteA = reply;
+                    this.parseCommand();
+                } else {
+                    twoBytes = true;
+                }
+            }
+
+            if (correctReply) {
+                currentCommand = reply;
+                commandAccepted = true;
+            }    
+            numberOfBytes = 0;
+            commandAccepted = false
+            correctReply = false;
+            twoBytes = false;
+
+            if (reply == 41) {
+                correctReply = true;
+            }
         },
         sleep: function(delay) {
             var start = new Date().getTime();
@@ -97,7 +148,13 @@ export default {
             }
             return new Uint8Array(asciiCommand);
         },
-        parseRPM: function() {
+        parseCommand: function() {
+            var callFunction = obdCommandInfo.find(function(element) {
+                return element == currentCommand;
+            });
+            callFunction.convertFunction;
+        },
+        convertRPM: function() {
             return ((parseInt(byteA, 16) * 256) + parseInt(byteB, 16)) / 4;
         }
     },
