@@ -7,6 +7,8 @@
 <script>
 var serviceUUID = "e7810a71-73ae-499d-8c15-faa9aef0c3f2";
 var charUUID = "bef8d6c9-9c21-4c9e-b632-bd58c1009f9f";
+var byteA;
+var byteB;
 export default {
     name: "OBD",
     data: {
@@ -73,12 +75,19 @@ export default {
         sendCommands: function(char, commands) {
             let encoder = new TextEncoder('utf-8');
 
+            // maybe improved sleep function, needs testing
+            const sleep = (delay) => {
+                return new Promise(resolve => setTimeout(resolve, delay))
+            }
+
             var i = 0;
             while(i < commands.length)
             {
-                characteristic.writeValue(commands[i]);
-                i++;
-                this.sleep(1000);
+                sleep(500).then(() => {
+                    characteristic.writeValue(commands[i]);
+                    i++;
+                })
+                //this.sleep(1000);
             }
         },
         encodeCommand: function(command) {
@@ -87,6 +96,9 @@ export default {
                 asciiCommand[i] = command.charCodeAt(i);
             }
             return new Uint8Array(asciiCommand);
+        },
+        parseRPM: function() {
+            return ((parseInt(byteA, 16) * 256) + parseInt(byteB, 16)) / 4;
         }
     },
     mounted() {
