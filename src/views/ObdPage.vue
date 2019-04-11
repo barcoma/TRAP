@@ -33,7 +33,6 @@ export default {
             .then(characteristic => characteristic.startNotifications())
             .then(characteristic => {
                 let encoder = new TextEncoder('utf-8');
-
                 var commands = [];
                 commands.push(encoder.encode("ATD\r\n"))
                 commands.push(encoder.encode("ATZ\r\n"))
@@ -43,35 +42,17 @@ export default {
                 commands.push(encoder.encode("ATH0\r\n"));
                 commands.push(encoder.encode("ATSP0\r\n"));
 
-                var i = 0;
-                while(i < commands.length)
-                {
-                    characteristic.writeValue(commands[i]);
-                    i++;
-                    this.sleep(1000);
-                }
+                this.sendCommands(characteristic, commands);
+
                 characteristic.addEventListener('characteristicvaluechanged',
                 this.handleCharacteristicValueChanged);
 
-                var x = "010C\r";
-                var zero = x.charCodeAt(0);
-                var one = x.charCodeAt(1);
-                var two = x.charCodeAt(2);
-                var three = x.charCodeAt(3);
-                var four = x.charCodeAt(4);
-
-                var testArray = new Uint8Array([zero, one, two, three, four]);
-
-                console.log(characteristic);
-                var data = new Uint8Array([0x02, 0x01, 0x0C, 0x55, 0x55, 0x55, 0x55, 0x55, 0x0D]);
+                var obdCommand = "010C\r";
+                var testArray = this.encodeCommand(obdCommand);
+                // new Uint8Array([zero, one, two, three, four]);
+                // test again with this textencoder, should work in theory
                 let message = encoder.encode("010C\r");
                 let message2 = encoder.encode("ATDP\r\n");
-                // var x = '\x01\x00\r'
-                // const buffer = new ArrayBuffer(3);
-                // const uint8 ATZ= new Uint8Array(buffer);
-                // uint8.set([01, 00, 13]);
-
-                //characteristic.writeValue(message2);
                 return characteristic.writeValue(testArray);
             })
             .then(value => {
@@ -81,17 +62,32 @@ export default {
                 console.log(error.message); 
             });
         },
-
         handleCharacteristicValueChanged: function(event) {
             let test = event.target.value;
             console.log('Received ' + test.buffer);
-            // TODO: Parse Heart Rate Measurement value.
-            // See https://github.com/WebBluetoothCG/demos/blob/gh-pages/heart-rate-sensor/heartRateSensor.js
         },
         sleep: function(delay) {
             var start = new Date().getTime();
             while (new Date().getTime() < start + delay);
         },    
+        sendCommands: function(char, commands) {
+            let encoder = new TextEncoder('utf-8');
+
+            var i = 0;
+            while(i < commands.length)
+            {
+                characteristic.writeValue(commands[i]);
+                i++;
+                this.sleep(1000);
+            }
+        },
+        encodeCommand: function(command) {
+            var asciiCommand = [];
+            for (var i = 0; i < command.length; i++) {
+                asciiCommand[i] = command.charCodeAt(i);
+            }
+            return new Uint8Array(asciiCommand);
+        }
     },
     mounted() {
     // this.$http.get('http://192.168.0.10:35000').then(response => {
