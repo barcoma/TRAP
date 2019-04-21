@@ -4,7 +4,7 @@
       ref="MapBox"
       class="main-map"
       />
-      <map-nav id="map-navigation"></map-nav>
+      <!-- <map-nav id="map-navigation"></map-nav> -->
     </section>
 </template>
 
