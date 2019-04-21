@@ -1,9 +1,9 @@
 <template>
 <div class="wrapper">
   <!-- <div ref="custom-marker" class="custom-marker"></div> -->
-  <input type="text" v-on:change="searchPOI($event)"  placeholder="Discover.."/>
+  <!-- <input type="text" v-on:change="searchPOI($event)"  placeholder="Discover.."/> -->
   <div class="map-controls-container">
-    <h5>Navigieren</h5>
+    <h5 v-if="!navigationMode">Navigieren</h5>
     <v-btn v-if="isVisible" fab dark small color="white" class="routing-button black--text"
     v-on:click="showRouting()"
     v-bind:class="{ change : isVisible }"
@@ -64,7 +64,10 @@ export default {
       inputs: Object,
       inputStart: Object,
       inputDestination: Object,
-      directionsProfile: Object
+      directionsProfile: Object,
+      instructionUpdate: null,
+      navigationMode: false,
+      firstInstruction: []
     }
   },
   methods: {
@@ -110,17 +113,20 @@ export default {
       for (var i  = 0; i < markers.length; i++) {
         markers[i].remove();
       }
-    },
+    }, // Navigation
     showRouting: function() {
       this.setUserLocation();
       this.isVisible = !this.isVisible;
       this.displayNavigation =!this.displayNavigation;
       this.destination.style.display = "block";
       this.directionsProfile.style.display = "block";
+      //this.rotateMapAccordingToUserMovement();
     },
     closeRouting: function() {
       this.isVisible = !this.isVisible;
-      this.displayNavigation =!this.displayNavigation;
+      this.navigationMode =!this.navigationMode;
+      //this.displayNavigation =!this.displayNavigation;
+      //var directionsControl = document.getElementsByClassName("directions-control-inputs")[0].style.display = "none";
       this.directions.removeRoutes();
       this.routeReady = false;
       this.inputs.style.display = "block";
@@ -128,14 +134,25 @@ export default {
       this.directionsProfile.style.display = "none";
       this.inputStart.value = null;
       this.inputDestination.value = null;
+      document.getElementsByClassName("mapboxgl-ctrl-top-left")[0].style.backgroundImage = "linear-gradient(90deg, #4285f4, #00ebff)";
       var startButton = document.getElementsByClassName("start-navigation-button")[0].style.display = "block";
+      document.getElementById('map-navigation').style.display = "block"; 
+      clearInterval(this.updateInstructions);
+      //clearInterval(this.updateInstructions);
     },
     reverseDirections: function() {
       this.directions.reverse();
+      var startValueTemp = this.inputStart.value;
+      this.inputStart.value = this.inputDestination.value;
+      this.inputDestination.value = startValueTemp;
     },
     startRoute: function() {
+      this.displayNavigation =!this.displayNavigation;
+      this.navigationMode =!this.navigationMode;
       var instructions = document.getElementsByClassName('mapbox-directions-instructions')[0];
       var startButton = document.getElementsByClassName("start-navigation-button")[0];
+      var directionsControl = document.getElementsByClassName("mapbox-directions-route-summary")[0].style.display = "none";
+      document.getElementsByClassName("mapboxgl-ctrl-top-left")[0].style.backgroundImage = "none";
       var altRoutes = document.getElementsByClassName("mapbox-directions-routes")[0];
       if (altRoutes) {
         altRoutes.style.display = "none";
@@ -143,11 +160,97 @@ export default {
       instructions.style.display = "block";
       startButton.style.display = "none";
       this.inputs.style.display = "none";
+      document.getElementById('map-navigation').style.display = "none"; 
+      this.showCurrentInstruction();
+      var instructions = document.getElementsByClassName('mapbox-directions-step')[0];
+      var instructionLong = instructions.getAttribute('data-lng');
+      var instructionLat = instructions.getAttribute('data-lat');
+      this.mainMap.flyTo({
+        center: [
+          instructionLong,
+          instructionLat
+        ],
+        zoom: 15,
+        bearing: 151
+      });
     },
     setUserLocation: function() {
       this.directions.setDestination(this.inputStart.value);
       this.directions.setOrigin([userLong, userLat]);
       this.inputStart.value = "Aktueller Standpunkt";
+    },
+    showCurrentInstruction: function() {
+      //this.firstInstruction = document.getElementsByClassName('mapbox-directions-step')[0];
+      var instructionsLength = document.getElementsByClassName('mapbox-directions-steps')[0].childNodes.length/2;
+      for (var i = 2; i < instructionsLength-1; i++) {
+        document.getElementsByClassName('mapbox-directions-step')[i].style.display = "none";
+      }
+      this.updateInstructions = setInterval(() => {
+        var currentLong = this.userLocation._lastKnownPosition.coords.longitude;
+        var currentLat = this.userLocation._lastKnownPosition.coords.latitude;
+        for (var i = 0; i < instructionsLength-1; i++) {
+          var instructions = document.getElementsByClassName('mapbox-directions-step')[i];
+          var instructionLong = instructions.getAttribute('data-lng');
+          var instructionLat = instructions.getAttribute('data-lat');
+          if (this.convertPositionsInMeter(currentLat, currentLong, instructionLat, instructionLong) < 15) {
+            var previousInstructions = document.getElementsByClassName('mapbox-directions-step')[i].style.display = "none";
+            var nextInstructions = document.getElementsByClassName('mapbox-directions-step')[i+2].style.display = "block";
+            this.rotateMapAccordingToUserMovement();
+
+            // Worked
+            // document.getElementsByClassName('mapbox-directions-step')[0].style.display = "none";
+            // document.getElementsByClassName('mapbox-directions-step')[1].style.display = "none";
+            // var previousInstructions = document.getElementsByClassName('mapbox-directions-step')[i].style.display = "none";
+            // var nextInstructions = document.getElementsByClassName('mapbox-directions-step')[i+1].style.display = "block";
+            // var nextInstructions2 = document.getElementsByClassName('mapbox-directions-step')[i+2].style.display = "block";
+          } 
+        }
+      }, 3000)
+	  },
+    convertPositionsInMeter: function(lat1, lon1, lat2, lon2) {
+      var R = 6378.137; // Radius of earth in KM
+      var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
+      var dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
+      var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      var d = R * c;
+      return d * 1000; // meters
+    },
+    rotateMapAccordingToUserMovement: function() {
+      var firstUserPos =  [this.userLocation._lastKnownPosition.coords.longitude, this.userLocation._lastKnownPosition.coords.latitude];
+      this.sleep(1000);
+      var secondUserPos =  [this.userLocation._lastKnownPosition.coords.longitude, this.userLocation._lastKnownPosition.coords.latitude];
+
+      // var firstUserPos =  [48.052812, 8.20419];
+      // //sleep(2000);
+      // var secondUserPos =  [48.053272, 8.20682];
+      // var y = Math.sin(λ2-λ1) * Math.cos(φ2);
+      // var x = Math.cos(φ1)*Math.sin(φ2) -
+      // Math.sin(φ1)*Math.cos(φ2)*Math.cos(λ2-λ1);
+      // var brng = Math.atan2(y, x).toDegrees();
+
+      var y = Math.sin(secondUserPos[1]-firstUserPos[1]) * Math.cos(secondUserPos[0]);
+      var x = Math.cos(firstUserPos[0])*Math.sin(secondUserPos[0]) - Math.sin(firstUserPos[0])*Math.cos(secondUserPos[0])*Math.cos(secondUserPos[1]-firstUserPos[1]);
+      //var brng = Math.atan2(y, x).toDegrees();
+      var brng = Math.atan2(y, x);
+      var pi = Math.PI;
+      var degrees = Math.abs(brng * (180/pi));
+      // if (degrees < 0) {
+        //Math.abs(degrees);
+      //}
+      console.log(degrees);
+      //return degrees;
+
+      this.mainMap.flyTo({
+          bearing: degrees 
+        });
+    },
+    sleep: function(miliseconds) {
+      var currentTime = new Date().getTime();
+      while (currentTime + miliseconds >= new Date().getTime()) {
+      }
     }
   },
   apollo: {
@@ -164,6 +267,9 @@ export default {
         }
       }
     }`
+  },
+    beforeDestroy () {
+    clearInterval(this.polling)
   },
   created(){
     eventBus.$on('toggleDirections', (isVisible) => {
@@ -207,7 +313,8 @@ export default {
     positionOptions: {
       enableHighAccuracy: true
     },
-    trackUserLocation: true
+    trackUserLocation: true,
+    instructions: false
   });
 
   this.mainMap
@@ -320,9 +427,12 @@ h5 {
 }
 
 .mapboxgl-ctrl-top-left .mapboxgl-ctrl {
-  width: 79%;
+  max-width: 100%;
+  margin: 10px;
+  margin-right: 4rem;
+  float: unset;
   //margin: 10px !important;
-  margin-left: 1.4rem;
+  //margin-left: 1.4rem;
 }
 
 #mapbox-directions-origin-input, #mapbox-directions-destination-input {
@@ -627,6 +737,11 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   /* Alt route selection */
   .mapbox-directions-instructions {
       overflow: scroll;
+/* Recent */
+      background-color: rgba(0, 0, 0, 0.8);
+      border-radius: 15px;
+      height: 12rem;
+      margin-bottom: 1rem;
     }
     .mapbox-directions-instructions-wrapper {
       max-height: 17vh;

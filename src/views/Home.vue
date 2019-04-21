@@ -13,11 +13,11 @@
           :size="64"
           color="grey lighten-4"
         >
-          <img src="https://i1.rgstatic.net/ii/profile.image/390911189110788-1470211898704_Q512/Wolfgang_Taube2.jpg" alt="avatar">
+          <!-- <img src="https://i1.rgstatic.net/ii/profile.image/390911189110788-1470211898704_Q512/Wolfgang_Taube2.jpg" alt="avatar"> -->
         </v-avatar>
       </v-flex>
       <v-flex class="text-xs-left" xs12 offset-xs1>
-        <h1>Hi, Wolfang!</h1>
+        <h1>Hi, Lisa!</h1>
         <h3>Wo soll deine Reise hingehen?</h3>
       </v-flex>
 
