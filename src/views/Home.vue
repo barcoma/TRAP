@@ -1,6 +1,6 @@
 <template>
 <v-app>
-  <v-container >
+  <v-container>
 
     <v-layout align-center row wrap class="top-area">
 
@@ -227,24 +227,28 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
       newDestination: Object
     }),
     methods: {
-      locationSearch: function(event){
-        //console.log('A',this.newDestination);
-        // this.$router.push('map');
-        // eventBus.$emit('LocationFromHome', this.searchTerm);
+      locationSearch: function(event){ 
+        this.$router.push('map');
+        var newDest = this.newDestination
+        setTimeout(function(){
+          eventBus.$emit('locationFromHome', newDest); 
+        }, 10);
         },
         locationSearch2: function(){
          // console.log('B')
         },
         getDestination: function(event){
-          this.newDestination = event.geometry.coordinates;
-          //console.log('CHANGE INPUT', this.newDestination)
+          this.items.map(item => {
+          if(item.id == event){
+          this.newDestination = item.geometry.coordinates;
+          }});
         }
       },
 
     computed: {
       items () {
         return this.entries.map(entry => {
-          if(entry.relevance > .5){
+          if(entry.relevance > .1){
           return  Object.assign({}, entry);
           }
         })
@@ -279,7 +283,6 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
           const { count, entries } = newProps
           this.count = count
           this.entries = entries
-          console.log('items()', this.items)
         })
         .catch(error => {
           console.log(error)

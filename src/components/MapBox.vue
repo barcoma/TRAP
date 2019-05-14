@@ -64,7 +64,9 @@ export default {
       inputs: Object,
       inputStart: Object,
       inputDestination: Object,
-      directionsProfile: Object
+      directionsProfile: Object,
+      locationHome: false
+
     }
   },
   methods: {
@@ -77,7 +79,7 @@ export default {
         ease: 0.2,
         animate: true,
         center: [this.long, this.lat],
-        zoom: 8,
+        zoom: 12,
         bearing: 0
       })
     },
@@ -165,16 +167,11 @@ export default {
       }
     }`
   },
-  created(){
-    eventBus.$on('toggleDirections', (isVisible) => {
-      if(isVisible == true){
-        this.mainMap.addControl(this.directions, 'bottom-left');
-      } else {
-        this.mainMap.removeControl(this.directions);
-      }
-    });
-  },
   mounted(){
+  eventBus.$on('locationFromHome', (newDest)=>{
+    this.refresh(newDest[0], newDest[1]);
+  });
+    
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this.lat = 48.218800;
   this.long = 11.624707;
@@ -218,19 +215,18 @@ export default {
     .addControl(this.userLocation, 'bottom-right')
     .addControl(this.directions, 'top-left')
 
-
   this.mainMap.on("load", e => {
     this.userLocation.trigger();
   })
 
   //this.userLocation.trigger();
 
-  this.userLocation.on('geolocate', function(e) {
-      userLong = e.coords.longitude;
-      userLat = e.coords.latitude;
-      // console.log(userLong);
-      // console.log(userLat);
-  });
+  // this.userLocation.on('geolocate', function(e) {
+  //     userLong = e.coords.longitude;
+  //     userLat = e.coords.latitude;
+  //     // console.log(userLong);
+  //     // console.log(userLat);
+  // });
 
 
   this.destination = document.getElementsByClassName("mapbox-directions-destination")[0];
@@ -251,6 +247,7 @@ export default {
     .addTo(this.mainMap);
 
   this.geocoder.on('result', this.updateMarker);
+
   }
 }
 </script>
