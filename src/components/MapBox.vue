@@ -21,8 +21,8 @@
       <v-icon dark>compare_arrows</v-icon>
     </v-btn>
     <v-btn v-if="routeReady" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
+    <!-- <div v-if="navigationMode" v-on:click="toggleMinMaxInstructions" id="minimize-instructions"></div> -->
   </div>
-  
   <div id="map" ref="map"></div>
 </div>
 </template>
@@ -65,9 +65,11 @@ export default {
       inputStart: Object,
       inputDestination: Object,
       directionsProfile: Object,
+      mapControl: Object,
       instructionUpdate: null,
       navigationMode: false,
-      firstInstruction: []
+      firstInstruction: [],
+      minimizeButton: Object
     }
   },
   methods: {
@@ -120,13 +122,11 @@ export default {
       this.displayNavigation =!this.displayNavigation;
       this.destination.style.display = "block";
       this.directionsProfile.style.display = "block";
-      //this.rotateMapAccordingToUserMovement();
     },
     closeRouting: function() {
+      this.mapControl.style.height = "unset";
       this.isVisible = !this.isVisible;
       this.navigationMode =!this.navigationMode;
-      //this.displayNavigation =!this.displayNavigation;
-      //var directionsControl = document.getElementsByClassName("directions-control-inputs")[0].style.display = "none";
       this.directions.removeRoutes();
       this.routeReady = false;
       this.inputs.style.display = "block";
@@ -138,7 +138,6 @@ export default {
       var startButton = document.getElementsByClassName("start-navigation-button")[0].style.display = "block";
       document.getElementById('map-navigation').style.display = "block"; 
       clearInterval(this.updateInstructions);
-      //clearInterval(this.updateInstructions);
     },
     reverseDirections: function() {
       this.directions.reverse();
@@ -147,6 +146,7 @@ export default {
       this.inputDestination.value = startValueTemp;
     },
     startRoute: function() {
+      this.mapControl.style.height = "100%";
       this.displayNavigation =!this.displayNavigation;
       this.navigationMode =!this.navigationMode;
       var instructions = document.getElementsByClassName('mapbox-directions-instructions')[0];
@@ -161,6 +161,8 @@ export default {
       startButton.style.display = "none";
       this.inputs.style.display = "none";
       document.getElementById('map-navigation').style.display = "none"; 
+      // var minimizeButton = document.getElementById('minimize-instructions');
+      // instructions.appendChild(minimizeButton);
       this.showCurrentInstruction();
       var instructions = document.getElementsByClassName('mapbox-directions-step')[0];
       var instructionLong = instructions.getAttribute('data-lng');
@@ -180,12 +182,12 @@ export default {
       this.inputStart.value = "Aktueller Standpunkt";
     },
     showCurrentInstruction: function() {
-      //this.firstInstruction = document.getElementsByClassName('mapbox-directions-step')[0];
       var instructionsLength = document.getElementsByClassName('mapbox-directions-steps')[0].childNodes.length/2;
       for (var i = 2; i < instructionsLength-1; i++) {
         document.getElementsByClassName('mapbox-directions-step')[i].style.display = "none";
       }
       this.updateInstructions = setInterval(() => {
+        //this.rotateMapAccordingToUserMovement();
         var currentLong = this.userLocation._lastKnownPosition.coords.longitude;
         var currentLat = this.userLocation._lastKnownPosition.coords.latitude;
         for (var i = 0; i < instructionsLength-1; i++) {
@@ -193,19 +195,15 @@ export default {
           var instructionLong = instructions.getAttribute('data-lng');
           var instructionLat = instructions.getAttribute('data-lat');
           if (this.convertPositionsInMeter(currentLat, currentLong, instructionLat, instructionLong) < 15) {
+            this.sleep(1000);
             var previousInstructions = document.getElementsByClassName('mapbox-directions-step')[i].style.display = "none";
+            //var currentInstruction = document.getElementsByClassName('mapbox-directions-step')[i+1].style.fontWeight = "800 !important";
+            //console.log(currentInstruction);
             var nextInstructions = document.getElementsByClassName('mapbox-directions-step')[i+2].style.display = "block";
-            this.rotateMapAccordingToUserMovement();
-
-            // Worked
-            // document.getElementsByClassName('mapbox-directions-step')[0].style.display = "none";
-            // document.getElementsByClassName('mapbox-directions-step')[1].style.display = "none";
-            // var previousInstructions = document.getElementsByClassName('mapbox-directions-step')[i].style.display = "none";
-            // var nextInstructions = document.getElementsByClassName('mapbox-directions-step')[i+1].style.display = "block";
-            // var nextInstructions2 = document.getElementsByClassName('mapbox-directions-step')[i+2].style.display = "block";
+            //var currentInstruction = document.getElementsByClassName('mapbox-directions-step')[i+2].style.fontWeight = "800";
           } 
         }
-      }, 3000)
+      }, 1000)
 	  },
     convertPositionsInMeter: function(lat1, lon1, lat2, lon2) {
       var R = 6378.137; // Radius of earth in KM
@@ -223,25 +221,12 @@ export default {
       this.sleep(1000);
       var secondUserPos =  [this.userLocation._lastKnownPosition.coords.longitude, this.userLocation._lastKnownPosition.coords.latitude];
 
-      // var firstUserPos =  [48.052812, 8.20419];
-      // //sleep(2000);
-      // var secondUserPos =  [48.053272, 8.20682];
-      // var y = Math.sin(λ2-λ1) * Math.cos(φ2);
-      // var x = Math.cos(φ1)*Math.sin(φ2) -
-      // Math.sin(φ1)*Math.cos(φ2)*Math.cos(λ2-λ1);
-      // var brng = Math.atan2(y, x).toDegrees();
-
       var y = Math.sin(secondUserPos[1]-firstUserPos[1]) * Math.cos(secondUserPos[0]);
       var x = Math.cos(firstUserPos[0])*Math.sin(secondUserPos[0]) - Math.sin(firstUserPos[0])*Math.cos(secondUserPos[0])*Math.cos(secondUserPos[1]-firstUserPos[1]);
-      //var brng = Math.atan2(y, x).toDegrees();
+      
       var brng = Math.atan2(y, x);
       var pi = Math.PI;
       var degrees = Math.abs(brng * (180/pi));
-      // if (degrees < 0) {
-        //Math.abs(degrees);
-      //}
-      console.log(degrees);
-      //return degrees;
 
       this.mainMap.flyTo({
           bearing: degrees 
@@ -343,8 +328,13 @@ export default {
   this.directionsProfile = document.getElementsByClassName("mapbox-directions-profile")[0];
   this.inputStart = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[0].childNodes[1];
   this.inputDestination = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[1].childNodes[1];
+  this.mapControl = document.getElementsByClassName('mapboxgl-ctrl-top-left')[0];
 
-
+  // this.minimizeButton = document.createElement('div');
+  // this.minimizeButton.setAttribute("id", "minimize-instructions");
+  // this.minimizeButton.setAttribute("class", "maximized");
+  // console.log(this.minimizeButton);
+  // this.minimizeButton.setAttribute('onclick','toggleMinMaxInstructions()');
 
 
   this.marker = new mapboxgl.Marker({
@@ -392,23 +382,6 @@ export default {
   cursor: pointer;
 }
 
-// .geocoder {
-//     position:absolute;
-//     z-index:1;
-//     width:50%;
-//     left:50%;
-//     margin-left:-25%;
-//     top:20px;
-// }
-
-// .mapboxgl-ctrl-geocoder {
-//     min-width:100%;
-// }
-
-@media only screen and (max-width: 599px) {
-
-}
-
 /* Map Navigation */
 
 h5 {
@@ -420,6 +393,9 @@ h5 {
   color: white;
 }
 
+.mapboxgl-ctrl.mapboxgl-ctrl-attrib.mapboxgl-compact {
+    display: none;  
+}
 
 .mapboxgl-ctrl-top-left {
   width: 100%;
@@ -431,8 +407,6 @@ h5 {
   margin: 10px;
   margin-right: 4rem;
   float: unset;
-  //margin: 10px !important;
-  //margin-left: 1.4rem;
 }
 
 #mapbox-directions-origin-input, #mapbox-directions-destination-input {
@@ -446,13 +420,11 @@ h5 {
     padding-right: 10px;
 }
 
-#mapbox-directions-destination-input {
-  // margin-top: 0.5rem;
+.mapboxgl-ctrl-geocoder input[type='text'] {
+  font-size: 16px !important;
+  transform: scale(0.85);
+  left: -1rem !important;
 }
-
-// #mapbox-directions-destination-input .mapboxgl-ctrl-geocoder span.geocoder-icon.geocoder-icon-search {
-//   display: none;
-// }
 
 .mapboxgl-ctrl-geocoder input {
   width: 90%;
@@ -484,8 +456,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 
 .routing-button {
     z-index: 9;
-    // top: 3.2rem;
-    // right: -11.6rem;
     float: right;
     top: 3.2rem;
 }
@@ -587,10 +557,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
             animation: rotate 400ms linear infinite;
     }
 
-
-
 /* Search, Close, Loading, Inputs */
-
 
 .mapboxgl-ctrl-geocoder,
 .mapboxgl-ctrl-geocoder *,
@@ -604,10 +571,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   font:15px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
   position:relative;
   background-color:white;
-  // width:calc(100% - 360px);;
-  // min-width:calc(100% - 40px);;
-  // max-width:calc(100% - 40px);;
-  //margin-left:40px;
   border-radius:0 0 3px 0;
   }
   .mapbox-directions-origin .mapboxgl-ctrl-geocoder {
@@ -670,12 +633,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   }
   .mapboxgl-ctrl-geocoder .geocoder-pin-right *.active { display:block; }
 
-// .mapboxgl-ctrl-geocoder,
-// .mapboxgl-ctrl-geocoder ul {
-//   box-shadow:none;
-//   }
-
-/* Profile */
   .mapbox-directions-profile {
   display: none;
   margin:7px 0 0;
@@ -720,8 +677,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   font-size:15px;
   line-height:28px;
   }
-  .mapbox-directions-route-summary + .mapbox-directions-instructions {
-    }
   .mapbox-directions-route-summary h1 {
     font-weight:500;
     margin:0;
@@ -740,8 +695,12 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 /* Recent */
       background-color: rgba(0, 0, 0, 0.8);
       border-radius: 15px;
-      height: 12rem;
+      height: 10rem;
       margin-bottom: 1rem;
+      margin-right: -3.3rem;
+      width: 94%;
+      position: absolute;
+      bottom: 2rem;
     }
     .mapbox-directions-instructions-wrapper {
       max-height: 17vh;
@@ -768,9 +727,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   .mapbox-directions-instructions {
     display: none;
   }
-</style>
-
-<style lang="scss">
+   
   .mapboxgl-popup {
     max-width: 200px;
   }
@@ -853,24 +810,8 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     visibility:hidden;
   }
 
-/* Mobile */
- @media only screen and (max-width:640px)  {
-
-}
-
 // /* Containers */
  .directions-control.directions-control { width:100%; max-width:100%; }
-
-// /* Input container */
-// .directions-control.directions-control-inputs { top:0;left:0; }
-// .mapbox-directions-profile { margin:10px; }
-
-// /* Instructions container */
-// .mapbox-directions-routes { float:right; margin-right:10px; }
-// .directions-control.directions-control-directions { top:auto; max-height:40%; }
-// .mapbox-directions-multiple { min-height:50px; }
-
-// }
 
 @-webkit-keyframes rotate { from { -webkit-transform: rotate(0deg); } to { -webkit-transform: rotate(360deg); } }
    @-moz-keyframes rotate { from { -moz-transform: rotate(0deg); } to { -moz-transform: rotate(360deg); } }
@@ -931,5 +872,26 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 
 .pop-up-text {
   color: black;
+}
+
+// GPS Icon
+
+.mapboxgl-ctrl-bottom-right .mapboxgl-ctrl {
+    margin: 0 5px 5px 0;
+    float: right;
+}
+
+// Minimize Instructions Button
+
+div#minimize-instructions {
+    margin-left: 35%;
+    margin-right: 35%;
+    width: 30%;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+    position: absolute;
+    bottom: 0.5rem;
+    z-index: 9;
 }
 </style>
