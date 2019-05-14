@@ -15,7 +15,6 @@ import {eventBus} from '../main.js';
     mounted() {
     },
     methods: {
-    
     },
     components:{
     },

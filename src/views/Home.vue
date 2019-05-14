@@ -3,9 +3,6 @@
   <v-container>
 
     <v-layout align-center row wrap class="top-area">
-
-      
-         <sidebarmenu class="sidebarmenu"/>
       
       <v-spacer></v-spacer>
       <v-flex xs4 mt-3 class="flex-avatar">
@@ -205,14 +202,12 @@ import {eventBus} from '../main.js';
 import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
-import Sidebarmenu from '../components/Sidebarmenu.vue'
 
 
   export default {
     components: {
       Carousel,
-      Slide,
-      Sidebarmenu
+      Slide
     },
     data: () => ({
       lorem: `Lorem ipsum dolor sit amet, mel at clita quando. Te sit oratio vituperatoribus, nam ad ipsum posidonium mediocritatem, explicari dissentiunt cu mea. Repudiare disputationi vim in, mollis iriure nec cu, alienum argumentum ius ad. Pri eu justo aeque torquatos.`,
