@@ -24,7 +24,7 @@ var twoBytes = false;
 // ]
 
 export default {
-    name: 'OBDLogic',
+    name: "OBDLogic",
     data() {
         return{
             currentRPM: "0",
