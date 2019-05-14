@@ -24,6 +24,6 @@ import {eventBus} from '../main.js';
 }
 </script>
  
-<style  lang="scss">
+<style scoped lang="scss">
 
 </style>
