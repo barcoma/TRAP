@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-
+    <sidebarmenu></sidebarmenu>
     <section class="app-content">
       <router-view/>
     </section>
@@ -17,6 +17,7 @@ import MapBox from './components/MapBox.vue'
 import MapNav from './components/MapNav.vue'
 import TabNav from './components/TabNav.vue'
 import mapboxgl from 'mapbox-gl'
+import Sidebarmenu from './components/Sidebarmenu.vue'
 
 
 
@@ -26,7 +27,8 @@ export default {
   components: {
     MapBox,
     MapNav,
-    TabNav
+    TabNav,
+    Sidebarmenu
   },
   methods: {
     removeGeocode: function(){

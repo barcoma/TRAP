@@ -1,23 +1,23 @@
 <template lang="html">
-  
+  <section class="home">
+    <h1>Home Sider</h1>
+  </section>
 </template>
  
 <script lang="js">
-import {eventBus} from '../main.js';
-
   export default  {
-    name: 'MapNav',
+    name: 'HomeSlider',
     props: [],
+    mounted() {
+      
+    },
     data() {
       return {
+        
       }
-    },
-    mounted() {
     },
     methods: {
     
-    },
-    components:{
     },
     computed: {
  
@@ -25,6 +25,8 @@ import {eventBus} from '../main.js';
 }
 </script>
  
-<style  lang="scss">
-
+<style scoped lang="scss">
+  .home {
+ 
+  }
 </style>
