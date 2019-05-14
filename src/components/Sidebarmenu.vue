@@ -119,7 +119,7 @@ div.v-list__tile__title {
    color:white;
 }
 .burger.v-btn{
- top : 20px;
+ top : 5px;
 }
 button.burger.v-btn.v-btn.theme--dark{
 
