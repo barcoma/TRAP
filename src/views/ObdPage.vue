@@ -4,7 +4,6 @@
  
 <script lang="js">
 import OBDLogic from '../components/OBDLogic.vue' 
-import OBDLogic from '../components/OBDLogic.vue'
 
 export default {
     name: "OBD",
