@@ -137,7 +137,7 @@ export default {
       this.inputDestination.value = null;
       document.getElementsByClassName("mapboxgl-ctrl-top-left")[0].style.backgroundImage = "linear-gradient(90deg, #4285f4, #00ebff)";
       var startButton = document.getElementsByClassName("start-navigation-button")[0].style.display = "block";
-      document.getElementById('map-navigation').style.display = "block"; 
+      // document.getElementById('map-navigation').style.display = "block"; 
       clearInterval(this.updateInstructions);
     },
     reverseDirections: function() {
@@ -161,7 +161,7 @@ export default {
       instructions.style.display = "block";
       startButton.style.display = "none";
       this.inputs.style.display = "none";
-      document.getElementById('map-navigation').style.display = "none"; 
+      // document.getElementById('map-navigation').style.display = "none"; 
       // var minimizeButton = document.getElementById('minimize-instructions');
       // instructions.appendChild(minimizeButton);
       this.showCurrentInstruction();
@@ -318,12 +318,12 @@ export default {
 
   //this.userLocation.trigger();
 
-  // this.userLocation.on('geolocate', function(e) {
-  //     userLong = e.coords.longitude;
-  //     userLat = e.coords.latitude;
-  //     // console.log(userLong);
-  //     // console.log(userLat);
-  // });
+  this.userLocation.on('geolocate', function(e) {
+      userLong = e.coords.longitude;
+      userLat = e.coords.latitude;
+      // console.log(userLong);
+      // console.log(userLat);
+  });
 
 
   this.destination = document.getElementsByClassName("mapbox-directions-destination")[0];
