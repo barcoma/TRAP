@@ -20,9 +20,11 @@
     <v-btn v-if="displayNavigation" v-on:click="reverseDirections" fab dark small color="white" class="route-switch-button black--text">
       <v-icon dark>compare_arrows</v-icon>
     </v-btn>
-    <v-btn v-if="routeReady" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
+    <v-btn v-if="routeReady & !navigationMode" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
     <!-- <div v-if="navigationMode" v-on:click="toggleMinMaxInstructions" id="minimize-instructions"></div> -->
+    
   </div>
+  <!-- <v-btn v-if="navigationMode" v-on:click="showRouting()" class="minMaxInstructions">Instructions</v-btn> -->
   <div id="map" ref="map"></div>
 </div>
 </template>
@@ -118,11 +120,14 @@ export default {
       }
     }, // Navigation
     showRouting: function() {
-      this.setUserLocation();
-      this.isVisible = !this.isVisible;
-      this.displayNavigation =!this.displayNavigation;
-      this.destination.style.display = "block";
-      this.directionsProfile.style.display = "block";
+      if (this.setUserLocation()) {
+        this.isVisible = !this.isVisible;
+        this.displayNavigation =!this.displayNavigation;
+        this.destination.style.display = "block";
+        this.directionsProfile.style.display = "block";
+      } else {
+        console.log("Aktueller Standort nicht gefunden!"); // TODO: Implement Pop Up
+      }
     },
     closeRouting: function() {
       this.mapControl.style.height = "unset";
@@ -164,7 +169,7 @@ export default {
       // document.getElementById('map-navigation').style.display = "none"; 
       // var minimizeButton = document.getElementById('minimize-instructions');
       // instructions.appendChild(minimizeButton);
-      this.showCurrentInstruction();
+      // this.showCurrentInstruction(); // Player Follow
       var instructions = document.getElementsByClassName('mapbox-directions-step')[0];
       var instructionLong = instructions.getAttribute('data-lng');
       var instructionLat = instructions.getAttribute('data-lat');
@@ -179,8 +184,13 @@ export default {
     },
     setUserLocation: function() {
       this.directions.setDestination(this.inputStart.value);
-      this.directions.setOrigin([userLong, userLat]);
-      this.inputStart.value = "Aktueller Standpunkt";
+      if (userLong != 0 && userLat != 0) {
+        this.directions.setOrigin([userLong, userLat]);
+        this.inputStart.value = "Aktueller Standpunkt";
+        return true;
+      } else {
+        return false;
+      }
     },
     showCurrentInstruction: function() {
       var instructionsLength = document.getElementsByClassName('mapbox-directions-steps')[0].childNodes.length/2;
@@ -375,6 +385,8 @@ export default {
   position: absolute;
   top: 0;
   right: 0;
+  width: 100%;
+  height: 100%;
 }
 
 //custom-marker
@@ -466,18 +478,18 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 }
 
 .route-switch-button {
-  z-index: 9;
-  top: 6.5rem;
-  position: absolute;
-  right: -11.4rem;
-  display: none;
+    position: absolute !important;
+    z-index: 9;
+    top: 6.5rem;
+    right: 0rem;
+    display: none;
 }
 
 .start-navigation-button {
-  top: 12.5rem;
-  right: -4rem;
-  z-index: 9;
-  z-index: 9;
+    top: 13rem;
+    right: 0rem;
+    z-index: 9;
+    position: absolute !important;
 }
 
 .mapboxgl-user-location-dot::before {

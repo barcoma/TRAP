@@ -1,14 +1,8 @@
 <template>
-  <!-- <div class="alert alert-dismissible alert-info" v-if="showInstallBanner">
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
-    Do you want to <a href="#" @click.prevent="install">add this app to your home screen?</a>
-  </div> -->
-
 <div class="install-prompt" v-if="showInstallBanner">
     <v-btn fab dark small color="white" v-on:click="showInstallBanner=false" class="install-prompt-btn black--text" data-dismiss="alert">
       <v-icon dark>close</v-icon>
     </v-btn>
-    <!-- <button type="button" v-on:click="showInstallBanner=false" class="install-prompt-btn" data-dismiss="alert">&times;</button> -->
     <a href="#" @click.prevent="install">App zum Homescreen hinzufügen</a>
 </div>
 </template>
@@ -21,7 +15,7 @@ export default {
   name: 'installPrompt',
   data() {
     return {
-      showInstallBanner: true
+      showInstallBanner: false
     };
   },
   created() {
