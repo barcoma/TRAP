@@ -17,7 +17,7 @@
         </v-avatar>
       </v-flex>
       <v-flex class="text-xs-left" xs12 offset-xs1>
-        <h1>Hi, Wolfang!</h1>
+        <h1>Hi, Martin!</h1>
         <h3>Wo soll deine Reise hingehen?</h3>
       </v-flex>
 
@@ -125,7 +125,7 @@
                     <v-card-title>
                       <v-icon medium>location_on</v-icon>
                       <div class="carousel-text">
-                        <div class="carousel-tex-headline">Wolfang</div>
+                        <div class="carousel-tex-headline">Martin</div>
                         <div class="carousel-tex-subheader">Paris, France</div>
                       </div>
                     </v-card-title>                
@@ -181,7 +181,7 @@
                     <v-card-title>
                       <v-icon medium>location_on</v-icon>
                       <div class="carousel-text">
-                        <div class="carousel-tex-headline">Wolfang</div>
+                        <div class="carousel-tex-headline">Martin</div>
                         <div class="carousel-tex-subheader">Paris, France</div>
                       </div>
                     </v-card-title>                
