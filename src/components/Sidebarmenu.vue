@@ -47,14 +47,14 @@
         <v-list-tile >
           
         <v-list-tile-content >
-            <v-list-tile-title >Hi, Wolfgang</v-list-tile-title>
+            <v-list-tile-title >Hi, Laura</v-list-tile-title>
           </v-list-tile-content>
            <v-flex row class="flex-avatar">
             <v-avatar
           :size="64"
           color="grey lighten-4"
         >
-          <img src="https://i1.rgstatic.net/ii/profile.image/390911189110788-1470211898704_Q512/Wolfgang_Taube2.jpg" alt="avatar">
+          <img src="https://cdn.pixabay.com/photo/2017/06/05/11/01/airport-2373727_1280.jpg" alt="avatar">
         </v-avatar>
         </v-flex>
          
@@ -69,7 +69,6 @@
         <v-list-tile
           v-for="item in items"
           :key="item.title"
-          @click=""
         >
           <v-list-tile-action>
             <v-icon>{{ item.icon }}</v-icon>
@@ -132,8 +131,8 @@ button.burger.v-btn.v-btn.theme--dark{
 }
 aside.v-navigation-drawer.v-navigation-drawer--temporary.theme--dark{
   background-color: black;
-   background: -webkit-linear-gradient(to right, #2980b9, #2c3e50); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #2980b9, #2c3e50); 
+   background: -webkit-linear-gradient(to right, #4285f4, #00ebff); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #4285f4, #00ebff); 
   height:100%;
 }
 aside.v-navigation-drawer.bg-image--absolute{
