@@ -131,24 +131,36 @@ export default {
     //   this.lat = newCenter[1];
     // },
     searchPOI: function(event) {
-      this.clearMarkers();
-      this.$apollo.queries.search.skip = false;
-      var resultPromise = this.$apollo.queries.search.refetch({ term: event, latitude: this.mainMap.getBounds().getCenter().lat, longitude: this.mainMap.getBounds().getCenter().lng, radius: 40000, limit: 15 })
-      resultPromise.then(result => this.addMarker(result.data.search.business));
+      this.$apollo.queries.yelpPOI.skip = false;
+      this.$apollo.queries.customPOI.skip = false;
+      var customResults = this.$apollo.queries.customPOI.refetch({term: event, latitude: this.lat, longitude: this.long});
+      var resultPromise = this.$apollo.queries.yelpPOI.refetch({ term: event, latitude: this.mainMap.getBounds().getCenter().lat, longitude: this.mainMap.getBounds().getCenter().lng, radius: 5000, limit: 15 })
+      resultPromise.then(result => this.addMarker(result.data.yelpPOI, "yelp"));
+      customResults.then(result => this.addMarker(result.data.customPOI, "custom"));
     },
-    addMarker: function(queryResult) {
+    addMarker: function(queryResult, type) {
       for (var i = 0; i < queryResult.length; i++) {
-        var business = queryResult[i];
-        var currentMarker = new mapboxgl.Marker({
-          draggable: false
-        })
-        .setLngLat([business.coordinates.longitude, business.coordinates.latitude])
+        var poi = queryResult[i];
+        
+        var currentMarker;
+        if (type === "custom") {
+          currentMarker = new mapboxgl.Marker({
+          draggable: false,
+          color: "#24c94d"
+        })} else {
+          currentMarker= new mapboxgl.Marker({
+          draggable: false,
+          color:"#c64917"
+        })}
+
+        currentMarker
+        .setLngLat([poi.coordinates.longitude, poi.coordinates.latitude])
         .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-        .setHTML('<h3 class="pop-up-text">' + business.name + '</h3>'))
+        .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3>'))
         .addTo(this.mainMap);
         markers.push(currentMarker);
       }
-    },
+    },   
     clearMarkers: function() {
       for (var i  = 0; i < markers.length; i++) {
         markers[i].remove();
@@ -293,31 +305,47 @@ export default {
     }
   },
   apollo: {
-    search: gql`{
-      search
+    yelpPOI: gql`{
+      yelpPOI
       {
-        total
-        business {
-          name
-          coordinates {
-            latitude
-            longitude
-          }
+        name
+        coordinates {
+          latitude
+          longitude
         }
       }
-    }`
+    }`,
+    customPOI: {
+    query: gql`query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) {
+      customPOI (latitude: $latitude, longitude: $longitude, term: $term){
+        name
+        coordinates {
+          latitude
+          longitude
+        }
+        description
+      }
+    }`,
+    variables: {
+      latitude: 43,
+      longitude: 10,
+      term: "test"
+    },
+    },
   },
     beforeDestroy () {
     clearInterval(this.polling)
   },
   created(){
-    // eventBus.$on('toggleDirections', (isVisible) => {
-    //   if(isVisible == true){
-    //     this.mainMap.addControl(this.directions, 'bottom-left');
-    //   } else {
-    //     this.mainMap.removeControl(this.directions);
-    //   }
-    // });
+    this.$apollo.queries.yelpPOI.skip = true;
+    this.$apollo.queries.customPOI.skip = true;
+    eventBus.$on('toggleDirections', (isVisible) => {
+      if(isVisible == true){
+        this.mainMap.addControl(this.directions, 'bottom-left');
+      } else {
+        this.mainMap.removeControl(this.directions);
+      }
+    });
   },
   mounted(){
   // eventBus.$on('locationFromHome', (newDest)=>{
@@ -327,7 +355,6 @@ export default {
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this.lat = 48.218800;
   this.long = 11.624707;
-  this.$apollo.queries.search.skip = true;
 
   this.mainMap = new mapboxgl.Map({
       container: 'map',
