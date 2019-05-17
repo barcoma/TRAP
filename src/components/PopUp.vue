@@ -10,11 +10,13 @@
 
 
 <script>
+import { eventBus } from '../main.js';
+
 export default {
   name: 'PopUp',
   data() {
     return {
-      showPopUp: true,
+      showPopUp: false,
       popUp: {
           title: String,
           text: String
@@ -22,6 +24,11 @@ export default {
     };
   },
   created() {
+      eventBus.$on('showPopUp', (title, text) => {
+          this.popUp.title = title;
+          this.popUp.text = text;
+          this.showPopUp = true;
+      })
   },
   methods: {
   }
@@ -30,7 +37,7 @@ export default {
 
 <style scoped lang="scss">
 .popUp-container {
-    position: fixed;
+    position: relative;
     background-color: rgba(0, 0, 0, 0.8);
     top: 45%;
     z-index: 9999999999999;
@@ -38,17 +45,24 @@ export default {
     margin-left: 5%;
     margin-right: 5%;
     height: 9rem;
+    margin-top: -9rem;
     border-radius: 12px;
     .popUp-close-btn {
-        position: fixed;
-        left: 6%;
+        position: absolute;
+        right: 0rem;
     }
     .popUp-title {
         color: white;
         margin-top: 1rem;
+        font-size: 16px;
+        position: absolute;
+        left: 1rem;
     }
     .popUp-description {
+        position: absolute;
         color: white;
+        padding: 1rem;
+        margin-top: 3rem;
     }
 }
 </style>
