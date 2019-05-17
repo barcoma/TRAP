@@ -1,9 +1,47 @@
 <template>
 <div class="wrapper">
-  <!-- <div ref="custom-marker" class="custom-marker"></div> -->
-  <!-- <input type="text" v-on:change="searchPOI($event)"  placeholder="Discover.."/> -->
-  <div class="map-controls-container">
-    <h5 v-if="!navigationMode">Navigieren</h5>
+  <div v-if="!navigationMode" class="header-area">
+    <ul class="map-function-switch">
+      <li @click="activate(1), toggleNavigation()" :class="{ active : active_el == 1 }">Naviegieren</li>
+      <li @click="activate(2), toggleNavigation()" :class="{ active : active_el == 2 }">Entdecken</li>
+    </ul>
+  </div>
+  <div v-if="active_el == 2" class="POI-controls-container">
+    <input class="POI-Input" type="text" v-on:change="searchPOI($event.target.value)"  placeholder="Hotel, Restaurant..."/>
+    <v-btn fab dark small color="white" class="POI-filter-btn">
+      <v-icon dark>filter_list</v-icon>
+    </v-btn>
+    <v-btn fab dark small color="white" class="POI-search-btn"
+    v-on:click="searchPOI($event)"
+    >
+      <v-icon dark>subdirectory_arrow_right</v-icon>
+    </v-btn>
+    <div class="POI-suggestion-container">
+      <v-btn color="white" dark fab small class="POI-suggestion-icon" @click="toggleDisplay()">
+          <v-icon v-if="display" dark>keyboard_arrow_left</v-icon>
+          <v-icon v-else dark>keyboard_arrow_right</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="blue-grey darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Werkstatt')">
+          <v-icon dark>build</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="deep-orange darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Restaurant')">
+          <v-icon dark>restaurant</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="blue" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Hotel')">
+          <v-icon dark>hotel</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Supermarkt')">
+          <v-icon dark>shopping_cart</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="green darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Tankstelle')">
+          <v-icon dark>local_gas_station</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="red" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Krankenhaus')">
+          <v-icon dark>local_hospital</v-icon>
+      </v-btn>
+    </div>
+  </div>
+  <div v-if="active_el == 1" class="map-controls-container">
     <v-btn v-if="isVisible" fab dark small color="white" class="routing-button black--text"
     v-on:click="showRouting()"
     v-bind:class="{ change : isVisible }"
@@ -16,15 +54,11 @@
     >
       <v-icon dark>close</v-icon>
     </v-btn>
-
     <v-btn v-if="displayNavigation" v-on:click="reverseDirections" fab dark small color="white" class="route-switch-button black--text">
       <v-icon dark>compare_arrows</v-icon>
     </v-btn>
     <v-btn v-if="routeReady & !navigationMode" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
-    <!-- <div v-if="navigationMode" v-on:click="toggleMinMaxInstructions" id="minimize-instructions"></div> -->
-    
   </div>
-  <!-- <v-btn v-if="navigationMode" v-on:click="showRouting()" class="minMaxInstructions">Instructions</v-btn> -->
   <div id="map" ref="map"></div>
 </div>
 </template>
@@ -48,8 +82,8 @@ export default {
   name: 'MapBox',
   data() {
     return {
-      newlong:'',
-      newlat:'',
+      // newlong:'',
+      // newlat:'',
       lat: Number,
       long: Number,
       mainMap: Object,
@@ -67,38 +101,39 @@ export default {
       inputStart: Object,
       inputDestination: Object,
       directionsProfile: Object,
-      locationHome: false,
+      // locationHome: false,
       mapControl: Object,
       instructionUpdate: null,
       navigationMode: false,
       firstInstruction: [],
-      minimizeButton: Object
+      active_el: 1,
+      display: true,
     }
   },
   methods: {
-    refresh: function(newlong, newlat){
-      this.long = newlong;
-      this.lat = newlat;
-      this.marker.setLngLat([this.long, this.lat])
-      this.mainMap.easeTo({
-        duration: 3000,
-        ease: 0.2,
-        animate: true,
-        center: [this.long, this.lat],
-        zoom: 12,
-        bearing: 0
-      })
-    },
-    updateMarker: function(e){
-      var newCenter = e.result.center;
-      this.marker.setLngLat([newCenter[0],newCenter[1]]);
-      this.long = newCenter[0];
-      this.lat = newCenter[1];
-    },
+    // refresh: function(newlong, newlat){
+    //   this.long = newlong;
+    //   this.lat = newlat;
+    //   this.marker.setLngLat([this.long, this.lat])
+    //   this.mainMap.easeTo({
+    //     duration: 3000,
+    //     ease: 0.2,
+    //     animate: true,
+    //     center: [this.long, this.lat],
+    //     zoom: 12,
+    //     bearing: 0
+    //   })
+    // },
+    // updateMarker: function(e){
+    //   var newCenter = e.result.center;
+    //   this.marker.setLngLat([newCenter[0],newCenter[1]]);
+    //   this.long = newCenter[0];
+    //   this.lat = newCenter[1];
+    // },
     searchPOI: function(event) {
       this.clearMarkers();
       this.$apollo.queries.search.skip = false;
-      var resultPromise = this.$apollo.queries.search.refetch({ term: event.target.value, latitude: this.lat, longitude: this.long, radius: 5000, limit: 15 })
+      var resultPromise = this.$apollo.queries.search.refetch({ term: event, latitude: this.mainMap.getBounds().getCenter().lat, longitude: this.mainMap.getBounds().getCenter().lng, radius: 40000, limit: 15 })
       resultPromise.then(result => this.addMarker(result.data.search.business));
     },
     addMarker: function(queryResult) {
@@ -141,8 +176,6 @@ export default {
       this.inputStart.value = null;
       this.inputDestination.value = null;
       document.getElementsByClassName("mapboxgl-ctrl-top-left")[0].style.backgroundImage = "linear-gradient(90deg, #4285f4, #00ebff)";
-      var startButton = document.getElementsByClassName("start-navigation-button")[0].style.display = "block";
-      // document.getElementById('map-navigation').style.display = "block"; 
       clearInterval(this.updateInstructions);
     },
     reverseDirections: function() {
@@ -166,9 +199,6 @@ export default {
       instructions.style.display = "block";
       startButton.style.display = "none";
       this.inputs.style.display = "none";
-      // document.getElementById('map-navigation').style.display = "none"; 
-      // var minimizeButton = document.getElementById('minimize-instructions');
-      // instructions.appendChild(minimizeButton);
       // this.showCurrentInstruction(); // Player Follow
       var instructions = document.getElementsByClassName('mapbox-directions-step')[0];
       var instructionLong = instructions.getAttribute('data-lng');
@@ -208,10 +238,7 @@ export default {
           if (this.convertPositionsInMeter(currentLat, currentLong, instructionLat, instructionLong) < 15) {
             this.sleep(1000);
             var previousInstructions = document.getElementsByClassName('mapbox-directions-step')[i].style.display = "none";
-            //var currentInstruction = document.getElementsByClassName('mapbox-directions-step')[i+1].style.fontWeight = "800 !important";
-            //console.log(currentInstruction);
             var nextInstructions = document.getElementsByClassName('mapbox-directions-step')[i+2].style.display = "block";
-            //var currentInstruction = document.getElementsByClassName('mapbox-directions-step')[i+2].style.fontWeight = "800";
           } 
         }
       }, 1000)
@@ -247,6 +274,22 @@ export default {
       var currentTime = new Date().getTime();
       while (currentTime + miliseconds >= new Date().getTime()) {
       }
+    },
+    activate:function(el){
+        this.active_el = el;
+    },
+    toggleDisplay: function(){
+        this.display = !this.display;
+    },
+    toggleNavigation: function() {
+      if (this.active_el == 2) {
+        this.mapControl.style.display = "none";
+        // this.directions.interactive = false; //TODO get working
+        console.log(this.directions);
+      } else {
+        this.mapControl.style.display = "block";
+        // this.directions.interactive = true; // TODO get working
+      }
     }
   },
   apollo: {
@@ -268,18 +311,18 @@ export default {
     clearInterval(this.polling)
   },
   created(){
-    eventBus.$on('toggleDirections', (isVisible) => {
-      if(isVisible == true){
-        this.mainMap.addControl(this.directions, 'bottom-left');
-      } else {
-        this.mainMap.removeControl(this.directions);
-      }
-    });
+    // eventBus.$on('toggleDirections', (isVisible) => {
+    //   if(isVisible == true){
+    //     this.mainMap.addControl(this.directions, 'bottom-left');
+    //   } else {
+    //     this.mainMap.removeControl(this.directions);
+    //   }
+    // });
   },
   mounted(){
-  eventBus.$on('locationFromHome', (newDest)=>{
-    this.refresh(newDest[0], newDest[1]);
-  });
+  // eventBus.$on('locationFromHome', (newDest)=>{
+  //   this.refresh(newDest[0], newDest[1]);
+  // });
     
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this.lat = 48.218800;
@@ -318,7 +361,6 @@ export default {
   });
 
   this.mainMap
-    //.addControl(this.geocoder, 'top-right')
     .addControl(this.userLocation, 'bottom-right')
     .addControl(this.directions, 'top-left')
 
@@ -326,39 +368,20 @@ export default {
     this.userLocation.trigger();
   })
 
-  //this.userLocation.trigger();
-
   this.userLocation.on('geolocate', function(e) {
       userLong = e.coords.longitude;
       userLat = e.coords.latitude;
-      // console.log(userLong);
-      // console.log(userLat);
   });
 
 
   this.destination = document.getElementsByClassName("mapbox-directions-destination")[0];
-  //this.instructions = document.getElementsByClassName('mapbox-directions-instructions')[0];
   this.inputs = document.getElementsByClassName("directions-control-inputs")[0];
   this.directionsProfile = document.getElementsByClassName("mapbox-directions-profile")[0];
   this.inputStart = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[0].childNodes[1];
   this.inputDestination = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[1].childNodes[1];
   this.mapControl = document.getElementsByClassName('mapboxgl-ctrl-top-left')[0];
 
-  // this.minimizeButton = document.createElement('div');
-  // this.minimizeButton.setAttribute("id", "minimize-instructions");
-  // this.minimizeButton.setAttribute("class", "maximized");
-  // console.log(this.minimizeButton);
-  // this.minimizeButton.setAttribute('onclick','toggleMinMaxInstructions()');
-
-
-  this.marker = new mapboxgl.Marker({
-    // element: this.$refs.custom-marker,     WENN CUSTOM MARKER EINGEFÜGT IST
-    draggable: false
-  })
-    .setLngLat([this.long, this.lat])
-    .addTo(this.mainMap);
-
-  this.geocoder.on('result', this.updateMarker);
+  // this.geocoder.on('result', this.updateMarker);
 
   }
 }
@@ -370,7 +393,7 @@ export default {
 
 /* Custom CSS */
 
-.wrapper{
+.wrapper {
   width: 100vw;
   height: 100%;
 }
@@ -513,41 +536,36 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   overflow:hidden;
   font-size:12px;
   }
-  .mapboxgl-ctrl-bottom-left .mapboxgl-ctrl-geocoder ul,
-  .mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-geocoder ul {
-    top:auto;
-    bottom:100%;
-    }
-  .mapboxgl-ctrl-geocoder ul > li > a {
-    clear:both;
-    cursor:default;
-    display:block;
-    padding:5px 10px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    border-bottom:1px solid rgba(0,0,0,0.1);
-    color:#404040;
-    }
-    .mapboxgl-ctrl-geocoder ul > li:last-child > a { border-bottom:none; }
-    .mapboxgl-ctrl-geocoder ul > li > a:hover {
-      color:#202020;
-      background-color:#f3f3f3;
-      text-decoration:none;
-      cursor:pointer;
-      }
-    .mapboxgl-ctrl-geocoder ul > li.active > a {
-      color:#202020;
-      background-color:#e3e3e3;
-      text-decoration:none;
-      cursor:pointer;
-      }
-
-@-webkit-keyframes rotate { from { -webkit-transform: rotate(0deg); } to { -webkit-transform: rotate(360deg); } }
-   @-moz-keyframes rotate { from { -moz-transform: rotate(0deg); } to { -moz-transform: rotate(360deg); } }
-    @-ms-keyframes rotate { from { -ms-transform: rotate(0deg); } to { -ms-transform: rotate(360deg); } }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.mapboxgl-ctrl-bottom-left .mapboxgl-ctrl-geocoder ul,
+.mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-geocoder ul {
+  top:auto;
+  bottom:100%;
+}
+.mapboxgl-ctrl-geocoder ul > li > a {
+  clear:both;
+  cursor:default;
+  display:block;
+  padding:5px 10px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  border-bottom:1px solid rgba(0,0,0,0.1);
+  color:#404040;
+}
+.mapboxgl-ctrl-geocoder ul > li:last-child > a { border-bottom:none; }
+.mapboxgl-ctrl-geocoder ul > li > a:hover {
+  color:#202020;
+  background-color:#f3f3f3;
+  text-decoration:none;
+  cursor:pointer;
+}
+.mapboxgl-ctrl-geocoder ul > li.active > a {
+  color:#202020;
+  background-color:#e3e3e3;
+  text-decoration:none;
+  cursor:pointer;
+}
 
 /* icons */
 .geocoder-icon {
@@ -555,7 +573,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   width:20px;
   height:20px;
   vertical-align:middle;
-  //speak:none;
   background-repeat:no-repeat;
   }
   .geocoder-icon-search {
@@ -609,14 +626,12 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 
   }
   .mapbox-directions-origin input[type='text'] {
-    // box-shadow:0 1px 0 0 #ddd;
     position:relative;
     z-index:1;
     left: 0rem;
     top: -0.3rem;
     }
     .mapbox-directions-destination input[type='text'] {
-    // box-shadow:0 1px 0 0 #ddd;
     position:relative;
     z-index:1;
     left: 0rem;
@@ -688,7 +703,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   position: relative;
   z-index:1;
   width:100%;
-  // background-color:rgba(0,0,0,0.75);
   color:#fff;
   padding:5px 10px;
   font-size:15px;
@@ -702,7 +716,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     line-height:inherit;
     }
   .mapbox-directions-route-summary span {
-    // color:rgba(255,255,255,0.5);
     margin:0 5px;
     }
 
@@ -898,17 +911,84 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     float: right;
 }
 
-// Minimize Instructions Button
+// POI Controls
 
-div#minimize-instructions {
-    margin-left: 35%;
-    margin-right: 35%;
-    width: 30%;
-    height: 5px;
-    background-color: rgba(255, 255, 255, 0.5);
+.POI-controls-container {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 9;
+  background-image: linear-gradient(90deg, #4285f4, #00ebff);
+  height: 5rem;
+  height: 13%;
+  .v-btn--floating.v-btn--small .v-icon {
+    color: black;
+  }
+  .POI-Input {
+    height: 2rem;
+    border: 1px solid white;
+    background-color: white;
     border-radius: 50px;
+    padding-top: 1.3rem;
+    padding-bottom: 1.3rem;
+    padding-left: 1rem;
+    padding-right: 25%;
+    margin-top: 3.7rem;
+    float: left;
+    margin-left: 0.8rem;
+  }
+  .POI-search-btn {
+    top: 3.2rem;
     position: absolute;
-    bottom: 0.5rem;
-    z-index: 9;
+    right: 0rem;
+  }
+  .POI-filter-btn {
+    position: absolute;
+    top: 3.2rem;
+    right: 3.5rem;
+  }
+  .POI-suggestion-container {
+    position: absolute;
+    top: 100%;
+    .POI-suggestion-icon {
+      width: 39px;
+      height: 39px;
+      margin: 7px;
+    }
+  }
 }
+
+.map-function-switch {
+    position: absolute;
+    top: 9px;
+    z-index: 10;
+        right: 0.5rem;
+    padding: 0.5rem 0.2rem 0.5rem 0.2rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50px;
+    li {
+      display: inline;
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      color: white;
+    }
+}
+
+.active {
+    background-color: dodgerblue;
+    border-radius: 50px;
+    color: white;
+    display: block;
+}
+
+.header-area {
+    position: absolute;
+    height: 2.8rem;
+    width: 100%;
+    top: 0;
+    z-index: 16;
+}
+
 </style>
