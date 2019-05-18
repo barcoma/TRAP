@@ -1,6 +1,6 @@
 <template lang="html">
     <section class="OBD">
-        <button v-on:click="getDevices">Request devices</button>
+        <button v-on:click="startWorker">Request devices</button>
         <h1 color="black">{{currentRPM + obdCommandInfo[0].unit}}</h1>
     </section>
 </template>
@@ -10,7 +10,6 @@ var serviceUUID = "e7810a71-73ae-499d-8c15-faa9aef0c3f2";
 var charUUID = "bef8d6c9-9c21-4c9e-b632-bd58c1009f9f";
 var byteA;
 var byteB;
-var lastBuffer;
 var setupDone = false;
 var currentCommand;
 var correctReply = false;
@@ -31,10 +30,19 @@ export default {
             pidResponse: [],
             byteCounter: 0,
             obdCommandInfo: [
-                {pid: "0C", bytes: 2, name: "rpm", unit: "rev/min", convertFunction: this.convertRPM(byteA, byteB)},
-            ]
+                {service: "01", pid: "0C", bytes: 2, name: "rpm", unit: "rev/min"}
+                // {service: "01", pid: "05", bytes: 1, name: "engCoolant", unit: "degree", convertFunction: this.convertTemp(byteA)},
+                // {service: "01", pid: "46", bytes: 1, name: "airTemp", unit: "degree", convertFunction: this.convertTemp(byteA)},
+                // {service: "01", pid: "5C", bytes: 1, name: "oilTemp", unit: "degree", convertFunction: this.convertTemp(byteA)},
+                // {service: "01", pid: "5E", bytes: 1, name: "fuelRate", unit: "L/h", convertFunction: this.convertRate(byteA, byteB)},
+            ],
+            testCount: 0,
+            lastBuffer: ArrayBuffer,
         }
-    }, 
+    },
+    computed: {
+
+    },
     methods: {
         getDevices: function() {
             navigator.bluetooth.requestDevice({
@@ -65,8 +73,8 @@ export default {
                 commands.push(encoder.encode("ATH0\r\n"));
                 commands.push(encoder.encode("ATSP0\r\n"));
 
-                this.sendCommands(characteristic, commands);
-
+                this.sendCommands(characteristic, commands);                
+                
                 characteristic.addEventListener('characteristicvaluechanged',
                 this.handleCharacteristicValueChanged);
 
@@ -98,84 +106,29 @@ export default {
             var decoder = new TextDecoder('ascii');
             var command = "010C1\r";
             var currentBufferDecoded = decoder.decode(value.buffer);
+            if(this.lastBuffer.byteLength > 0){
             var lastBufferDecoded = decoder.decode(this.lastBuffer);
+            }
             if ( lastBufferDecoded == command){
                 this.setupDone = true;
             }
-            // if(this.setupDone == true){
-            //     console.log(currentBufferDecoded);
-            //     this.pidResponse.push(value.buffer);
-            //     if(lastBufferDecoded == "0C"){
-            //         this.pidResponse[0] = decoder.decode(value.buffer);
-            //     }
-            //     if(lastBufferDecoded == this.pidResponse[0]){
-            //         this.pidResponse[1] = decoder.decode(value.buffer);
-            //         this.currentRPM = this.convertRPM(this.pidResponse[0], this.pidResponse[1]);
-            //     }
-            // }
-
-
-
-
-
-
-
             if(this.setupDone == true){
                 console.log('yeet', currentBufferDecoded);
                 if(currentBufferDecoded == "41"){
-                    this.byteCounter = this.obdCommandInfo.bytes + 2;
+                    this.byteCounter = this.obdCommandInfo[0].bytes + 2;
+                    console.log('HEY', this.byteCounter)
                 }
                 if (this.byteCounter > 0){
                     this.pidResponse.push(currentBufferDecoded);
                     this.byteCounter--;
                     if(this.byteCounter == 0){
-                    this.obdCommandInfo.convertFunction(this.pidResponse[3], this.pidResponse[4])
-                    this.currentRPM = this.convertRPM(this.pidResponse[3], this.pidResponse[4]);
+                        //this.obdCommandInfo[0].convertFunction(this.pidResponse[3], this.pidResponse[4])
+                        this.currentRPM = this.convertRPM(this.pidResponse[3], this.pidResponse[4]);
+                        this.pidResponse = [];
                     }
                 }
             }
             this.lastBuffer = value.buffer;
-            // var firstByte = value.buffer.getUint8(0);
-            // try {
-            //     var secondByte = value.buffer.getUint8(1);
-            // } catch {
-            //     var secondByte = null;
-            // }
-            // if (secondByte != null) {
-            //     var reply = parseInt(firstByte + secondByte);
-            // } else {
-            //     var reply = parseInt(firstByte);
-            // }
-
-            // if (twoBytes) {
-            //     byteB = reply;
-            //     this.parseCommand();
-            // }
-
-            // if (commandAccepted) {
-            //     numberOfBytes = obdCommandInfo.find(function(element) {
-            //         return element.pid == currentCommand;
-            //     });
-            //     if (numberOfBytes == 1) {
-            //         byteA = reply;
-            //         this.parseCommand();
-            //     } else {
-            //         twoBytes = true;
-            //     }
-            // }
-
-            // if (correctReply) {
-            //     currentCommand = reply;
-            //     commandAccepted = true;
-            // }    
-            // numberOfBytes = 0;
-            // commandAccepted = false
-            // correctReply = false;
-            // twoBytes = false;
-
-            // if (reply == 41) {
-            //     correctReply = true;
-            // }
         },
         sleep: function(delay) {
             var start = new Date().getTime();
@@ -215,9 +168,19 @@ export default {
         },
         convertRPM: function(byteA, byteB) {
             return ((parseInt(byteA, 16) * 256) + parseInt(byteB, 16)) / 4;
+        },
+        convertRate: function(byteA, byteB) {
+            return ((parseInt(byteA, 16) * 256) + parseInt(byteB, 16)) / 20;
+        },
+        convertTemp: function(byteA){
+            return byteA - 40;
+        },
+        startWorker: function(){
+            this.$worker.run(this.getDevices(), [this.$data])
         }
     },
     mounted() {
+
     // this.$http.get('http://192.168.0.10:35000').then(response => {
 
     // // get body data

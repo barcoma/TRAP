@@ -4,7 +4,6 @@
 
       <div>
         <v-tabs
-          v-model="active"
           color="white"
           light
           centered
