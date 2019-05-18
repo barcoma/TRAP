@@ -15,11 +15,6 @@ npm run serve
 ```
 npm run build
 ```
-### deploy locally 
-```
-npm install -g serve
-serve -s dist
-```
 
 ### Run your tests
 ```

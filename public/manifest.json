@@ -3,17 +3,19 @@
   "short_name": "trap",
   "icons": [
     {
-      "src": "./img/icons/android-chrome-192x192.png",
+      "src": "./img/icons/android-icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "./img/icons/android-chrome-512x512.png",
+      "src": "./img/icons/trapp_logo_512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
   "start_url": "./index.html",
   "display": "standalone",
-  "orientation": "landscape"
-  }
+  "orientation": "landscape",
+  "background_color": "#FFFFFF",
+  "theme_color": "#000000"
+}
