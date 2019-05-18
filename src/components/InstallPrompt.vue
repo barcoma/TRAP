@@ -52,7 +52,7 @@ a {
 .install-prompt {
     position: fixed;
     top: 0;
-    z-index: 99999;
+    z-index: 999999999999999;
     width: 100vw;
     padding-top: 1rem;
     padding-bottom: 1rem;

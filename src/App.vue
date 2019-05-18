@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <install-prompt></install-prompt>
+    <pop-up></pop-up>
     <section class="app-content">
       <router-view/>
     </section>
@@ -18,6 +19,7 @@ import MapNav from './components/MapNav.vue'
 import TabNav from './components/TabNav.vue'
 import InstallPrompt from './components/InstallPrompt.vue'
 import mapboxgl from 'mapbox-gl'
+import PopUp from './components/PopUp.vue'
 
 
 
@@ -28,7 +30,8 @@ export default {
     MapBox,
     MapNav,
     TabNav,
-    InstallPrompt
+    InstallPrompt,
+    PopUp
   },
   methods: {
     removeGeocode: function(){

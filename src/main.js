@@ -22,7 +22,9 @@ const httpLink = new HttpLink({
 
 const apolloClient = new ApolloClient({
   link: httpLink,
-  cache: new InMemoryCache()
+  cache: new InMemoryCache({
+    dataIdFromObject: object => object.name
+  })
 })
 
 Vue.use(VueApollo)

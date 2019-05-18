@@ -164,4 +164,12 @@ aside.v-navigation-drawer.v-navigation-drawer--absolute{
 .v-list__tile__title{
     height:30px;
 }
+
+.v-btn--floating.v-btn--absolute {
+  z-index: 100 !important;
+}
+
+button.burger.v-btn.v-btn--absolute.v-btn--floating.v-btn--left.v-btn--depressed.theme--dark {
+    margin-top: -0.5rem;
+}
 </style>
