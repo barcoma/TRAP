@@ -2,7 +2,7 @@
 <div class="wrapper">
   <div v-if="!navigationMode" class="header-area">
     <ul class="map-function-switch">
-      <li @click="activate(1), toggleNavigation()" :class="{ active : active_el == 1 }">Naviegieren</li>
+      <li @click="activate(1), toggleNavigation()" :class="{ active : active_el == 1 }">Navigieren</li>
       <li @click="activate(2), toggleNavigation()" :class="{ active : active_el == 2 }">Entdecken</li>
     </ul>
   </div>
@@ -201,13 +201,13 @@ export default {
     }, // Navigation
     showRouting: function() {
       if (this.setUserLocation()) {
-        this.isVisible = !this.isVisible;
-        this.displayNavigation =!this.displayNavigation;
-        this.destination.style.display = "block";
-        this.directionsProfile.style.display = "block";
       } else {
-        console.log("Aktueller Standort nicht gefunden!"); // TODO: Implement Pop Up
+        this.showPopUp();
       }
+      this.isVisible = !this.isVisible;
+      this.displayNavigation =!this.displayNavigation;
+      this.destination.style.display = "block";
+      this.directionsProfile.style.display = "block";
     },
     closeRouting: function() {
       this.mapControl.style.height = "unset";
@@ -303,10 +303,8 @@ export default {
       var firstUserPos =  [this.userLocation._lastKnownPosition.coords.longitude, this.userLocation._lastKnownPosition.coords.latitude];
       this.sleep(1000);
       var secondUserPos =  [this.userLocation._lastKnownPosition.coords.longitude, this.userLocation._lastKnownPosition.coords.latitude];
-
       var y = Math.sin(secondUserPos[1]-firstUserPos[1]) * Math.cos(secondUserPos[0]);
       var x = Math.cos(firstUserPos[0])*Math.sin(secondUserPos[0]) - Math.sin(firstUserPos[0])*Math.cos(secondUserPos[0])*Math.cos(secondUserPos[1]-firstUserPos[1]);
-      
       var brng = Math.atan2(y, x);
       var pi = Math.PI;
       var degrees = Math.abs(brng * (180/pi));
@@ -330,11 +328,13 @@ export default {
       if (this.active_el == 2) {
         this.mapControl.style.display = "none";
         // this.directions.interactive = false; //TODO get working
-        console.log(this.directions);
       } else {
         this.mapControl.style.display = "block";
         // this.directions.interactive = true; // TODO get working
       }
+    },
+    showPopUp: function() {
+      eventBus.$emit('showPopUp', "GPS nicht gefunden", "Ihr aktueller GPS-Standort konnte nicht gefunden werden");
     }
   },
   apollo: {
@@ -474,6 +474,10 @@ export default {
 <style lang="scss">
 
 /* Custom CSS */
+
+*:focus {
+    outline: none;
+}
 
 .wrapper {
   width: 100vw;
@@ -699,7 +703,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   border:0;
   background-color:transparent;
   height:28px;
-  margin:0;
+  // margin:0;
   color:rgba(0,0,0,.5);
   padding:10px 40px 10px 10px;
   text-overflow:ellipsis;
@@ -710,20 +714,22 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   .mapbox-directions-origin input[type='text'] {
     position:relative;
     z-index:1;
-    left: 0rem;
-    top: -0.3rem;
+    // left: 0rem;
+    // top: -0.3rem;
+    height: 100%;
     }
     .mapbox-directions-destination input[type='text'] {
     position:relative;
     z-index:1;
-    left: 0rem;
-    top: -0.3rem;
+    // left: 0rem;
+    // top: -0.3rem;
+    height: 100%;
     }
-  .mapboxgl-ctrl-geocoder input:focus {
-    color:rgba(0,0,0,.75);
-    outline:0;
-    outline:thin dotted\8;
-    }
+  // .mapboxgl-ctrl-geocoder input:focus {
+  //   color:rgba(0,0,0,.75);
+  //   outline:0;
+  //   outline:thin dotted\8;
+  //   }
 
 .mapboxgl-ctrl-geocoder .geocoder-icon-search {
   position:absolute;
@@ -1001,8 +1007,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   width: 100%;
   z-index: 9;
   background-image: linear-gradient(90deg, #4285f4, #00ebff);
-  height: 5rem;
-  height: 13%;
+  height: 7rem;
   .v-btn--floating.v-btn--small .v-icon {
     color: black;
   }
@@ -1071,6 +1076,31 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     width: 100%;
     top: 0;
     z-index: 16;
+}
+
+@media screen and (max-width: 372px) {
+  .POI-controls-container {
+    .POI-Input {
+      padding-right: 0;
+      width: 67%;
+    }
+    .POI-search-btn {
+      width: 37px;
+      height: 37px;
+    }
+    .POI-filter-btn {
+      height: 37px;
+      width: 37px;
+      right: 3rem;
+    }
+    .POI-suggestion-container {
+      .POI-suggestion-icon {
+        width: 37px;
+        height: 37px;
+        margin: 4px;
+      }
+    }
+  }
 }
 
 </style>
