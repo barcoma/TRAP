@@ -169,7 +169,7 @@ export default {
     showRouting: function() {
       if (this.setUserLocation()) {
       } else {
-        this.showPopUp();
+        this.showPopUp("GPS nicht gefunden", "Ihr aktueller GPS-Standort konnte nicht gefunden werden", "white");
       }
       this.isVisible = !this.isVisible;
       this.displayNavigation =!this.displayNavigation;
@@ -300,8 +300,8 @@ export default {
         // this.directions.interactive = true; // TODO get working
       }
     },
-    showPopUp: function() {
-      eventBus.$emit('showPopUp', "GPS nicht gefunden", "Ihr aktueller GPS-Standort konnte nicht gefunden werden");
+    showPopUp: function(title, text, color) {
+      eventBus.$emit('showPopUp', title, text, color);
     }
   },
   apollo: {
@@ -371,8 +371,11 @@ export default {
       unit: 'metric',
       alternatives: true,
       congestion: true,
-      accessToken: mapboxgl.accessToken
+      accessToken: mapboxgl.accessToken,
+      placeholderOrigin: "Wo möchten Sie hin?" // fucking won't work
     }, 'bottom-left');
+
+  console.log(this.directions);
 
   this.directions.on("route", e => {
     this.routeReady = true;
@@ -495,17 +498,19 @@ h5 {
   font-size: 16px !important;
   transform: scale(0.85);
   left: -1rem !important;
+  width:100%;
+  border:0;
+  background-color:transparent;
+  height:28px;
+  color:rgba(0,0,0,.5);
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  overflow:hidden;
 }
 
 .mapboxgl-ctrl-geocoder input {
   width: 90%;
   height: 2rem;
-  margin-top: -1rem;
-}
-
-.mapboxgl-ctrl-geocoder input::placeholder {
-  color: black;
-  font-size: 10pt;
 }
 
 .mapbox-directions-origin {
@@ -565,7 +570,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   top:100%;
   z-index:1000;
   overflow:hidden;
-  font-size:12px;
+  // font-size:12px;
   }
 .mapboxgl-ctrl-bottom-left .mapboxgl-ctrl-geocoder ul,
 .mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-geocoder ul {
@@ -633,7 +638,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
           box-sizing:border-box;
   }
 .mapboxgl-ctrl-geocoder {
-  font:15px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  // font:15px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
   position:relative;
   background-color:white;
   border-radius:0 0 3px 0;
@@ -642,20 +647,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     border-radius:0 3px 0 0;
     }
 
-.mapboxgl-ctrl-geocoder input[type='text'] {
-  font-size:12px;
-  width:100%;
-  border:0;
-  background-color:transparent;
-  height:28px;
-  // margin:0;
-  color:rgba(0,0,0,.5);
-  padding:10px 40px 10px 10px;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  overflow:hidden;
-
-  }
   .mapbox-directions-origin input[type='text'] {
     position:relative;
     z-index:1;
@@ -712,7 +703,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     display:block;
     border-radius:16px;
     padding:3px 5px;
-    font-size:12px;
+    // font-size:12px;
     color:rgba(0,0,0,.5);
     line-height:20px;
     text-align:center;
