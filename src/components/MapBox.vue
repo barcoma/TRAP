@@ -30,7 +30,7 @@
       <v-btn v-if="display" color="blue" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'hotels')">
           <v-icon dark>hotel</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'Supermarkt')">
+      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click="testQuery()">
           <v-icon dark>shopping_cart</v-icon>
       </v-btn>
       <v-btn v-if="display" color="green darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'servicestations')">
@@ -78,6 +78,8 @@ var markers = [];
 var userLong = 0;
 var userLat = 0;
 
+
+
 export default {
   name: 'MapBox',
   data() {
@@ -108,6 +110,42 @@ export default {
       firstInstruction: [],
       active_el: 1,
       display: true,
+      foursquareQuery: gql` query foursquarePOI ($latitude: Float!, $longitude: Float!, $term: String, $categories: String) 
+      {
+        foursquarePOI (latitude: $latitude, longitude: $longitude, term: $term, categories: $categories) 
+        {
+          name
+          coordinates 
+          {
+            latitude
+            longitude
+          }
+        }
+      }`,
+      yelpQuery: gql` query yelpPOI ($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $categories: String) 
+      {
+        yelpPOI (latitude: $latitude, longitude: $longitude, term: $term, radius: $radius, limit: $limit, categories: $categories)
+        {
+          name
+          coordinates {
+            latitude
+            longitude
+          }
+        }
+      }`,
+      customQuery: gql` query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) 
+      {
+        customPOI (latitude: $latitude, longitude: $longitude, term: $term)
+        {
+          name
+          coordinates 
+          {
+            latitude
+            longitude
+          }
+          description
+        }
+      }`
     }
   },
   methods: {
@@ -130,13 +168,28 @@ export default {
     //   this.long = newCenter[0];
     //   this.lat = newCenter[1];
     // },
+
+    testQuery: function() {
+      this.$apollo.query({
+        query: this.foursquareQuery,
+        variables: {
+          term: "food", 
+          latitude: 43, 
+          longitude: 10, 
+        }
+      }).then((response) => {
+        console.log(response);
+      }
+      ).catch((response) => {
+        console.log(response);
+      }
+      );
+    },
     searchPOI: function(searchTerm = undefined, categories = undefined) {
       var foursquareCategory = this.getIdByCategoryName(categories);
       this.clearMarkers();
-      this.$apollo.queries.yelpPOI.skip = false;
-      this.$apollo.queries.customPOI.skip = false;
-      this.$apollo.queries.foursquarePOI.skip = false;
       var center = this.mainMap.getBounds().getCenter();
+
       var lat = center.lat;
       var lng = center.lng;
       var customSearch = searchTerm;
@@ -144,33 +197,42 @@ export default {
       if (customSearch == null || customSearch == undefined) {
         customSearch = categories;
       }
-      var foursquarePromise = this.$apollo.queries.foursquarePOI.refetch({term: searchTerm, latitude: lat, longitude: lng, categories: foursquareCategory});
-      var customResults = this.$apollo.queries.customPOI.refetch({term: customSearch, latitude: lat, longitude: lng});
-      var resultPromise = this.$apollo.queries.yelpPOI.refetch({term: searchTerm, latitude: lat, longitude: lng, radius: 5000, limit: 15, categories: categories});
-      resultPromise.then(result => this.addMarker(result.data.yelpPOI, "yelp"));
-      customResults.then(result => this.addMarker(result.data.customPOI, "custom"));
-      foursquarePromise.then(result => this.addMarker(result.data.foursquarePOI, "foursquare"));
+      this.executeQuery(this.foursquareQuery, {term: searchTerm, latitude: lat, longitude: lng, categories: foursquareCategory}, "foursquare");
+      this.executeQuery(this.yelpQuery, {term: searchTerm, latitude: lat, longitude: lng, radius: 5000, limit: 15, categories: categories}, "yelp");
+      this.executeQuery(this.customQuery, {term: customSearch, latitude: lat, longitude: lng}, "custom");
+    },
+    executeQuery: function(query, variables, type) {
+      this.$apollo.query({
+        query: query,
+        variables: variables
+      }).then((response) => {
+        this.addMarker(response.data, type);
+      }
+      ).catch((response) => {
+        console.log(response);
+      }
+      );
     },
     addMarker: function(queryResult, type) {
-      for (var i = 0; i < queryResult.length; i++) {
-        var poi = queryResult[i];
-        
-        var currentMarker;
-        if (type === "custom") {
-          currentMarker = new mapboxgl.Marker({
-          draggable: false,
-          color: "#24c94d"
-        })} else if (type === "yelp") {
-          currentMarker = new mapboxgl.Marker({
-          draggable: false,
-          color:"#c64917"
-        })} else {
-          currentMarker = new mapboxgl.Marker({
-          draggable: false,
-          color:"#1ecebc"
-        })}
+      var color;
+      var pois;
+      if (type === "foursquare") {
+        pois = queryResult.foursquarePOI;
+        color = "#1ecebc";
+      } else if (type === "yelp") {
+        pois = queryResult.yelpPOI;
+        color = "#c64917"
+      } else {
+        pois = queryResult.customPOI;
+        color = "#24c94d";
+      }
 
-        currentMarker
+      for (var i = 0; i < pois.length; i++) {
+        var poi = pois[i];
+        var currentMarker = new mapboxgl.Marker({
+          draggable: false,
+          color: color
+        })
         .setLngLat([poi.coordinates.longitude, poi.coordinates.latitude])
         .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
         .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3>'))
@@ -337,60 +399,60 @@ export default {
       eventBus.$emit('showPopUp', title, text, color);
     }
   },
-  apollo: {
-    yelpPOI: {
-      query: gql` query yelpPOI ($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $categories: String) 
-      {
-        yelpPOI (latitude: $latitude, longitude: $longitude, term: $term, radius: $radius, limit: $limit, categories: $categories)
-        {
-          name
-          coordinates {
-            latitude
-            longitude
-          }
-        }
-      }`, variables: {},
-      skip () {
-        this.$apollo.queries.yelpPOI.skip = true;
-      }
-    },
-    customPOI: {
-      query: gql` query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) 
-      {
-        customPOI (latitude: $latitude, longitude: $longitude, term: $term)
-        {
-          name
-          coordinates 
-          {
-            latitude
-            longitude
-          }
-          description
-        }
-      }`,variables: {},
-      skip () {
-        this.$apollo.queries.customPOI.skip = true;
-      }
-    },
-    foursquarePOI: {
-      query: gql` query foursquarePOI ($latitude: Float!, $longitude: Float!, $term: String, $categories: String) 
-      {
-        foursquarePOI (latitude: $latitude, longitude: $longitude, term: $term, categories: $categories) 
-        {
-          name
-          coordinates 
-          {
-            latitude
-            longitude
-          }
-        }
-      }`, variables: {},
-      skip () {
-        this.$apollo.queries.foursquarePOI.skip = true;
-      } 
-    },
-  },
-    beforeDestroy () {
+  // apollo: {
+  //   yelpPOI: {
+  //     query: gql` query yelpPOI ($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $categories: String) 
+  //     {
+  //       yelpPOI (latitude: $latitude, longitude: $longitude, term: $term, radius: $radius, limit: $limit, categories: $categories)
+  //       {
+  //         name
+  //         coordinates {
+  //           latitude
+  //           longitude
+  //         }
+  //       }
+  //     }`, variables: {},
+  //     skip () {
+  //       this.$apollo.queries.yelpPOI.skip = true;
+  //     }
+  //   },
+  //   customPOI: {
+  //     query: gql` query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) 
+  //     {
+  //       customPOI (latitude: $latitude, longitude: $longitude, term: $term)
+  //       {
+  //         name
+  //         coordinates 
+  //         {
+  //           latitude
+  //           longitude
+  //         }
+  //         description
+  //       }
+  //     }`,variables: {},
+  //     skip () {
+  //       this.$apollo.queries.customPOI.skip = true;
+  //     }
+  //   },
+  //   foursquarePOI: {
+  //     query: gql` query foursquarePOI ($latitude: Float!, $longitude: Float!, $term: String, $categories: String) 
+  //     {
+  //       foursquarePOI (latitude: $latitude, longitude: $longitude, term: $term, categories: $categories) 
+  //       {
+  //         name
+  //         coordinates 
+  //         {
+  //           latitude
+  //           longitude
+  //         }
+  //       }
+  //     }`, variables: {},
+  //     skip () {
+  //       this.$apollo.queries.foursquarePOI.skip = true;
+  //     } 
+  //   },
+  // },
+  beforeDestroy () {
     clearInterval(this.polling)
   },
   created(){
