@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <sidebarmenu class="sidebarmenu"/>
     <install-prompt></install-prompt>
     <pop-up></pop-up>
     <section class="app-content">
@@ -20,6 +21,7 @@ import TabNav from './components/TabNav.vue'
 import InstallPrompt from './components/InstallPrompt.vue'
 import mapboxgl from 'mapbox-gl'
 import PopUp from './components/PopUp.vue'
+import Sidebarmenu from './components/Sidebarmenu.vue'
 
 
 
@@ -31,7 +33,8 @@ export default {
     MapNav,
     TabNav,
     InstallPrompt,
-    PopUp
+    PopUp,
+    Sidebarmenu
   },
   methods: {
     removeGeocode: function(){

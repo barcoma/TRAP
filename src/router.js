@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import MapPage from './views/MapPage.vue'
 import Home from './views/Home.vue'
-import Team from './views/Team.vue'
 import ObdPage from './views/ObdPage.vue'
 import GraphQl from './components/GraphQlTest.vue'
 import POIPage from './views/POIPage.vue'
@@ -20,11 +19,6 @@ export default new Router({
       path: '/',
       name: 'home',
       component: Home
-    },
-    {
-      path: '/team',
-      name: 'team',
-      component: Team
     },
     {
       path: '/obd',
