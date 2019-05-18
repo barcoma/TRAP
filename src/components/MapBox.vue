@@ -1,9 +1,9 @@
 <template>
 <div class="wrapper">
   <!-- <div ref="custom-marker" class="custom-marker"></div> -->
-  <input type="text" v-on:change="searchPOI($event)"  placeholder="Discover.."/>
+  <!-- <input type="text" v-on:change="searchPOI($event)"  placeholder="Discover.."/> -->
   <div class="map-controls-container">
-    <h5>Navigieren</h5>
+    <h5 v-if="!navigationMode">Navigieren</h5>
     <v-btn v-if="isVisible" fab dark small color="white" class="routing-button black--text"
     v-on:click="showRouting()"
     v-bind:class="{ change : isVisible }"
@@ -20,9 +20,11 @@
     <v-btn v-if="displayNavigation" v-on:click="reverseDirections" fab dark small color="white" class="route-switch-button black--text">
       <v-icon dark>compare_arrows</v-icon>
     </v-btn>
-    <v-btn v-if="routeReady" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
+    <v-btn v-if="routeReady & !navigationMode" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
+    <!-- <div v-if="navigationMode" v-on:click="toggleMinMaxInstructions" id="minimize-instructions"></div> -->
+    
   </div>
-  
+  <!-- <v-btn v-if="navigationMode" v-on:click="showRouting()" class="minMaxInstructions">Instructions</v-btn> -->
   <div id="map" ref="map"></div>
 </div>
 </template>
@@ -64,7 +66,13 @@ export default {
       inputs: Object,
       inputStart: Object,
       inputDestination: Object,
-      directionsProfile: Object
+      directionsProfile: Object,
+      locationHome: false,
+      mapControl: Object,
+      instructionUpdate: null,
+      navigationMode: false,
+      firstInstruction: [],
+      minimizeButton: Object
     }
   },
   methods: {
@@ -77,7 +85,7 @@ export default {
         ease: 0.2,
         animate: true,
         center: [this.long, this.lat],
-        zoom: 8,
+        zoom: 12,
         bearing: 0
       })
     },
@@ -110,17 +118,21 @@ export default {
       for (var i  = 0; i < markers.length; i++) {
         markers[i].remove();
       }
-    },
+    }, // Navigation
     showRouting: function() {
-      this.setUserLocation();
-      this.isVisible = !this.isVisible;
-      this.displayNavigation =!this.displayNavigation;
-      this.destination.style.display = "block";
-      this.directionsProfile.style.display = "block";
+      if (this.setUserLocation()) {
+        this.isVisible = !this.isVisible;
+        this.displayNavigation =!this.displayNavigation;
+        this.destination.style.display = "block";
+        this.directionsProfile.style.display = "block";
+      } else {
+        console.log("Aktueller Standort nicht gefunden!"); // TODO: Implement Pop Up
+      }
     },
     closeRouting: function() {
+      this.mapControl.style.height = "unset";
       this.isVisible = !this.isVisible;
-      this.displayNavigation =!this.displayNavigation;
+      this.navigationMode =!this.navigationMode;
       this.directions.removeRoutes();
       this.routeReady = false;
       this.inputs.style.display = "block";
@@ -128,14 +140,25 @@ export default {
       this.directionsProfile.style.display = "none";
       this.inputStart.value = null;
       this.inputDestination.value = null;
+      document.getElementsByClassName("mapboxgl-ctrl-top-left")[0].style.backgroundImage = "linear-gradient(90deg, #4285f4, #00ebff)";
       var startButton = document.getElementsByClassName("start-navigation-button")[0].style.display = "block";
+      // document.getElementById('map-navigation').style.display = "block"; 
+      clearInterval(this.updateInstructions);
     },
     reverseDirections: function() {
       this.directions.reverse();
+      var startValueTemp = this.inputStart.value;
+      this.inputStart.value = this.inputDestination.value;
+      this.inputDestination.value = startValueTemp;
     },
     startRoute: function() {
+      this.mapControl.style.height = "100%";
+      this.displayNavigation =!this.displayNavigation;
+      this.navigationMode =!this.navigationMode;
       var instructions = document.getElementsByClassName('mapbox-directions-instructions')[0];
       var startButton = document.getElementsByClassName("start-navigation-button")[0];
+      var directionsControl = document.getElementsByClassName("mapbox-directions-route-summary")[0].style.display = "none";
+      document.getElementsByClassName("mapboxgl-ctrl-top-left")[0].style.backgroundImage = "none";
       var altRoutes = document.getElementsByClassName("mapbox-directions-routes")[0];
       if (altRoutes) {
         altRoutes.style.display = "none";
@@ -143,11 +166,87 @@ export default {
       instructions.style.display = "block";
       startButton.style.display = "none";
       this.inputs.style.display = "none";
+      // document.getElementById('map-navigation').style.display = "none"; 
+      // var minimizeButton = document.getElementById('minimize-instructions');
+      // instructions.appendChild(minimizeButton);
+      // this.showCurrentInstruction(); // Player Follow
+      var instructions = document.getElementsByClassName('mapbox-directions-step')[0];
+      var instructionLong = instructions.getAttribute('data-lng');
+      var instructionLat = instructions.getAttribute('data-lat');
+      this.mainMap.flyTo({
+        center: [
+          instructionLong,
+          instructionLat
+        ],
+        zoom: 15,
+        bearing: 151
+      });
     },
     setUserLocation: function() {
       this.directions.setDestination(this.inputStart.value);
-      this.directions.setOrigin([userLong, userLat]);
-      this.inputStart.value = "Aktueller Standpunkt";
+      if (userLong != 0 && userLat != 0) {
+        this.directions.setOrigin([userLong, userLat]);
+        this.inputStart.value = "Aktueller Standpunkt";
+        return true;
+      } else {
+        return false;
+      }
+    },
+    showCurrentInstruction: function() {
+      var instructionsLength = document.getElementsByClassName('mapbox-directions-steps')[0].childNodes.length/2;
+      for (var i = 2; i < instructionsLength-1; i++) {
+        document.getElementsByClassName('mapbox-directions-step')[i].style.display = "none";
+      }
+      this.updateInstructions = setInterval(() => {
+        //this.rotateMapAccordingToUserMovement();
+        var currentLong = this.userLocation._lastKnownPosition.coords.longitude;
+        var currentLat = this.userLocation._lastKnownPosition.coords.latitude;
+        for (var i = 0; i < instructionsLength-1; i++) {
+          var instructions = document.getElementsByClassName('mapbox-directions-step')[i];
+          var instructionLong = instructions.getAttribute('data-lng');
+          var instructionLat = instructions.getAttribute('data-lat');
+          if (this.convertPositionsInMeter(currentLat, currentLong, instructionLat, instructionLong) < 15) {
+            this.sleep(1000);
+            var previousInstructions = document.getElementsByClassName('mapbox-directions-step')[i].style.display = "none";
+            //var currentInstruction = document.getElementsByClassName('mapbox-directions-step')[i+1].style.fontWeight = "800 !important";
+            //console.log(currentInstruction);
+            var nextInstructions = document.getElementsByClassName('mapbox-directions-step')[i+2].style.display = "block";
+            //var currentInstruction = document.getElementsByClassName('mapbox-directions-step')[i+2].style.fontWeight = "800";
+          } 
+        }
+      }, 1000)
+	  },
+    convertPositionsInMeter: function(lat1, lon1, lat2, lon2) {
+      var R = 6378.137; // Radius of earth in KM
+      var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
+      var dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
+      var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      var d = R * c;
+      return d * 1000; // meters
+    },
+    rotateMapAccordingToUserMovement: function() {
+      var firstUserPos =  [this.userLocation._lastKnownPosition.coords.longitude, this.userLocation._lastKnownPosition.coords.latitude];
+      this.sleep(1000);
+      var secondUserPos =  [this.userLocation._lastKnownPosition.coords.longitude, this.userLocation._lastKnownPosition.coords.latitude];
+
+      var y = Math.sin(secondUserPos[1]-firstUserPos[1]) * Math.cos(secondUserPos[0]);
+      var x = Math.cos(firstUserPos[0])*Math.sin(secondUserPos[0]) - Math.sin(firstUserPos[0])*Math.cos(secondUserPos[0])*Math.cos(secondUserPos[1]-firstUserPos[1]);
+      
+      var brng = Math.atan2(y, x);
+      var pi = Math.PI;
+      var degrees = Math.abs(brng * (180/pi));
+
+      this.mainMap.flyTo({
+          bearing: degrees 
+        });
+    },
+    sleep: function(miliseconds) {
+      var currentTime = new Date().getTime();
+      while (currentTime + miliseconds >= new Date().getTime()) {
+      }
     }
   },
   apollo: {
@@ -165,6 +264,9 @@ export default {
       }
     }`
   },
+    beforeDestroy () {
+    clearInterval(this.polling)
+  },
   created(){
     eventBus.$on('toggleDirections', (isVisible) => {
       if(isVisible == true){
@@ -175,6 +277,10 @@ export default {
     });
   },
   mounted(){
+  eventBus.$on('locationFromHome', (newDest)=>{
+    this.refresh(newDest[0], newDest[1]);
+  });
+    
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this.lat = 48.218800;
   this.long = 11.624707;
@@ -195,9 +301,6 @@ export default {
       unit: 'metric',
       alternatives: true,
       congestion: true,
-      // controls: {
-      //     instructions: false
-      //   },
       accessToken: mapboxgl.accessToken
     }, 'bottom-left');
 
@@ -210,14 +313,14 @@ export default {
     positionOptions: {
       enableHighAccuracy: true
     },
-    trackUserLocation: true
+    trackUserLocation: true,
+    instructions: false
   });
 
   this.mainMap
     //.addControl(this.geocoder, 'top-right')
     .addControl(this.userLocation, 'bottom-right')
     .addControl(this.directions, 'top-left')
-
 
   this.mainMap.on("load", e => {
     this.userLocation.trigger();
@@ -239,8 +342,13 @@ export default {
   this.directionsProfile = document.getElementsByClassName("mapbox-directions-profile")[0];
   this.inputStart = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[0].childNodes[1];
   this.inputDestination = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[1].childNodes[1];
+  this.mapControl = document.getElementsByClassName('mapboxgl-ctrl-top-left')[0];
 
-
+  // this.minimizeButton = document.createElement('div');
+  // this.minimizeButton.setAttribute("id", "minimize-instructions");
+  // this.minimizeButton.setAttribute("class", "maximized");
+  // console.log(this.minimizeButton);
+  // this.minimizeButton.setAttribute('onclick','toggleMinMaxInstructions()');
 
 
   this.marker = new mapboxgl.Marker({
@@ -251,6 +359,7 @@ export default {
     .addTo(this.mainMap);
 
   this.geocoder.on('result', this.updateMarker);
+
   }
 }
 </script>
@@ -276,6 +385,8 @@ export default {
   position: absolute;
   top: 0;
   right: 0;
+  width: 100%;
+  height: 100%;
 }
 
 //custom-marker
@@ -286,23 +397,6 @@ export default {
   height: 50px;
   border-radius: 50%;
   cursor: pointer;
-}
-
-// .geocoder {
-//     position:absolute;
-//     z-index:1;
-//     width:50%;
-//     left:50%;
-//     margin-left:-25%;
-//     top:20px;
-// }
-
-// .mapboxgl-ctrl-geocoder {
-//     min-width:100%;
-// }
-
-@media only screen and (max-width: 599px) {
-
 }
 
 /* Map Navigation */
@@ -316,6 +410,9 @@ h5 {
   color: white;
 }
 
+.mapboxgl-ctrl.mapboxgl-ctrl-attrib.mapboxgl-compact {
+    display: none;  
+}
 
 .mapboxgl-ctrl-top-left {
   width: 100%;
@@ -323,9 +420,10 @@ h5 {
 }
 
 .mapboxgl-ctrl-top-left .mapboxgl-ctrl {
-  width: 79%;
-  //margin: 10px !important;
-  margin-left: 1.4rem;
+  max-width: 100%;
+  margin: 10px;
+  margin-right: 4rem;
+  float: unset;
 }
 
 #mapbox-directions-origin-input, #mapbox-directions-destination-input {
@@ -339,13 +437,11 @@ h5 {
     padding-right: 10px;
 }
 
-#mapbox-directions-destination-input {
-  // margin-top: 0.5rem;
+.mapboxgl-ctrl-geocoder input[type='text'] {
+  font-size: 16px !important;
+  transform: scale(0.85);
+  left: -1rem !important;
 }
-
-// #mapbox-directions-destination-input .mapboxgl-ctrl-geocoder span.geocoder-icon.geocoder-icon-search {
-//   display: none;
-// }
 
 .mapboxgl-ctrl-geocoder input {
   width: 90%;
@@ -377,25 +473,23 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 
 .routing-button {
     z-index: 9;
-    // top: 3.2rem;
-    // right: -11.6rem;
     float: right;
     top: 3.2rem;
 }
 
 .route-switch-button {
-  z-index: 9;
-  top: 6.5rem;
-  position: absolute;
-  right: -11.4rem;
-  display: none;
+    position: absolute !important;
+    z-index: 9;
+    top: 6.5rem;
+    right: 0rem;
+    display: none;
 }
 
 .start-navigation-button {
-  top: 12.5rem;
-  right: -4rem;
-  z-index: 9;
-  z-index: 9;
+    top: 13rem;
+    right: 0rem;
+    z-index: 9;
+    position: absolute !important;
 }
 
 .mapboxgl-user-location-dot::before {
@@ -480,10 +574,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
             animation: rotate 400ms linear infinite;
     }
 
-
-
 /* Search, Close, Loading, Inputs */
-
 
 .mapboxgl-ctrl-geocoder,
 .mapboxgl-ctrl-geocoder *,
@@ -497,10 +588,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   font:15px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
   position:relative;
   background-color:white;
-  // width:calc(100% - 360px);;
-  // min-width:calc(100% - 40px);;
-  // max-width:calc(100% - 40px);;
-  //margin-left:40px;
   border-radius:0 0 3px 0;
   }
   .mapbox-directions-origin .mapboxgl-ctrl-geocoder {
@@ -563,12 +650,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   }
   .mapboxgl-ctrl-geocoder .geocoder-pin-right *.active { display:block; }
 
-// .mapboxgl-ctrl-geocoder,
-// .mapboxgl-ctrl-geocoder ul {
-//   box-shadow:none;
-//   }
-
-/* Profile */
   .mapbox-directions-profile {
   display: none;
   margin:7px 0 0;
@@ -613,8 +694,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   font-size:15px;
   line-height:28px;
   }
-  .mapbox-directions-route-summary + .mapbox-directions-instructions {
-    }
   .mapbox-directions-route-summary h1 {
     font-weight:500;
     margin:0;
@@ -630,6 +709,15 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   /* Alt route selection */
   .mapbox-directions-instructions {
       overflow: scroll;
+/* Recent */
+      background-color: rgba(0, 0, 0, 0.8);
+      border-radius: 15px;
+      height: 10rem;
+      margin-bottom: 1rem;
+      margin-right: -3.3rem;
+      width: 94%;
+      position: absolute;
+      bottom: 2rem;
     }
     .mapbox-directions-instructions-wrapper {
       max-height: 17vh;
@@ -656,9 +744,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   .mapbox-directions-instructions {
     display: none;
   }
-</style>
-
-<style lang="scss">
+   
   .mapboxgl-popup {
     max-width: 200px;
   }
@@ -741,24 +827,8 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     visibility:hidden;
   }
 
-/* Mobile */
- @media only screen and (max-width:640px)  {
-
-}
-
 // /* Containers */
  .directions-control.directions-control { width:100%; max-width:100%; }
-
-// /* Input container */
-// .directions-control.directions-control-inputs { top:0;left:0; }
-// .mapbox-directions-profile { margin:10px; }
-
-// /* Instructions container */
-// .mapbox-directions-routes { float:right; margin-right:10px; }
-// .directions-control.directions-control-directions { top:auto; max-height:40%; }
-// .mapbox-directions-multiple { min-height:50px; }
-
-// }
 
 @-webkit-keyframes rotate { from { -webkit-transform: rotate(0deg); } to { -webkit-transform: rotate(360deg); } }
    @-moz-keyframes rotate { from { -moz-transform: rotate(0deg); } to { -moz-transform: rotate(360deg); } }
@@ -819,5 +889,26 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 
 .pop-up-text {
   color: black;
+}
+
+// GPS Icon
+
+.mapboxgl-ctrl-bottom-right .mapboxgl-ctrl {
+    margin: 0 5px 5px 0;
+    float: right;
+}
+
+// Minimize Instructions Button
+
+div#minimize-instructions {
+    margin-left: 35%;
+    margin-right: 35%;
+    width: 30%;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+    position: absolute;
+    bottom: 0.5rem;
+    z-index: 9;
 }
 </style>
