@@ -21,22 +21,22 @@
           <v-icon v-if="display" dark>keyboard_arrow_left</v-icon>
           <v-icon v-else dark>keyboard_arrow_right</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="blue-grey darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Werkstatt')">
+      <v-btn v-if="display" color="blue-grey darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'autorepair')">
           <v-icon dark>build</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="deep-orange darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Restaurant')">
+      <v-btn v-if="display" color="deep-orange darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'food')">
           <v-icon dark>restaurant</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="blue" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Hotel')">
+      <v-btn v-if="display" color="blue" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'hotels')">
           <v-icon dark>hotel</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Supermarkt')">
+      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'Supermarkt')">
           <v-icon dark>shopping_cart</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="green darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Tankstelle')">
+      <v-btn v-if="display" color="green darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'servicestations')">
           <v-icon dark>local_gas_station</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="red" dark fab class="POI-suggestion-icon" v-on:click="searchPOI('Krankenhaus')">
+      <v-btn v-if="display" color="red" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'physicians')">
           <v-icon dark>local_hospital</v-icon>
       </v-btn>
     </div>
@@ -130,13 +130,26 @@ export default {
     //   this.long = newCenter[0];
     //   this.lat = newCenter[1];
     // },
-    searchPOI: function(event) {
+    searchPOI: function(searchTerm = undefined, categories = undefined) {
+      var foursquareCategory = this.getIdByCategoryName(categories);
+      this.clearMarkers();
       this.$apollo.queries.yelpPOI.skip = false;
       this.$apollo.queries.customPOI.skip = false;
-      var customResults = this.$apollo.queries.customPOI.refetch({term: event, latitude: this.lat, longitude: this.long});
-      var resultPromise = this.$apollo.queries.yelpPOI.refetch({ term: event, latitude: this.mainMap.getBounds().getCenter().lat, longitude: this.mainMap.getBounds().getCenter().lng, radius: 5000, limit: 15 })
+      this.$apollo.queries.foursquarePOI.skip = false;
+      var center = this.mainMap.getBounds().getCenter();
+      var lat = center.lat;
+      var lng = center.lng;
+      var customSearch = searchTerm;
+
+      if (customSearch == null || customSearch == undefined) {
+        customSearch = categories;
+      }
+      var foursquarePromise = this.$apollo.queries.foursquarePOI.refetch({term: searchTerm, latitude: lat, longitude: lng, categories: foursquareCategory});
+      var customResults = this.$apollo.queries.customPOI.refetch({term: customSearch, latitude: lat, longitude: lng});
+      var resultPromise = this.$apollo.queries.yelpPOI.refetch({term: searchTerm, latitude: lat, longitude: lng, radius: 5000, limit: 15, categories: categories});
       resultPromise.then(result => this.addMarker(result.data.yelpPOI, "yelp"));
       customResults.then(result => this.addMarker(result.data.customPOI, "custom"));
+      foursquarePromise.then(result => this.addMarker(result.data.foursquarePOI, "foursquare"));
     },
     addMarker: function(queryResult, type) {
       for (var i = 0; i < queryResult.length; i++) {
@@ -147,10 +160,14 @@ export default {
           currentMarker = new mapboxgl.Marker({
           draggable: false,
           color: "#24c94d"
-        })} else {
-          currentMarker= new mapboxgl.Marker({
+        })} else if (type === "yelp") {
+          currentMarker = new mapboxgl.Marker({
           draggable: false,
           color:"#c64917"
+        })} else {
+          currentMarker = new mapboxgl.Marker({
+          draggable: false,
+          color:"#1ecebc"
         })}
 
         currentMarker
@@ -161,6 +178,22 @@ export default {
         markers.push(currentMarker);
       }
     },   
+    getIdByCategoryName: function(name) {
+      var id;
+      switch(name) {
+        case "food": id = "4d4b7105d754a06374d81259";
+          break;
+        case "physicians": id = "4bf58dd8d48988d104941735";
+          break;
+        case "autorepair": id = "56aa371be4b08b9a8d5734d3";
+          break;
+        case "hotels": id = "4bf58dd8d48988d1fa931735";
+          break;
+        case "servicestations": id = "4bf58dd8d48988d113951735";
+          break;
+      }
+      return id;
+    },
     clearMarkers: function() {
       for (var i  = 0; i < markers.length; i++) {
         markers[i].remove();
@@ -305,41 +338,63 @@ export default {
     }
   },
   apollo: {
-    yelpPOI: gql`{
-      yelpPOI
+    yelpPOI: {
+      query: gql` query yelpPOI ($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $categories: String) 
       {
-        name
-        coordinates {
-          latitude
-          longitude
+        yelpPOI (latitude: $latitude, longitude: $longitude, term: $term, radius: $radius, limit: $limit, categories: $categories)
+        {
+          name
+          coordinates {
+            latitude
+            longitude
+          }
         }
+      }`, variables: {},
+      skip () {
+        this.$apollo.queries.yelpPOI.skip = true;
       }
-    }`,
-    customPOI: {
-    query: gql`query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) {
-      customPOI (latitude: $latitude, longitude: $longitude, term: $term){
-        name
-        coordinates {
-          latitude
-          longitude
-        }
-        description
-      }
-    }`,
-    variables: {
-      latitude: 43,
-      longitude: 10,
-      term: "test"
     },
+    customPOI: {
+      query: gql` query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) 
+      {
+        customPOI (latitude: $latitude, longitude: $longitude, term: $term)
+        {
+          name
+          coordinates 
+          {
+            latitude
+            longitude
+          }
+          description
+        }
+      }`,variables: {},
+      skip () {
+        this.$apollo.queries.customPOI.skip = true;
+      }
+    },
+    foursquarePOI: {
+      query: gql` query foursquarePOI ($latitude: Float!, $longitude: Float!, $term: String, $categories: String) 
+      {
+        foursquarePOI (latitude: $latitude, longitude: $longitude, term: $term, categories: $categories) 
+        {
+          name
+          coordinates 
+          {
+            latitude
+            longitude
+          }
+        }
+      }`, variables: {},
+      skip () {
+        this.$apollo.queries.foursquarePOI.skip = true;
+      } 
     },
   },
     beforeDestroy () {
     clearInterval(this.polling)
   },
   created(){
-    this.$apollo.queries.yelpPOI.skip = true;
-    this.$apollo.queries.customPOI.skip = true;
-    eventBus.$on('toggleDirections', (isVisible) => {
+      eventBus.$on('toggleDirections', (isVisible) => {
       if(isVisible == true){
         this.mainMap.addControl(this.directions, 'bottom-left');
       } else {
