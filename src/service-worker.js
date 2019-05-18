@@ -57,16 +57,16 @@ self.addEventListener('fetch', function(event) {
     );
   }  
 
-  if (url.includes('localhost:4000/graphql')) {
-    event.respondWith(
-      // cache.match(event.request).then(function (response) {
-      //   return response || fetch(event.request).then(function(response) {
-      //     caches.open('local-graphql').then(function(cache) {
-      //       cache.put(event.request, response.clone());
-      //     });
-      //     return response;
-      //   });
-      // })
-    )
-  }
+  // if (url.includes('localhost:4000/graphql')) {
+  //   event.respondWith(
+  //     cache.match(event.request).then(function (response) {
+  //       return response || fetch(event.request).then(function(response) {
+  //         caches.open('local-graphql').then(function(cache) {
+  //           cache.put(event.request, response.clone());
+  //         });
+  //         return response;
+  //       });
+  //     })
+  //   )
+  // }
 })

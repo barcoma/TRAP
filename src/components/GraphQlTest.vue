@@ -15,7 +15,7 @@
   <button v-on:click="test">log console</button>
 </ApolloQuery> -->
 <div>
-    <button v-on:click="testIntercept">log console</button>
+    <button v-on:click="testCache">log console</button>
     <div>{{query}}</div>
 </div>
 </template>
@@ -80,11 +80,26 @@ export default {
     }`
   },
   methods: {
-    testIntercept: function() {
-      this.$apollo.queries.query.skip = false;
-      var x = this.$apollo.queries.query.refetch({ term: 'food', latitude: 52.520008, longitude: 13.404954, radius: 50, limit: 15 })
-      x.then(xd => console.log(xd.data.search));
-    },
+    // testIntercept: function() {
+    //   this.$apollo.queries.query.skip = false;
+    //   var x = this.$apollo.queries.query.refetch({ term: 'food', latitude: 52.520008, longitude: 13.404954, radius: 50, limit: 15 })
+    //   x.then(xd => console.log(xd.data.search));
+    // },
+    testCache() {
+      try {
+        let cachedQuery = this.$apolloProvider.defaultClient.readFragment({
+          name: "Starbucks",
+          fragment: gql`
+          fragment mySearch on search {
+            name
+          }`
+        })
+        
+        console.log(cachedQuery)
+      } catch (e) {
+        console.log(e);
+      }
+    }
   }
 }
 </script>
