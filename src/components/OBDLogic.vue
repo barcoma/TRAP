@@ -26,18 +26,22 @@ export default {
     name: "OBDLogic",
     data() {
         return{
+            writeDelay: 50,
             currentRPM: "0",
             pidResponse: [],
             byteCounter: 0,
             obdCommandInfo: [
-                {service: "01", pid: "0C", bytes: 2, name: "rpm", unit: "rev/min"}
-                // {service: "01", pid: "05", bytes: 1, name: "engCoolant", unit: "degree", convertFunction: this.convertTemp(byteA)},
-                // {service: "01", pid: "46", bytes: 1, name: "airTemp", unit: "degree", convertFunction: this.convertTemp(byteA)},
-                // {service: "01", pid: "5C", bytes: 1, name: "oilTemp", unit: "degree", convertFunction: this.convertTemp(byteA)},
-                // {service: "01", pid: "5E", bytes: 1, name: "fuelRate", unit: "L/h", convertFunction: this.convertRate(byteA, byteB)},
+                {service: "010C1\r", pid: "0C", bytes: 2, name: "rpm", unit: "rev/min"},
+                {service: "0105\r", pid: "05", bytes: 1, name: "engCoolant", unit: "degree"},
+                {service: "0146\r", pid: "46", bytes: 1, name: "airTemp", unit: "degree"},
+                {service: "015C\r", pid: "5C", bytes: 1, name: "oilTemp", unit: "degree"},
+                {service: "015E\r", pid: "5E", bytes: 1, name: "fuelRate", unit: "L/h"},
+                {service: "012F\r", pid: "5E", bytes: 1, name: "fuelRate", unit: "percent"},
             ],
             testCount: 0,
             lastBuffer: ArrayBuffer,
+            queue: ["010C1\r", "01051\r", "01461\r", "015C\r", "015E\r"],
+            lastCommandSent: String
         }
     },
     computed: {
@@ -78,21 +82,28 @@ export default {
                 characteristic.addEventListener('characteristicvaluechanged',
                 this.handleCharacteristicValueChanged);
 
-                var obdCommand = "010C1\r"; 
+                var obdCommand = "010C1\r";
                 var testArray = this.encodeCommand(obdCommand);  
-                //return characteristic.writeValue(testArray);
 
+                // setInterval(function(){
+                //     return characteristic.writeValue(testArray);
+                // }, 3000);
+
+                var commandToSend = this.encodeCommand(this.queue[0]);
+                this.lastCommandSent = commandToSend;
+                // if(queueCount >= this.queue.length){
+                //     queueCount = 0;
+                // };
                 setInterval(function(){
-                    return characteristic.writeValue(testArray);
+                    return characteristic.writeValue(commandToSend);
                 }, 3000);
-            
+                        // for(i = 0; i < this.queue.length; i++){
+                        //     var commandToSend = this.encodeCommand(this.queue[i]);
+                        //     characteristic.writeValue();
+                        //     if (i=this.queue.length){
 
-                //var testArray = this.encodeCommand(obdCommand);
-                // new Uint8Array([zero, one, two, three, four]);
-                // test again with this textencoder, should work in theory
-                // let message = encoder.encode("010C\r");
-                // let message2 = encoder.encode("ATDP\r\n");
-                // return characteristic.writeValue(testArray);
+                        //     }
+                        // }            
             })
             .then(value => {
                 console.log(value);
@@ -104,7 +115,11 @@ export default {
         handleCharacteristicValueChanged: function(event) {
             let value = event.target.value;
             var decoder = new TextDecoder('ascii');
-            var command = "010C1\r";
+            var command = decoder.decode(this.lastCommandSent);
+            // var replyBytes = this.obdCommandInfo.find(function(service){
+            //     return service == command;
+            // });
+            var replyBytes = 2;
             var currentBufferDecoded = decoder.decode(value.buffer);
             if(this.lastBuffer.byteLength > 0){
             var lastBufferDecoded = decoder.decode(this.lastBuffer);
@@ -113,17 +128,20 @@ export default {
                 this.setupDone = true;
             }
             if(this.setupDone == true){
-                console.log('yeet', currentBufferDecoded);
                 if(currentBufferDecoded == "41"){
-                    this.byteCounter = this.obdCommandInfo[0].bytes + 2;
-                    console.log('HEY', this.byteCounter)
+                    this.byteCounter = replyBytes + 2;
                 }
                 if (this.byteCounter > 0){
                     this.pidResponse.push(currentBufferDecoded);
                     this.byteCounter--;
                     if(this.byteCounter == 0){
+                        this.pidResponse.splice(0,2);
+                        var reply = this.convertValue(this.pidResponse);
+                        console.log("pid: " +command + 'value:' +reply);
+
                         //this.obdCommandInfo[0].convertFunction(this.pidResponse[3], this.pidResponse[4])
-                        this.currentRPM = this.convertRPM(this.pidResponse[3], this.pidResponse[4]);
+                        // this.currentRPM = this.convertRPM(this.pidResponse[2], this.pidResponse[3]);
+                        // console.log(this.currentRPM);
                         this.pidResponse = [];
                     }
                 }
@@ -174,6 +192,18 @@ export default {
         },
         convertTemp: function(byteA){
             return byteA - 40;
+        },
+        convertValue: function(response){
+            var reply;
+            switch(response.length){
+                case 1:
+                    reply = parseInt(response[0], 16) - 40;
+                    break;
+                case 2:
+                    reply = ((parseInt(response[0], 16) * 256) + parseInt(response[1], 16)) / 4;
+                    break;
+            }
+            return reply;
         },
         startWorker: function(){
             this.$worker.run(this.getDevices(), [this.$data])
