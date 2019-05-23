@@ -88,19 +88,6 @@
 </template>
 
 <script>
-// import Vue from 'vue'
-// import Router from 'vue-router'
-// import POIPage from './views/POIPage.vue'
-
-// Vue.use(Router)
-// const router = new Router({
-//   routes: [{
-//     path: '/poi',
-//     component: POIPage
-//   }]
-// })
-
-
   export default {
     data () {
       return {

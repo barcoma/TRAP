@@ -8,7 +8,7 @@
   </div>
   <div v-if="active_el == 2" class="POI-controls-container">
     <input class="POI-Input" type="text" v-on:change="searchPOI($event.target.value)"  placeholder="Hotel, Restaurant..."/>
-    <v-btn fab dark small color="white" class="POI-filter-btn">
+    <v-btn fab dark small color="white" class="POI-filter-btn" :to="{ name: 'poi'}">
       <v-icon dark>filter_list</v-icon>
     </v-btn>
     <v-btn fab dark small color="white" class="POI-search-btn"
@@ -1079,13 +1079,16 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   }
   .POI-search-btn {
     top: 3.2rem;
-    position: absolute;
+    position: absolute !important;
     right: 0rem;
   }
   .POI-filter-btn {
-    position: absolute;
+    position: absolute !important;
     top: 3.2rem;
     right: 3.5rem;
+    .v-btn__content {
+      height: unset;
+    }
   }
   .POI-suggestion-container {
     position: absolute;
