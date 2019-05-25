@@ -1,11 +1,11 @@
 <template>
 <v-app>
-  <v-container >
+  <v-container>
 
     <v-layout align-center row wrap class="top-area">
 
       
-         <sidebarmenu class="sidebarmenu"/>
+         <!-- <sidebarmenu class="sidebarmenu"/> -->
       
       <v-spacer></v-spacer>
       <v-flex xs4 mt-3 class="flex-avatar">
@@ -13,11 +13,11 @@
           :size="64"
           color="grey lighten-4"
         >
-          <img src="https://i1.rgstatic.net/ii/profile.image/390911189110788-1470211898704_Q512/Wolfgang_Taube2.jpg" alt="avatar">
+          <!-- <img src="https://i1.rgstatic.net/ii/profile.image/390911189110788-1470211898704_Q512/Wolfgang_Taube2.jpg" alt="avatar"> -->
         </v-avatar>
       </v-flex>
       <v-flex class="text-xs-left" xs12 offset-xs1>
-        <h1>Hi, Wolfang!</h1>
+        <h1>Hi, Lisa!</h1>
         <h3>Wo soll deine Reise hingehen?</h3>
       </v-flex>
 
@@ -77,7 +77,6 @@
                 v-for="i in 3"
                 :key="i"
                 :value="'tab-' + i"
-                touchless
                 lazy
           >
 
@@ -228,24 +227,28 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
       newDestination: Object
     }),
     methods: {
-      locationSearch: function(event){
-        //console.log('FUCK',this.newDestination);
-        // this.$router.push('map');
-        // eventBus.$emit('LocationFromHome', this.searchTerm);
+      locationSearch: function(event){ 
+        this.$router.push('map');
+        var newDest = this.newDestination
+        setTimeout(function(){
+          eventBus.$emit('locationFromHome', newDest); 
+        }, 10);
         },
         locationSearch2: function(){
-         // console.log('CUNT')
+         // console.log('B')
         },
         getDestination: function(event){
-          this.newDestination = event.geometry.coordinates;
-          //console.log('CHANGE INPUT', this.newDestination)
+          this.items.map(item => {
+          if(item.id == event){
+          this.newDestination = item.geometry.coordinates;
+          }});
         }
       },
 
     computed: {
       items () {
         return this.entries.map(entry => {
-          if(entry.relevance > .5){
+          if(entry.relevance > .1){
           return  Object.assign({}, entry);
           }
         })
@@ -280,7 +283,6 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
           const { count, entries } = newProps
           this.count = count
           this.entries = entries
-          console.log('items()', this.items)
         })
         .catch(error => {
           console.log(error)

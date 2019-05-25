@@ -1,9 +1,47 @@
 <template>
 <div class="wrapper">
-  <!-- <div ref="custom-marker" class="custom-marker"></div> -->
-  <input type="text" v-on:change="searchPOI($event)"  placeholder="Discover.."/>
-  <div class="map-controls-container">
-    <h5>Navigieren</h5>
+  <div v-if="!navigationMode" class="header-area">
+    <ul class="map-function-switch">
+      <li @click="activate(1), toggleNavigation()" :class="{ active : active_el == 1 }">Navigieren</li>
+      <li @click="activate(2), toggleNavigation()" :class="{ active : active_el == 2 }">Entdecken</li>
+    </ul>
+  </div>
+  <div v-if="active_el == 2" class="POI-controls-container">
+    <input class="POI-Input" type="text" v-on:change="searchPOI($event.target.value)"  placeholder="Hotel, Restaurant..."/>
+    <v-btn fab dark small color="white" class="POI-filter-btn" :to="{ name: 'poi'}">
+      <v-icon dark>filter_list</v-icon>
+    </v-btn>
+    <v-btn fab dark small color="white" class="POI-search-btn"
+    v-on:click="searchPOI($event)"
+    >
+      <v-icon dark>subdirectory_arrow_right</v-icon>
+    </v-btn>
+    <div class="POI-suggestion-container">
+      <v-btn color="white" dark fab small class="POI-suggestion-icon" @click="toggleDisplay()">
+          <v-icon v-if="display" dark>keyboard_arrow_left</v-icon>
+          <v-icon v-else dark>keyboard_arrow_right</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="blue-grey darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'autorepair')">
+          <v-icon dark>build</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="deep-orange darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'food')">
+          <v-icon dark>restaurant</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="blue" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'hotels')">
+          <v-icon dark>hotel</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click="testQuery()">
+          <v-icon dark>shopping_cart</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="green darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'servicestations')">
+          <v-icon dark>local_gas_station</v-icon>
+      </v-btn>
+      <v-btn v-if="display" color="red" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'physicians')">
+          <v-icon dark>local_hospital</v-icon>
+      </v-btn>
+    </div>
+  </div>
+  <div v-if="active_el == 1" class="map-controls-container">
     <v-btn v-if="isVisible" fab dark small color="white" class="routing-button black--text"
     v-on:click="showRouting()"
     v-bind:class="{ change : isVisible }"
@@ -16,13 +54,11 @@
     >
       <v-icon dark>close</v-icon>
     </v-btn>
-
     <v-btn v-if="displayNavigation" v-on:click="reverseDirections" fab dark small color="white" class="route-switch-button black--text">
       <v-icon dark>compare_arrows</v-icon>
     </v-btn>
-    <v-btn v-if="routeReady" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
+    <v-btn v-if="routeReady & !navigationMode" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
   </div>
-  
   <div id="map" ref="map"></div>
 </div>
 </template>
@@ -42,12 +78,14 @@ var markers = [];
 var userLong = 0;
 var userLat = 0;
 
+
+
 export default {
   name: 'MapBox',
   data() {
     return {
-      newlong:'',
-      newlat:'',
+      // newlong:'',
+      // newlat:'',
       lat: Number,
       long: Number,
       mainMap: Object,
@@ -64,63 +102,179 @@ export default {
       inputs: Object,
       inputStart: Object,
       inputDestination: Object,
-      directionsProfile: Object
+      directionsProfile: Object,
+      // locationHome: false,
+      mapControl: Object,
+      instructionUpdate: null,
+      navigationMode: false,
+      firstInstruction: [],
+      active_el: 1,
+      display: true,
+      foursquareQuery: gql` query foursquarePOI ($latitude: Float!, $longitude: Float!, $term: String, $categories: String) 
+      {
+        foursquarePOI (latitude: $latitude, longitude: $longitude, term: $term, categories: $categories) 
+        {
+          name
+          coordinates 
+          {
+            latitude
+            longitude
+          }
+        }
+      }`,
+      yelpQuery: gql` query yelpPOI ($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $categories: String) 
+      {
+        yelpPOI (latitude: $latitude, longitude: $longitude, term: $term, radius: $radius, limit: $limit, categories: $categories)
+        {
+          name
+          coordinates {
+            latitude
+            longitude
+          }
+        }
+      }`,
+      customQuery: gql` query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) 
+      {
+        customPOI (latitude: $latitude, longitude: $longitude, term: $term)
+        {
+          name
+          coordinates 
+          {
+            latitude
+            longitude
+          }
+          description
+        }
+      }`
     }
   },
   methods: {
-    refresh: function(newlong, newlat){
-      this.long = newlong;
-      this.lat = newlat;
-      this.marker.setLngLat([this.long, this.lat])
-      this.mainMap.easeTo({
-        duration: 3000,
-        ease: 0.2,
-        animate: true,
-        center: [this.long, this.lat],
-        zoom: 8,
-        bearing: 0
-      })
+    // refresh: function(newlong, newlat){
+    //   this.long = newlong;
+    //   this.lat = newlat;
+    //   this.marker.setLngLat([this.long, this.lat])
+    //   this.mainMap.easeTo({
+    //     duration: 3000,
+    //     ease: 0.2,
+    //     animate: true,
+    //     center: [this.long, this.lat],
+    //     zoom: 12,
+    //     bearing: 0
+    //   })
+    // },
+    // updateMarker: function(e){
+    //   var newCenter = e.result.center;
+    //   this.marker.setLngLat([newCenter[0],newCenter[1]]);
+    //   this.long = newCenter[0];
+    //   this.lat = newCenter[1];
+    // },
+
+    testQuery: function() {
+      this.$apollo.query({
+        query: this.foursquareQuery,
+        variables: {
+          term: "food", 
+          latitude: 43, 
+          longitude: 10, 
+        }
+      }).then((response) => {
+        console.log(response);
+      }
+      ).catch((response) => {
+        console.log(response);
+      }
+      );
     },
-    updateMarker: function(e){
-      var newCenter = e.result.center;
-      this.marker.setLngLat([newCenter[0],newCenter[1]]);
-      this.long = newCenter[0];
-      this.lat = newCenter[1];
-    },
-    searchPOI: function(event) {
+    searchPOI: function(searchTerm = undefined, categories = undefined) {
+      var foursquareCategory = this.getIdByCategoryName(categories);
       this.clearMarkers();
-      this.$apollo.queries.search.skip = false;
-      var resultPromise = this.$apollo.queries.search.refetch({ term: event.target.value, latitude: this.lat, longitude: this.long, radius: 5000, limit: 15 })
-      resultPromise.then(result => this.addMarker(result.data.search.business));
+      var center = this.mainMap.getBounds().getCenter();
+
+      var lat = center.lat;
+      var lng = center.lng;
+      var customSearch = searchTerm;
+
+      if (customSearch == null || customSearch == undefined) {
+        customSearch = categories;
+      }
+      this.executeQuery(this.foursquareQuery, {term: searchTerm, latitude: lat, longitude: lng, categories: foursquareCategory}, "foursquare");
+      this.executeQuery(this.yelpQuery, {term: searchTerm, latitude: lat, longitude: lng, radius: 5000, limit: 15, categories: categories}, "yelp");
+      this.executeQuery(this.customQuery, {term: customSearch, latitude: lat, longitude: lng}, "custom");
     },
-    addMarker: function(queryResult) {
-      for (var i = 0; i < queryResult.length; i++) {
-        var business = queryResult[i];
+    executeQuery: function(query, variables, type) {
+      this.$apollo.query({
+        query: query,
+        variables: variables
+      }).then((response) => {
+        this.addMarker(response.data, type);
+      }
+      ).catch((response) => {
+        console.log(response);
+      }
+      );
+    },
+    addMarker: function(queryResult, type) {
+      var color;
+      var pois;
+      if (type === "foursquare") {
+        pois = queryResult.foursquarePOI;
+        color = "#1ecebc";
+      } else if (type === "yelp") {
+        pois = queryResult.yelpPOI;
+        color = "#c64917"
+      } else {
+        pois = queryResult.customPOI;
+        color = "#24c94d";
+      }
+
+      for (var i = 0; i < pois.length; i++) {
+        var poi = pois[i];
         var currentMarker = new mapboxgl.Marker({
-          draggable: false
+          draggable: false,
+          color: color
         })
-        .setLngLat([business.coordinates.longitude, business.coordinates.latitude])
+        .setLngLat([poi.coordinates.longitude, poi.coordinates.latitude])
         .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-        .setHTML('<h3 class="pop-up-text">' + business.name + '</h3>'))
+        .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3>'))
         .addTo(this.mainMap);
         markers.push(currentMarker);
       }
+    },   
+    getIdByCategoryName: function(name) {
+      var id;
+      switch(name) {
+        case "food": id = "4d4b7105d754a06374d81259";
+          break;
+        case "physicians": id = "4bf58dd8d48988d104941735";
+          break;
+        case "autorepair": id = "56aa371be4b08b9a8d5734d3";
+          break;
+        case "hotels": id = "4bf58dd8d48988d1fa931735";
+          break;
+        case "servicestations": id = "4bf58dd8d48988d113951735";
+          break;
+      }
+      return id;
     },
     clearMarkers: function() {
       for (var i  = 0; i < markers.length; i++) {
         markers[i].remove();
       }
-    },
+    }, // Navigation
     showRouting: function() {
-      this.setUserLocation();
+      if (this.setUserLocation()) {
+      } else {
+        this.showPopUp("GPS nicht gefunden", "Ihr aktueller GPS-Standort konnte nicht gefunden werden", "white");
+      }
       this.isVisible = !this.isVisible;
       this.displayNavigation =!this.displayNavigation;
       this.destination.style.display = "block";
       this.directionsProfile.style.display = "block";
     },
     closeRouting: function() {
+      this.mapControl.style.height = "unset";
       this.isVisible = !this.isVisible;
-      this.displayNavigation =!this.displayNavigation;
+      this.navigationMode =!this.navigationMode;
       this.directions.removeRoutes();
       this.routeReady = false;
       this.inputs.style.display = "block";
@@ -128,14 +282,23 @@ export default {
       this.directionsProfile.style.display = "none";
       this.inputStart.value = null;
       this.inputDestination.value = null;
-      var startButton = document.getElementsByClassName("start-navigation-button")[0].style.display = "block";
+      document.getElementsByClassName("mapboxgl-ctrl-top-left")[0].style.backgroundImage = "linear-gradient(90deg, #4285f4, #00ebff)";
+      clearInterval(this.updateInstructions);
     },
     reverseDirections: function() {
       this.directions.reverse();
+      var startValueTemp = this.inputStart.value;
+      this.inputStart.value = this.inputDestination.value;
+      this.inputDestination.value = startValueTemp;
     },
     startRoute: function() {
+      this.mapControl.style.height = "100%";
+      this.displayNavigation =!this.displayNavigation;
+      this.navigationMode =!this.navigationMode;
       var instructions = document.getElementsByClassName('mapbox-directions-instructions')[0];
       var startButton = document.getElementsByClassName("start-navigation-button")[0];
+      var directionsControl = document.getElementsByClassName("mapbox-directions-route-summary")[0].style.display = "none";
+      document.getElementsByClassName("mapboxgl-ctrl-top-left")[0].style.backgroundImage = "none";
       var altRoutes = document.getElementsByClassName("mapbox-directions-routes")[0];
       if (altRoutes) {
         altRoutes.style.display = "none";
@@ -143,30 +306,157 @@ export default {
       instructions.style.display = "block";
       startButton.style.display = "none";
       this.inputs.style.display = "none";
+      // this.showCurrentInstruction(); // Player Follow
+      var instructions = document.getElementsByClassName('mapbox-directions-step')[0];
+      var instructionLong = instructions.getAttribute('data-lng');
+      var instructionLat = instructions.getAttribute('data-lat');
+      this.mainMap.flyTo({
+        center: [
+          instructionLong,
+          instructionLat
+        ],
+        zoom: 15,
+        bearing: 151
+      });
     },
     setUserLocation: function() {
       this.directions.setDestination(this.inputStart.value);
-      this.directions.setOrigin([userLong, userLat]);
-      this.inputStart.value = "Aktueller Standpunkt";
+      if (userLong != 0 && userLat != 0) {
+        this.directions.setOrigin([userLong, userLat]);
+        this.inputStart.value = "Aktueller Standpunkt";
+        return true;
+      } else {
+        return false;
+      }
+    },
+    showCurrentInstruction: function() {
+      var instructionsLength = document.getElementsByClassName('mapbox-directions-steps')[0].childNodes.length/2;
+      for (var i = 2; i < instructionsLength-1; i++) {
+        document.getElementsByClassName('mapbox-directions-step')[i].style.display = "none";
+      }
+      this.updateInstructions = setInterval(() => {
+        //this.rotateMapAccordingToUserMovement();
+        var currentLong = this.userLocation._lastKnownPosition.coords.longitude;
+        var currentLat = this.userLocation._lastKnownPosition.coords.latitude;
+        for (var i = 0; i < instructionsLength-1; i++) {
+          var instructions = document.getElementsByClassName('mapbox-directions-step')[i];
+          var instructionLong = instructions.getAttribute('data-lng');
+          var instructionLat = instructions.getAttribute('data-lat');
+          if (this.convertPositionsInMeter(currentLat, currentLong, instructionLat, instructionLong) < 15) {
+            this.sleep(1000);
+            var previousInstructions = document.getElementsByClassName('mapbox-directions-step')[i].style.display = "none";
+            var nextInstructions = document.getElementsByClassName('mapbox-directions-step')[i+2].style.display = "block";
+          } 
+        }
+      }, 1000)
+	  },
+    convertPositionsInMeter: function(lat1, lon1, lat2, lon2) {
+      var R = 6378.137; // Radius of earth in KM
+      var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
+      var dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
+      var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      var d = R * c;
+      return d * 1000; // meters
+    },
+    rotateMapAccordingToUserMovement: function() {
+      var firstUserPos =  [this.userLocation._lastKnownPosition.coords.longitude, this.userLocation._lastKnownPosition.coords.latitude];
+      this.sleep(1000);
+      var secondUserPos =  [this.userLocation._lastKnownPosition.coords.longitude, this.userLocation._lastKnownPosition.coords.latitude];
+      var y = Math.sin(secondUserPos[1]-firstUserPos[1]) * Math.cos(secondUserPos[0]);
+      var x = Math.cos(firstUserPos[0])*Math.sin(secondUserPos[0]) - Math.sin(firstUserPos[0])*Math.cos(secondUserPos[0])*Math.cos(secondUserPos[1]-firstUserPos[1]);
+      var brng = Math.atan2(y, x);
+      var pi = Math.PI;
+      var degrees = Math.abs(brng * (180/pi));
+
+      this.mainMap.flyTo({
+          bearing: degrees 
+        });
+    },
+    sleep: function(miliseconds) {
+      var currentTime = new Date().getTime();
+      while (currentTime + miliseconds >= new Date().getTime()) {
+      }
+    },
+    activate:function(el){
+        this.active_el = el;
+    },
+    toggleDisplay: function(){
+        this.display = !this.display;
+    },
+    toggleNavigation: function() {
+      if (this.active_el == 2) {
+        this.mapControl.style.display = "none";
+        // this.directions.interactive = false; //TODO get working
+      } else {
+        this.mapControl.style.display = "block";
+        // this.directions.interactive = true; // TODO get working
+      }
+    },
+    showPopUp: function(title, text, color) {
+      eventBus.$emit('showPopUp', title, text, color);
     }
   },
-  apollo: {
-    search: gql`{
-      search
-      {
-        total
-        business {
-          name
-          coordinates {
-            latitude
-            longitude
-          }
-        }
-      }
-    }`
+  // apollo: {
+  //   yelpPOI: {
+  //     query: gql` query yelpPOI ($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $categories: String) 
+  //     {
+  //       yelpPOI (latitude: $latitude, longitude: $longitude, term: $term, radius: $radius, limit: $limit, categories: $categories)
+  //       {
+  //         name
+  //         coordinates {
+  //           latitude
+  //           longitude
+  //         }
+  //       }
+  //     }`, variables: {},
+  //     skip () {
+  //       this.$apollo.queries.yelpPOI.skip = true;
+  //     }
+  //   },
+  //   customPOI: {
+  //     query: gql` query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) 
+  //     {
+  //       customPOI (latitude: $latitude, longitude: $longitude, term: $term)
+  //       {
+  //         name
+  //         coordinates 
+  //         {
+  //           latitude
+  //           longitude
+  //         }
+  //         description
+  //       }
+  //     }`,variables: {},
+  //     skip () {
+  //       this.$apollo.queries.customPOI.skip = true;
+  //     }
+  //   },
+  //   foursquarePOI: {
+  //     query: gql` query foursquarePOI ($latitude: Float!, $longitude: Float!, $term: String, $categories: String) 
+  //     {
+  //       foursquarePOI (latitude: $latitude, longitude: $longitude, term: $term, categories: $categories) 
+  //       {
+  //         name
+  //         coordinates 
+  //         {
+  //           latitude
+  //           longitude
+  //         }
+  //       }
+  //     }`, variables: {},
+  //     skip () {
+  //       this.$apollo.queries.foursquarePOI.skip = true;
+  //     } 
+  //   },
+  // },
+  beforeDestroy () {
+    clearInterval(this.polling)
   },
   created(){
-    eventBus.$on('toggleDirections', (isVisible) => {
+      eventBus.$on('toggleDirections', (isVisible) => {
       if(isVisible == true){
         this.mainMap.addControl(this.directions, 'bottom-left');
       } else {
@@ -175,10 +465,13 @@ export default {
     });
   },
   mounted(){
+  // eventBus.$on('locationFromHome', (newDest)=>{
+  //   this.refresh(newDest[0], newDest[1]);
+  // });
+    
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this.lat = 48.218800;
   this.long = 11.624707;
-  this.$apollo.queries.search.skip = true;
 
   this.mainMap = new mapboxgl.Map({
       container: 'map',
@@ -195,11 +488,11 @@ export default {
       unit: 'metric',
       alternatives: true,
       congestion: true,
-      // controls: {
-      //     instructions: false
-      //   },
-      accessToken: mapboxgl.accessToken
+      accessToken: mapboxgl.accessToken,
+      placeholderOrigin: "Wo möchten Sie hin?" // fucking won't work
     }, 'bottom-left');
+
+  console.log(this.directions);
 
   this.directions.on("route", e => {
     this.routeReady = true;
@@ -210,47 +503,33 @@ export default {
     positionOptions: {
       enableHighAccuracy: true
     },
-    trackUserLocation: true
+    trackUserLocation: true,
+    instructions: false
   });
 
   this.mainMap
-    //.addControl(this.geocoder, 'top-right')
     .addControl(this.userLocation, 'bottom-right')
     .addControl(this.directions, 'top-left')
-
 
   this.mainMap.on("load", e => {
     this.userLocation.trigger();
   })
 
-  //this.userLocation.trigger();
-
   this.userLocation.on('geolocate', function(e) {
       userLong = e.coords.longitude;
       userLat = e.coords.latitude;
-      // console.log(userLong);
-      // console.log(userLat);
   });
 
 
   this.destination = document.getElementsByClassName("mapbox-directions-destination")[0];
-  //this.instructions = document.getElementsByClassName('mapbox-directions-instructions')[0];
   this.inputs = document.getElementsByClassName("directions-control-inputs")[0];
   this.directionsProfile = document.getElementsByClassName("mapbox-directions-profile")[0];
   this.inputStart = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[0].childNodes[1];
   this.inputDestination = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[1].childNodes[1];
+  this.mapControl = document.getElementsByClassName('mapboxgl-ctrl-top-left')[0];
 
+  // this.geocoder.on('result', this.updateMarker);
 
-
-
-  this.marker = new mapboxgl.Marker({
-    // element: this.$refs.custom-marker,     WENN CUSTOM MARKER EINGEFÜGT IST
-    draggable: false
-  })
-    .setLngLat([this.long, this.lat])
-    .addTo(this.mainMap);
-
-  this.geocoder.on('result', this.updateMarker);
   }
 }
 </script>
@@ -261,7 +540,11 @@ export default {
 
 /* Custom CSS */
 
-.wrapper{
+*:focus {
+    outline: none;
+}
+
+.wrapper {
   width: 100vw;
   height: 100%;
 }
@@ -276,6 +559,8 @@ export default {
   position: absolute;
   top: 0;
   right: 0;
+  width: 100%;
+  height: 100%;
 }
 
 //custom-marker
@@ -286,23 +571,6 @@ export default {
   height: 50px;
   border-radius: 50%;
   cursor: pointer;
-}
-
-// .geocoder {
-//     position:absolute;
-//     z-index:1;
-//     width:50%;
-//     left:50%;
-//     margin-left:-25%;
-//     top:20px;
-// }
-
-// .mapboxgl-ctrl-geocoder {
-//     min-width:100%;
-// }
-
-@media only screen and (max-width: 599px) {
-
 }
 
 /* Map Navigation */
@@ -316,6 +584,9 @@ h5 {
   color: white;
 }
 
+.mapboxgl-ctrl.mapboxgl-ctrl-attrib.mapboxgl-compact {
+    display: none;  
+}
 
 .mapboxgl-ctrl-top-left {
   width: 100%;
@@ -323,9 +594,10 @@ h5 {
 }
 
 .mapboxgl-ctrl-top-left .mapboxgl-ctrl {
-  width: 79%;
-  //margin: 10px !important;
-  margin-left: 1.4rem;
+  max-width: 100%;
+  margin: 10px;
+  margin-right: 4rem;
+  float: unset;
 }
 
 #mapbox-directions-origin-input, #mapbox-directions-destination-input {
@@ -339,23 +611,23 @@ h5 {
     padding-right: 10px;
 }
 
-#mapbox-directions-destination-input {
-  // margin-top: 0.5rem;
+.mapboxgl-ctrl-geocoder input[type='text'] {
+  font-size: 16px !important;
+  transform: scale(0.85);
+  left: -1rem !important;
+  width:100%;
+  border:0;
+  background-color:transparent;
+  height:28px;
+  color:rgba(0,0,0,.5);
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  overflow:hidden;
 }
-
-// #mapbox-directions-destination-input .mapboxgl-ctrl-geocoder span.geocoder-icon.geocoder-icon-search {
-//   display: none;
-// }
 
 .mapboxgl-ctrl-geocoder input {
   width: 90%;
   height: 2rem;
-  margin-top: -1rem;
-}
-
-.mapboxgl-ctrl-geocoder input::placeholder {
-  color: black;
-  font-size: 10pt;
 }
 
 .mapbox-directions-origin {
@@ -377,25 +649,23 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 
 .routing-button {
     z-index: 9;
-    // top: 3.2rem;
-    // right: -11.6rem;
     float: right;
     top: 3.2rem;
 }
 
 .route-switch-button {
-  z-index: 9;
-  top: 6.5rem;
-  position: absolute;
-  right: -11.4rem;
-  display: none;
+    position: absolute !important;
+    z-index: 9;
+    top: 6.5rem;
+    right: 0rem;
+    display: none;
 }
 
 .start-navigation-button {
-  top: 12.5rem;
-  right: -4rem;
-  z-index: 9;
-  z-index: 9;
+    top: 13rem;
+    right: 0rem;
+    z-index: 9;
+    position: absolute !important;
 }
 
 .mapboxgl-user-location-dot::before {
@@ -417,43 +687,38 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   top:100%;
   z-index:1000;
   overflow:hidden;
-  font-size:12px;
+  // font-size:12px;
   }
-  .mapboxgl-ctrl-bottom-left .mapboxgl-ctrl-geocoder ul,
-  .mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-geocoder ul {
-    top:auto;
-    bottom:100%;
-    }
-  .mapboxgl-ctrl-geocoder ul > li > a {
-    clear:both;
-    cursor:default;
-    display:block;
-    padding:5px 10px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    border-bottom:1px solid rgba(0,0,0,0.1);
-    color:#404040;
-    }
-    .mapboxgl-ctrl-geocoder ul > li:last-child > a { border-bottom:none; }
-    .mapboxgl-ctrl-geocoder ul > li > a:hover {
-      color:#202020;
-      background-color:#f3f3f3;
-      text-decoration:none;
-      cursor:pointer;
-      }
-    .mapboxgl-ctrl-geocoder ul > li.active > a {
-      color:#202020;
-      background-color:#e3e3e3;
-      text-decoration:none;
-      cursor:pointer;
-      }
-
-@-webkit-keyframes rotate { from { -webkit-transform: rotate(0deg); } to { -webkit-transform: rotate(360deg); } }
-   @-moz-keyframes rotate { from { -moz-transform: rotate(0deg); } to { -moz-transform: rotate(360deg); } }
-    @-ms-keyframes rotate { from { -ms-transform: rotate(0deg); } to { -ms-transform: rotate(360deg); } }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.mapboxgl-ctrl-bottom-left .mapboxgl-ctrl-geocoder ul,
+.mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-geocoder ul {
+  top:auto;
+  bottom:100%;
+}
+.mapboxgl-ctrl-geocoder ul > li > a {
+  clear:both;
+  cursor:default;
+  display:block;
+  padding:5px 10px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  border-bottom:1px solid rgba(0,0,0,0.1);
+  color:#404040;
+}
+.mapboxgl-ctrl-geocoder ul > li:last-child > a { border-bottom:none; }
+.mapboxgl-ctrl-geocoder ul > li > a:hover {
+  color:#202020;
+  background-color:#f3f3f3;
+  text-decoration:none;
+  cursor:pointer;
+}
+.mapboxgl-ctrl-geocoder ul > li.active > a {
+  color:#202020;
+  background-color:#e3e3e3;
+  text-decoration:none;
+  cursor:pointer;
+}
 
 /* icons */
 .geocoder-icon {
@@ -461,7 +726,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   width:20px;
   height:20px;
   vertical-align:middle;
-  //speak:none;
   background-repeat:no-repeat;
   }
   .geocoder-icon-search {
@@ -480,10 +744,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
             animation: rotate 400ms linear infinite;
     }
 
-
-
 /* Search, Close, Loading, Inputs */
-
 
 .mapboxgl-ctrl-geocoder,
 .mapboxgl-ctrl-geocoder *,
@@ -494,52 +755,34 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
           box-sizing:border-box;
   }
 .mapboxgl-ctrl-geocoder {
-  font:15px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  // font:15px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
   position:relative;
   background-color:white;
-  // width:calc(100% - 360px);;
-  // min-width:calc(100% - 40px);;
-  // max-width:calc(100% - 40px);;
-  //margin-left:40px;
   border-radius:0 0 3px 0;
   }
   .mapbox-directions-origin .mapboxgl-ctrl-geocoder {
     border-radius:0 3px 0 0;
     }
 
-.mapboxgl-ctrl-geocoder input[type='text'] {
-  font-size:12px;
-  width:100%;
-  border:0;
-  background-color:transparent;
-  height:28px;
-  margin:0;
-  color:rgba(0,0,0,.5);
-  padding:10px 40px 10px 10px;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  overflow:hidden;
-
-  }
   .mapbox-directions-origin input[type='text'] {
-    // box-shadow:0 1px 0 0 #ddd;
     position:relative;
     z-index:1;
-    left: 0rem;
-    top: -0.3rem;
+    // left: 0rem;
+    // top: -0.3rem;
+    height: 100%;
     }
     .mapbox-directions-destination input[type='text'] {
-    // box-shadow:0 1px 0 0 #ddd;
     position:relative;
     z-index:1;
-    left: 0rem;
-    top: -0.3rem;
+    // left: 0rem;
+    // top: -0.3rem;
+    height: 100%;
     }
-  .mapboxgl-ctrl-geocoder input:focus {
-    color:rgba(0,0,0,.75);
-    outline:0;
-    outline:thin dotted\8;
-    }
+  // .mapboxgl-ctrl-geocoder input:focus {
+  //   color:rgba(0,0,0,.75);
+  //   outline:0;
+  //   outline:thin dotted\8;
+  //   }
 
 .mapboxgl-ctrl-geocoder .geocoder-icon-search {
   position:absolute;
@@ -563,12 +806,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   }
   .mapboxgl-ctrl-geocoder .geocoder-pin-right *.active { display:block; }
 
-// .mapboxgl-ctrl-geocoder,
-// .mapboxgl-ctrl-geocoder ul {
-//   box-shadow:none;
-//   }
-
-/* Profile */
   .mapbox-directions-profile {
   display: none;
   margin:7px 0 0;
@@ -583,7 +820,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     display:block;
     border-radius:16px;
     padding:3px 5px;
-    font-size:12px;
+    // font-size:12px;
     color:rgba(0,0,0,.5);
     line-height:20px;
     text-align:center;
@@ -607,14 +844,11 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   position: relative;
   z-index:1;
   width:100%;
-  // background-color:rgba(0,0,0,0.75);
   color:#fff;
   padding:5px 10px;
   font-size:15px;
   line-height:28px;
   }
-  .mapbox-directions-route-summary + .mapbox-directions-instructions {
-    }
   .mapbox-directions-route-summary h1 {
     font-weight:500;
     margin:0;
@@ -623,13 +857,21 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     line-height:inherit;
     }
   .mapbox-directions-route-summary span {
-    // color:rgba(255,255,255,0.5);
     margin:0 5px;
     }
 
   /* Alt route selection */
   .mapbox-directions-instructions {
       overflow: scroll;
+/* Recent */
+      background-color: rgba(0, 0, 0, 0.8);
+      border-radius: 15px;
+      height: 10rem;
+      margin-bottom: 1rem;
+      margin-right: -3.3rem;
+      width: 94%;
+      position: absolute;
+      bottom: 2rem;
     }
     .mapbox-directions-instructions-wrapper {
       max-height: 17vh;
@@ -656,9 +898,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   .mapbox-directions-instructions {
     display: none;
   }
-</style>
-
-<style lang="scss">
+   
   .mapboxgl-popup {
     max-width: 200px;
   }
@@ -741,24 +981,8 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     visibility:hidden;
   }
 
-/* Mobile */
- @media only screen and (max-width:640px)  {
-
-}
-
 // /* Containers */
  .directions-control.directions-control { width:100%; max-width:100%; }
-
-// /* Input container */
-// .directions-control.directions-control-inputs { top:0;left:0; }
-// .mapbox-directions-profile { margin:10px; }
-
-// /* Instructions container */
-// .mapbox-directions-routes { float:right; margin-right:10px; }
-// .directions-control.directions-control-directions { top:auto; max-height:40%; }
-// .mapbox-directions-multiple { min-height:50px; }
-
-// }
 
 @-webkit-keyframes rotate { from { -webkit-transform: rotate(0deg); } to { -webkit-transform: rotate(360deg); } }
    @-moz-keyframes rotate { from { -moz-transform: rotate(0deg); } to { -moz-transform: rotate(360deg); } }
@@ -820,4 +1044,119 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 .pop-up-text {
   color: black;
 }
+
+// GPS Icon
+
+.mapboxgl-ctrl-bottom-right .mapboxgl-ctrl {
+    margin: 0 5px 5px 0;
+    float: right;
+}
+
+// POI Controls
+
+.POI-controls-container {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 9;
+  background-image: linear-gradient(90deg, #4285f4, #00ebff);
+  height: 7rem;
+  .v-btn--floating.v-btn--small .v-icon {
+    color: black;
+  }
+  .POI-Input {
+    height: 2rem;
+    border: 1px solid white;
+    background-color: white;
+    border-radius: 50px;
+    padding-top: 1.3rem;
+    padding-bottom: 1.3rem;
+    padding-left: 1rem;
+    padding-right: 25%;
+    margin-top: 3.7rem;
+    float: left;
+    margin-left: 0.8rem;
+  }
+  .POI-search-btn {
+    top: 3.2rem;
+    position: absolute !important;
+    right: 0rem;
+  }
+  .POI-filter-btn {
+    position: absolute !important;
+    top: 3.2rem;
+    right: 3.5rem;
+    .v-btn__content {
+      height: unset;
+    }
+  }
+  .POI-suggestion-container {
+    position: absolute;
+    top: 100%;
+    .POI-suggestion-icon {
+      width: 39px;
+      height: 39px;
+      margin: 7px;
+    }
+  }
+}
+
+.map-function-switch {
+    position: absolute;
+    top: 9px;
+    z-index: 10;
+        right: 0.5rem;
+    padding: 0.5rem 0.2rem 0.5rem 0.2rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50px;
+    li {
+      display: inline;
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      color: white;
+    }
+}
+
+.active {
+    background-color: dodgerblue;
+    border-radius: 50px;
+    color: white;
+    display: block;
+}
+
+.header-area {
+    position: absolute;
+    height: 2.8rem;
+    width: 100%;
+    top: 0;
+    z-index: 16;
+}
+
+@media screen and (max-width: 372px) {
+  .POI-controls-container {
+    .POI-Input {
+      padding-right: 0;
+      width: 67%;
+    }
+    .POI-search-btn {
+      width: 37px;
+      height: 37px;
+    }
+    .POI-filter-btn {
+      height: 37px;
+      width: 37px;
+      right: 3rem;
+    }
+    .POI-suggestion-container {
+      .POI-suggestion-icon {
+        width: 37px;
+        height: 37px;
+        margin: 4px;
+      }
+    }
+  }
+}
+
 </style>

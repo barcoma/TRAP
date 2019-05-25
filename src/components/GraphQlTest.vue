@@ -33,9 +33,6 @@ export default {
       x.then(xd => console.log(xd.data.search));
     },
     testCache: function() {
-        console.log(this.$apollo)
-        const query = this.$apollo.queries.yelpPOI;
-
         const term = this.$apollo.provider.defaultClient.readQuery({
             query: gql`
             query yelpPOI {
