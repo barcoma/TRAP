@@ -30,7 +30,7 @@
       <v-btn v-if="display" color="blue" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'hotels')">
           <v-icon dark>hotel</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click="testQuery()">
+      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click='testQuery()'> <!-- v-on:click='' -->
           <v-icon dark>shopping_cart</v-icon>
       </v-btn>
       <v-btn v-if="display" color="green darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'servicestations')">
@@ -78,7 +78,95 @@ var markers = [];
 var userLong = 0;
 var userLat = 0;
 
+const BODY_QUERY = gql`
+  {
+    name
+      coordinates {
+        latitude
+        longitude
+      }
+  }`
+  
+  const FOURSQUARE_QUERY = 
+  gql` fragment FoursquarePOI on POI  {
+    foursquarePOI 
+      ${BODY_QUERY}
+  }`
 
+  const YELP_QUERY = 
+  gql` fragment YelpPOI on POI  {
+    yelpPOI 
+      ${BODY_QUERY}
+  }`
+
+  const CUSTOM_QUERY = 
+  gql` fragment CustomPOI on POI {
+    customPOI 
+      ${BODY_QUERY}
+  }`
+
+  const test = true;
+
+  const ALL_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $foursquareCategories: String, $yelpCategories: String)
+  {
+    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, foursquareCategories: $foursquareCategories, yelpCategories: $yelpCategories) 
+    {
+      ...FoursquarePOI
+      ...YelpPOI
+      ...CustomPOI
+    }
+  }${FOURSQUARE_QUERY}, ${YELP_QUERY}, ${CUSTOM_QUERY}`
+
+  const FS_YELP_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $foursquareCategories: String, $yelpCategories: String)
+  {
+    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, foursquareCategories: $foursquareCategories, yelpCategories: $yelpCategories) 
+    {
+      ...FoursquarePOI
+      ...YelpPOI
+    }
+  }${FOURSQUARE_QUERY}, ${YELP_QUERY}`
+
+  const FS_ONLY_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $foursquareCategories: String, $yelpCategories: String)
+  {
+    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, foursquareCategories: $foursquareCategories) 
+    {
+      ...FoursquarePOI
+    }
+  }${FOURSQUARE_QUERY}`
+
+  const YELP_ONLY_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $yelpCategories: String)
+  {
+    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, yelpCategories: $yelpCategories) 
+    {
+      ...YelpPOI
+    }
+  }${YELP_QUERY}`
+
+  const CUSTOM_ONLY_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int)
+  {
+    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit) 
+    {
+      ...CustomPOI
+    }
+  }${CUSTOM_QUERY}`
+
+  const CUSTOM_YELP_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $yelpCategories: String)
+  {
+    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, yelpCategories: $yelpCategories) 
+    {
+      ...CustomPOI
+      ...YelpPOI
+    }
+  }${CUSTOM_QUERY}, ${YELP_QUERY}`
+
+  const FS_CUSTOM_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $foursquareCategories: String)
+  {
+    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, foursquareCategories: $foursquareCategories) 
+    {
+      ...FoursquarePOI
+      ...CustomPOI
+    }
+  }${CUSTOM_QUERY}, ${FOURSQUARE_QUERY}`
 
 export default {
   name: 'MapBox',
@@ -113,38 +201,17 @@ export default {
       foursquareQuery: gql` query foursquarePOI ($latitude: Float!, $longitude: Float!, $term: String, $categories: String) 
       {
         foursquarePOI (latitude: $latitude, longitude: $longitude, term: $term, categories: $categories) 
-        {
-          name
-          coordinates 
-          {
-            latitude
-            longitude
-          }
-        }
+          ${BODY_QUERY}
       }`,
       yelpQuery: gql` query yelpPOI ($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $categories: String) 
       {
         yelpPOI (latitude: $latitude, longitude: $longitude, term: $term, radius: $radius, limit: $limit, categories: $categories)
-        {
-          name
-          coordinates {
-            latitude
-            longitude
-          }
-        }
-      }`,
+          ${BODY_QUERY}      
+        }`,
       customQuery: gql` query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) 
       {
         customPOI (latitude: $latitude, longitude: $longitude, term: $term)
-        {
-          name
-          coordinates 
-          {
-            latitude
-            longitude
-          }
-          description
-        }
+          ${BODY_QUERY}      
       }`
     }
   },
@@ -168,23 +235,6 @@ export default {
     //   this.long = newCenter[0];
     //   this.lat = newCenter[1];
     // },
-
-    testQuery: function() {
-      this.$apollo.query({
-        query: this.foursquareQuery,
-        variables: {
-          term: "food", 
-          latitude: 43, 
-          longitude: 10, 
-        }
-      }).then((response) => {
-        console.log(response);
-      }
-      ).catch((response) => {
-        console.log(response);
-      }
-      );
-    },
     searchPOI: function(searchTerm = undefined, categories = undefined) {
       var foursquareCategory = this.getIdByCategoryName(categories);
       this.clearMarkers();
@@ -207,12 +257,20 @@ export default {
         variables: variables
       }).then((response) => {
         this.addMarker(response.data, type);
-      }
-      ).catch((response) => {
+      }).catch((response) => {
         console.log(response);
-      }
-      );
+      });
     },
+    testQuery: function() {
+      this.$apollo.query({
+        query: ALL_QUERY,
+      }).then((response) => {
+        console.log(reponse);
+      }).catch((response) => {
+        console.log(response);
+      });
+    },
+
     addMarker: function(queryResult, type) {
       var color;
       var pois;
