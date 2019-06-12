@@ -20,13 +20,20 @@
             <p class="slider-value">Anzahl: <span id="demo"></span></p>
             <!-- <p>{{ sliderValue }}</p> -->
         </div>
-        <p class="POI-filter-search" :to="{ name: 'map'}">Suche starten</p>
+        <button class="POI-filter-search" v-on:click="startSearch" :to="{ name: 'map'}">Suche starten</button>
     </div>
 </template>
 
 
 <script>
 import { eventBus } from '../main.js'
+import gql from 'graphql-tag'
+import { poiFilterQuery } from  '../queries'
+    const updatePoiFilter = gql`
+        mutation($category: Object, $source: Object) {
+            updatePoiFilterParams(category: $category, source: $source) @client
+        }
+    `;
 
 export default {
   name: 'PoiFilter',
@@ -35,11 +42,11 @@ export default {
         sliderValue: 50,
         source: {
             yelp: true,
-            foursquare: false,
-            custom: false
+            foursquare: true,
+            custom: true
         },
         category: {
-            autorepair: true,
+            autorepair: false,
             food: false,
             hotels: false,
             servicestations: false,
@@ -50,8 +57,26 @@ export default {
   created() {
   },
   methods: {
+      startSearch() {
+        const category = this.category;
+        const source = this.source;
+
+        this.$apollo.mutate({
+            mutation: updatePoiFilter,
+            variables: { category, source }
+        })
+        this.$router.push('map');
+      }
   },
   mounted() {
+    try {
+        const filterParams = this.$apollo.provider.defaultClient.readQuery({
+            query: poiFilterQuery
+        });
+        this.source = filterParams.poiFilter.source;
+        this.category = filterParams.poiFilter.category;
+    } catch (exception) {}
+
     var slider = document.getElementsByClassName("slider-input")[0];
     var output = document.getElementById("demo");
     output.innerHTML = slider.value;

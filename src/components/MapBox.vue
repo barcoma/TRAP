@@ -7,7 +7,7 @@
     </ul>
   </div>
   <div v-if="active_el == 2" class="POI-controls-container">
-    <input class="POI-Input" type="text" v-on:change="searchPOI($event.target.value)"  placeholder="Hotel, Restaurant..."/>
+    <input class="POI-Input" type="text" v-on:change="querySearch($event.target.value)"  placeholder="Hotel, Restaurant..."/>
     <v-btn fab dark small color="white" class="POI-filter-btn" :to="{ name: 'poi'}">
       <v-icon dark>filter_list</v-icon>
     </v-btn>
@@ -21,22 +21,22 @@
           <v-icon v-if="display" dark>keyboard_arrow_left</v-icon>
           <v-icon v-else dark>keyboard_arrow_right</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="blue-grey darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'autorepair')">
+      <v-btn v-if="display" color="blue-grey darken-1" dark fab class="POI-suggestion-icon" v-on:click="querySearch(null, 'autorepair')">
           <v-icon dark>build</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="deep-orange darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'food')">
+      <v-btn v-if="display" color="deep-orange darken-1" dark fab class="POI-suggestion-icon" v-on:click="querySearch(null, 'food')">
           <v-icon dark>restaurant</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="blue" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'hotels')">
+      <v-btn v-if="display" color="blue" dark fab class="POI-suggestion-icon" v-on:click="querySearch(null, 'hotels')">
           <v-icon dark>hotel</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click='testQuery()'> <!-- v-on:click='' -->
+      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click='querySearch("food")'> <!-- v-on:click='' -->
           <v-icon dark>shopping_cart</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="green darken-1" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'servicestations')">
+      <v-btn v-if="display" color="green darken-1" dark fab class="POI-suggestion-icon" v-on:click="querySearch(null, 'servicestations')">
           <v-icon dark>local_gas_station</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="red" dark fab class="POI-suggestion-icon" v-on:click="searchPOI(null, 'physicians')">
+      <v-btn v-if="display" color="red" dark fab class="POI-suggestion-icon" v-on:click="querySearch(null, 'physicians')">
           <v-icon dark>local_hospital</v-icon>
       </v-btn>
     </div>
@@ -73,100 +73,21 @@ import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
 import { setTimeout } from 'timers';
+import { poiQueries, poiFilterQuery } from '../queries'
 
 var markers = [];
 var userLong = 0;
 var userLat = 0;
 
-const BODY_QUERY = gql`
-  {
-    name
-      coordinates {
-        latitude
-        longitude
-      }
-  }`
-  
-  const FOURSQUARE_QUERY = 
-  gql` fragment FoursquarePOI on POI  {
-    foursquarePOI 
-      ${BODY_QUERY}
-  }`
+var categoryArray = [
+    ['food', '4d4b7105d754a06374d81259'],
+    ['physicians', '4bf58dd8d48988d104941735'],
+    ['autorepair', '56aa371be4b08b9a8d5734d3'],
+    ['hotels', '4bf58dd8d48988d1fa931735'],
+    ['servicestations', '4bf58dd8d48988d113951735']
+];
 
-  const YELP_QUERY = 
-  gql` fragment YelpPOI on POI  {
-    yelpPOI 
-      ${BODY_QUERY}
-  }`
 
-  const CUSTOM_QUERY = 
-  gql` fragment CustomPOI on POI {
-    customPOI 
-      ${BODY_QUERY}
-  }`
-
-  const test = true;
-
-  const ALL_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $foursquareCategories: String, $yelpCategories: String)
-  {
-    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, foursquareCategories: $foursquareCategories, yelpCategories: $yelpCategories) 
-    {
-      ...FoursquarePOI
-      ...YelpPOI
-      ...CustomPOI
-    }
-  }${FOURSQUARE_QUERY}, ${YELP_QUERY}, ${CUSTOM_QUERY}`
-
-  const FS_YELP_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $foursquareCategories: String, $yelpCategories: String)
-  {
-    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, foursquareCategories: $foursquareCategories, yelpCategories: $yelpCategories) 
-    {
-      ...FoursquarePOI
-      ...YelpPOI
-    }
-  }${FOURSQUARE_QUERY}, ${YELP_QUERY}`
-
-  const FS_ONLY_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $foursquareCategories: String, $yelpCategories: String)
-  {
-    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, foursquareCategories: $foursquareCategories) 
-    {
-      ...FoursquarePOI
-    }
-  }${FOURSQUARE_QUERY}`
-
-  const YELP_ONLY_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $yelpCategories: String)
-  {
-    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, yelpCategories: $yelpCategories) 
-    {
-      ...YelpPOI
-    }
-  }${YELP_QUERY}`
-
-  const CUSTOM_ONLY_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int)
-  {
-    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit) 
-    {
-      ...CustomPOI
-    }
-  }${CUSTOM_QUERY}`
-
-  const CUSTOM_YELP_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $yelpCategories: String)
-  {
-    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, yelpCategories: $yelpCategories) 
-    {
-      ...CustomPOI
-      ...YelpPOI
-    }
-  }${CUSTOM_QUERY}, ${YELP_QUERY}`
-
-  const FS_CUSTOM_QUERY = gql` query getPOI($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $foursquareCategories: String)
-  {
-    getPOI (term: $term, latitude: $latitude, longitude: $longitude, radius: $radius, limit: $limit, foursquareCategories: $foursquareCategories) 
-    {
-      ...FoursquarePOI
-      ...CustomPOI
-    }
-  }${CUSTOM_QUERY}, ${FOURSQUARE_QUERY}`
 
 export default {
   name: 'MapBox',
@@ -198,20 +119,32 @@ export default {
       firstInstruction: [],
       active_el: 1,
       display: true,
+      source: {
+        yelp: true,
+        foursquare: true,
+        custom: true
+      },
+      category: {
+        autorepair: false,
+        food: false,
+        hotels: false,
+        servicestations: false,
+        physicians: false
+      },
       foursquareQuery: gql` query foursquarePOI ($latitude: Float!, $longitude: Float!, $term: String, $categories: String) 
       {
         foursquarePOI (latitude: $latitude, longitude: $longitude, term: $term, categories: $categories) 
-          ${BODY_QUERY}
+          ${poiQueries.BODY_QUERY}
       }`,
       yelpQuery: gql` query yelpPOI ($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $categories: String) 
       {
         yelpPOI (latitude: $latitude, longitude: $longitude, term: $term, radius: $radius, limit: $limit, categories: $categories)
-          ${BODY_QUERY}      
+          ${poiQueries.BODY_QUERY}      
         }`,
       customQuery: gql` query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) 
       {
         customPOI (latitude: $latitude, longitude: $longitude, term: $term)
-          ${BODY_QUERY}      
+          ${poiQueries.BODY_QUERY}      
       }`
     }
   },
@@ -235,6 +168,73 @@ export default {
     //   this.long = newCenter[0];
     //   this.lat = newCenter[1];
     // },
+
+    querySearch: function(term = null, quickCategory = null) {
+      var source;
+      var category;
+
+      try {
+        const filterParams = this.$apollo.provider.defaultClient.readQuery({
+            query: poiFilterQuery
+        });
+        source = filterParams.poiFilter.source;
+        if (quickCategory == null) {
+          category = filterParams.poiFilter.category;
+        }
+      } catch (exception) {
+        source = this.source;
+      }
+
+      if (quickCategory != undefined && quickCategory != null) {
+        category = {};
+        category[quickCategory] = true;
+      }
+      var query;
+
+      if (source.yelp) {
+          if (source.foursquare) {
+              if (source.custom) {
+                query = poiQueries.ALL_QUERY;
+              } else {
+                  query = poiQueries.FS_YELP_QUERY;
+              }
+          } else if (source.custom) {
+              query = poiQueries.CUSTOM_YELP_QUERY;
+          } else {
+              query = poiQueries.YELP_ONLY_QUERY;
+          }
+      } else if (source.foursquare) {
+        if (source.custom) {
+            query = poiQueries.FS_CUSTOM_QUERY;
+        } else {
+            query = poiQueries.FS_ONLY_QUERY;
+        }
+      } else if (source.custom) {
+          query = poiQueries.CUSTOM_ONLY_QUERY;
+      }
+
+      var categories = this.getCategories(category);
+      var center = this.mainMap.getBounds().getCenter();
+      var lat = center.lat;
+      var lng = center.lng;
+
+      var variables = {
+        latitude: lat,
+        longitude: lng,
+        limit: 15
+      }
+
+      if (term != undefined && term != null) {
+          variables.term = term;
+      }
+      if (this.source.yelp && categories.yelpCategories != "") {
+          variables.yelpCategories = categories.yelpCategories;
+      }
+      if (this.source.foursquare && categories.foursquareCategories != "") {
+          variables.foursquareCategories = categories.foursquareCategories;
+      }
+      this.executeQuery(query, variables);
+    },
     searchPOI: function(searchTerm = undefined, categories = undefined) {
       var foursquareCategory = this.getIdByCategoryName(categories);
       this.clearMarkers();
@@ -251,40 +251,27 @@ export default {
       this.executeQuery(this.yelpQuery, {term: searchTerm, latitude: lat, longitude: lng, radius: 5000, limit: 15, categories: categories}, "yelp");
       this.executeQuery(this.customQuery, {term: customSearch, latitude: lat, longitude: lng}, "custom");
     },
-    executeQuery: function(query, variables, type) {
+    executeQuery: function(query, variables) {
       this.$apollo.query({
         query: query,
         variables: variables
       }).then((response) => {
-        this.addMarker(response.data, type);
+        this.clearMarkers();
+        var pois = response.data.getPOI;
+        if (pois.customPOI != null && pois.customPOI != undefined) {
+            this.addMarker(pois.customPOI, "#24c94d");
+        }
+        if (pois.foursquarePOI != null && pois.foursquarePOI != undefined) {
+            this.addMarker(pois.foursquarePOI, "#1ecebc");
+        }
+        if (pois.yelpPOI != null && pois.yelpPOI != undefined) {
+            this.addMarker(pois.yelpPOI, "#c64917");
+        }
       }).catch((response) => {
         console.log(response);
       });
     },
-    testQuery: function() {
-      this.$apollo.query({
-        query: ALL_QUERY,
-      }).then((response) => {
-        console.log(reponse);
-      }).catch((response) => {
-        console.log(response);
-      });
-    },
-
-    addMarker: function(queryResult, type) {
-      var color;
-      var pois;
-      if (type === "foursquare") {
-        pois = queryResult.foursquarePOI;
-        color = "#1ecebc";
-      } else if (type === "yelp") {
-        pois = queryResult.yelpPOI;
-        color = "#c64917"
-      } else {
-        pois = queryResult.customPOI;
-        color = "#24c94d";
-      }
-
+    addMarker: function(pois, color) {
       for (var i = 0; i < pois.length; i++) {
         var poi = pois[i];
         var currentMarker = new mapboxgl.Marker({
@@ -313,6 +300,33 @@ export default {
           break;
       }
       return id;
+    },
+    getCategories: function(category) {
+        var keys = Object.keys(category);
+
+        var filteredKeys = keys.filter(function(key) {
+            return category[key] && key != "__typename";
+        });
+
+        var categoryMap = new Map(categoryArray);
+
+        var yelpCategories = "";
+        var foursquareCategories = "";
+
+        filteredKeys.forEach(function(key) {
+            if (yelpCategories != "") {
+                yelpCategories += ",";
+                foursquareCategories += ",";
+            } 
+            yelpCategories += key;
+            foursquareCategories += categoryMap.get(key);
+        })
+
+        var categories = {
+            yelpCategories: yelpCategories,
+            foursquareCategories: foursquareCategories
+        }; 
+        return categories;
     },
     clearMarkers: function() {
       for (var i  = 0; i < markers.length; i++) {
@@ -457,59 +471,6 @@ export default {
       eventBus.$emit('showPopUp', title, text, color);
     }
   },
-  // apollo: {
-  //   yelpPOI: {
-  //     query: gql` query yelpPOI ($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $categories: String) 
-  //     {
-  //       yelpPOI (latitude: $latitude, longitude: $longitude, term: $term, radius: $radius, limit: $limit, categories: $categories)
-  //       {
-  //         name
-  //         coordinates {
-  //           latitude
-  //           longitude
-  //         }
-  //       }
-  //     }`, variables: {},
-  //     skip () {
-  //       this.$apollo.queries.yelpPOI.skip = true;
-  //     }
-  //   },
-  //   customPOI: {
-  //     query: gql` query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) 
-  //     {
-  //       customPOI (latitude: $latitude, longitude: $longitude, term: $term)
-  //       {
-  //         name
-  //         coordinates 
-  //         {
-  //           latitude
-  //           longitude
-  //         }
-  //         description
-  //       }
-  //     }`,variables: {},
-  //     skip () {
-  //       this.$apollo.queries.customPOI.skip = true;
-  //     }
-  //   },
-  //   foursquarePOI: {
-  //     query: gql` query foursquarePOI ($latitude: Float!, $longitude: Float!, $term: String, $categories: String) 
-  //     {
-  //       foursquarePOI (latitude: $latitude, longitude: $longitude, term: $term, categories: $categories) 
-  //       {
-  //         name
-  //         coordinates 
-  //         {
-  //           latitude
-  //           longitude
-  //         }
-  //       }
-  //     }`, variables: {},
-  //     skip () {
-  //       this.$apollo.queries.foursquarePOI.skip = true;
-  //     } 
-  //   },
-  // },
   beforeDestroy () {
     clearInterval(this.polling)
   },
@@ -526,6 +487,12 @@ export default {
   // eventBus.$on('locationFromHome', (newDest)=>{
   //   this.refresh(newDest[0], newDest[1]);
   // });
+
+  eventBus.$on("poi_filter_selected", function (payLoad) {
+      console.log(payLoad)
+      this.category = payLoad.category;
+      this.source = payLoad.source;
+  });
     
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this.lat = 48.218800;
