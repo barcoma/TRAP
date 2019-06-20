@@ -106,7 +106,7 @@
           { title: 'Info', icon: 'info', href:"/map" },
           // { title: 'Einstellungen', icon: 'settings', href:"/map" },
           { title: 'Impressum', icon: 'perm_identity', href:"/map" },
-          { title: 'Datenschutz', icon: 'lock', href:"/map" },
+          { title: 'Datenschutz', icon: 'lock', href:"/map" }
         ]
       }
     },
