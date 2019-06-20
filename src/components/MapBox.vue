@@ -212,8 +212,11 @@ export default {
       } else if (source.custom) {
           query = poiQueries.CUSTOM_ONLY_QUERY;
       }
-
-      var categories = this.getCategories(category);
+      if (category != null && category != undefined) {
+        var categories = this.getCategories(category);
+      } else {
+        var categories = {};
+      }
       var center = this.mainMap.getBounds().getCenter();
       var lat = center.lat;
       var lng = center.lng;
@@ -267,8 +270,12 @@ export default {
         if (pois.yelpPOI != null && pois.yelpPOI != undefined) {
             this.addMarker(pois.yelpPOI, "#c64917");
         }
+        if (pois.customPOI == null && pois.foursquarePOI.length < 1 && pois.yelpPOI.length < 1) {
+          this.showPopUp("Kein Ort gefunden", "Ihr Suchbegriff ergab leider keine Ergebnisse", "white");
+        }
       }).catch((response) => {
         console.log(response);
+        // console.log(pois.yelpPOI);
       });
     },
     addMarker: function(pois, color) {
