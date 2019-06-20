@@ -212,17 +212,11 @@ export default {
       } else if (source.custom) {
           query = poiQueries.CUSTOM_ONLY_QUERY;
       }
-<<<<<<< HEAD
       if (category != null && category != undefined) {
         var categories = this.getCategories(category);
       } else {
         var categories = {};
       }
-=======
-      
-      var categories = this.getCategories(category);
-
->>>>>>> 2767429ce693593287556ddf2df743995439dd9f
       var center = this.mainMap.getBounds().getCenter();
       var lat = center.lat;
       var lng = center.lng;
