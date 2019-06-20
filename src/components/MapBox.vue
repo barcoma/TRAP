@@ -212,8 +212,9 @@ export default {
       } else if (source.custom) {
           query = poiQueries.CUSTOM_ONLY_QUERY;
       }
-
+      
       var categories = this.getCategories(category);
+
       var center = this.mainMap.getBounds().getCenter();
       var lat = center.lat;
       var lng = center.lng;
@@ -234,22 +235,6 @@ export default {
           variables.foursquareCategories = categories.foursquareCategories;
       }
       this.executeQuery(query, variables);
-    },
-    searchPOI: function(searchTerm = undefined, categories = undefined) {
-      var foursquareCategory = this.getIdByCategoryName(categories);
-      this.clearMarkers();
-      var center = this.mainMap.getBounds().getCenter();
-
-      var lat = center.lat;
-      var lng = center.lng;
-      var customSearch = searchTerm;
-
-      if (customSearch == null || customSearch == undefined) {
-        customSearch = categories;
-      }
-      this.executeQuery(this.foursquareQuery, {term: searchTerm, latitude: lat, longitude: lng, categories: foursquareCategory}, "foursquare");
-      this.executeQuery(this.yelpQuery, {term: searchTerm, latitude: lat, longitude: lng, radius: 5000, limit: 15, categories: categories}, "yelp");
-      this.executeQuery(this.customQuery, {term: customSearch, latitude: lat, longitude: lng}, "custom");
     },
     executeQuery: function(query, variables) {
       this.$apollo.query({
@@ -284,55 +269,72 @@ export default {
         .addTo(this.mainMap);
         markers.push(currentMarker);
       }
-    },   
-    getIdByCategoryName: function(name) {
-      var id;
-      switch(name) {
-        case "food": id = "4d4b7105d754a06374d81259";
-          break;
-        case "physicians": id = "4bf58dd8d48988d104941735";
-          break;
-        case "autorepair": id = "56aa371be4b08b9a8d5734d3";
-          break;
-        case "hotels": id = "4bf58dd8d48988d1fa931735";
-          break;
-        case "servicestations": id = "4bf58dd8d48988d113951735";
-          break;
-      }
-      return id;
-    },
+    },  
     getCategories: function(category) {
-        var keys = Object.keys(category);
+      var keys = Object.keys(category);
 
-        var filteredKeys = keys.filter(function(key) {
-            return category[key] && key != "__typename";
-        });
+      var filteredKeys = keys.filter(function(key) {
+          return category[key] && key != "__typename";
+      });
 
-        var categoryMap = new Map(categoryArray);
+      var categoryMap = new Map(categoryArray);
 
-        var yelpCategories = "";
-        var foursquareCategories = "";
+      var yelpCategories = "";
+      var foursquareCategories = "";
 
-        filteredKeys.forEach(function(key) {
-            if (yelpCategories != "") {
-                yelpCategories += ",";
-                foursquareCategories += ",";
-            } 
-            yelpCategories += key;
-            foursquareCategories += categoryMap.get(key);
-        })
+      filteredKeys.forEach(function(key) {
+          if (yelpCategories != "") {
+              yelpCategories += ",";
+              foursquareCategories += ",";
+          } 
+          yelpCategories += key;
+          foursquareCategories += categoryMap.get(key);
+      })
 
-        var categories = {
-            yelpCategories: yelpCategories,
-            foursquareCategories: foursquareCategories
-        }; 
-        return categories;
+      var categories = {
+          yelpCategories: yelpCategories,
+          foursquareCategories: foursquareCategories
+      }; 
+      return categories;
     },
     clearMarkers: function() {
       for (var i  = 0; i < markers.length; i++) {
         markers[i].remove();
       }
-    }, // Navigation
+    },
+    // searchPOI: function(searchTerm = undefined, categories = undefined) {
+    //   var foursquareCategory = this.getIdByCategoryName(categories);
+    //   this.clearMarkers();
+    //   var center = this.mainMap.getBounds().getCenter();
+
+    //   var lat = center.lat;
+    //   var lng = center.lng;
+    //   var customSearch = searchTerm;
+
+    //   if (customSearch == null || customSearch == undefined) {
+    //     customSearch = categories;
+    //   }
+    //   this.executeQuery(this.foursquareQuery, {term: searchTerm, latitude: lat, longitude: lng, categories: foursquareCategory}, "foursquare");
+    //   this.executeQuery(this.yelpQuery, {term: searchTerm, latitude: lat, longitude: lng, radius: 5000, limit: 15, categories: categories}, "yelp");
+    //   this.executeQuery(this.customQuery, {term: customSearch, latitude: lat, longitude: lng}, "custom");
+    // },
+    // getIdByCategoryName: function(name) {
+    //   var id;
+    //   switch(name) {
+    //     case "food": id = "4d4b7105d754a06374d81259";
+    //       break;
+    //     case "physicians": id = "4bf58dd8d48988d104941735";
+    //       break;
+    //     case "autorepair": id = "56aa371be4b08b9a8d5734d3";
+    //       break;
+    //     case "hotels": id = "4bf58dd8d48988d1fa931735";
+    //       break;
+    //     case "servicestations": id = "4bf58dd8d48988d113951735";
+    //       break;
+    //   }
+    //   return id;
+    // },
+    // Navigation
     showRouting: function() {
       if (this.setUserLocation()) {
       } else {

@@ -4,6 +4,7 @@ import gql from 'graphql-tag';
 const BODY_QUERY = gql`
   {
     name
+    id
       coordinates {
         latitude
         longitude
