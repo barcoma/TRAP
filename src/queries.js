@@ -147,3 +147,15 @@ query GetFilterParams {
         }
     }
 }`
+
+export const toggleNaviPoi = {
+  state: {
+    active_el: 1
+  },
+  showPOI() {
+    this.state.active_el = 2;
+  },
+  showNavi() {
+    this.state.active_el = 1;
+  }
+};

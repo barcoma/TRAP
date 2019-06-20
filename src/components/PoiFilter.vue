@@ -28,7 +28,7 @@
 <script>
 import { eventBus } from '../main.js'
 import gql from 'graphql-tag'
-import { poiFilterQuery } from  '../queries'
+import { poiFilterQuery, toggleNaviPoi } from  '../queries'
     const updatePoiFilter = gql`
         mutation($category: Object, $source: Object) {
             updatePoiFilterParams(category: $category, source: $source) @client
@@ -65,6 +65,9 @@ export default {
             mutation: updatePoiFilter,
             variables: { category, source }
         })
+        // eventBus.$emit('showPOI', 2);
+        toggleNaviPoi.showPOI();
+        eventBus.$emit('toogleNaviPoi');
         this.$router.push('map');
       }
   },

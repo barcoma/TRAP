@@ -73,7 +73,7 @@ import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
 import { setTimeout } from 'timers';
-import { poiQueries, poiFilterQuery } from '../queries'
+import { poiQueries, poiFilterQuery, toggleNaviPoi } from '../queries'
 
 var markers = [];
 var userLong = 0;
@@ -117,7 +117,7 @@ export default {
       instructionUpdate: null,
       navigationMode: false,
       firstInstruction: [],
-      active_el: 1,
+      active_el: toggleNaviPoi.state.active_el,
       display: true,
       source: {
         yelp: true,
@@ -483,13 +483,17 @@ export default {
     clearInterval(this.polling)
   },
   created(){
-      eventBus.$on('toggleDirections', (isVisible) => {
+    eventBus.$on('toggleDirections', (isVisible) => {
       if(isVisible == true){
         this.mainMap.addControl(this.directions, 'bottom-left');
       } else {
         this.mainMap.removeControl(this.directions);
       }
     });
+    eventBus.$on('toogleNaviPoi', e => {
+      this.toggleNavigation();
+      console.log("success!");
+    })
   },
   mounted(){
   // eventBus.$on('locationFromHome', (newDest)=>{
@@ -524,8 +528,6 @@ export default {
       accessToken: mapboxgl.accessToken,
       placeholderOrigin: "Wo möchten Sie hin?" // fucking won't work
     }, 'bottom-left');
-
-  console.log(this.directions);
 
   this.directions.on("route", e => {
     this.routeReady = true;
