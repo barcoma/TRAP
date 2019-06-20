@@ -94,6 +94,7 @@
         drawer: null,
         items: [
           { title: 'Orte finden', icon: 'filter_list', href:"/poi" },
+          { title: 'Orte hinzufügen', icon: 'add_location', href:"/createPoi" },
           { title: 'Aktueller Standort', icon: 'my_location', href:"/map" },
           { title: 'Letzte Ziele', icon: 'access_time', href:"/map" },
           { title: 'Favoriten', icon: 'star', href:"/map" },
