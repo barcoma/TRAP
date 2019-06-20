@@ -6,6 +6,7 @@ import ObdPage from './views/ObdPage.vue'
 import GraphQl from './components/GraphQlTest.vue'
 import POIPage from './views/POIPage.vue'
 import lastdest from './views/lastdest.vue'
+import createPoiPage from './views/createPoiPage.vue'
 
 Vue.use(Router)
 
@@ -40,6 +41,11 @@ export default new Router({
       path: '/lastdest',
       name: 'lastdest',
       component: lastdest
+    },
+    {
+      path: '/createPoi',
+      name: 'createPoi',
+      component: createPoiPage
     }
   ]
 })

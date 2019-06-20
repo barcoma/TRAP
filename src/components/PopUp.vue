@@ -76,6 +76,7 @@ export default {
         left: 5.5rem; 
         top: 1rem;
         text-align: left;
+        margin-right: 1rem;
     }
 }
 </style>
