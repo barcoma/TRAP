@@ -5,7 +5,7 @@
       class="main-map"
       />
       <!-- <map-nav id="map-navigation"></map-nav> -->
-      <sidebarmenu class="sidebarmenu"/>
+      <!-- <sidebarmenu class="sidebarmenu"/> -->
     </section>
 </template>
 

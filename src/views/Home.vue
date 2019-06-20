@@ -5,7 +5,7 @@
     <v-layout align-center row wrap class="top-area">
 
       
-         <sidebarmenu class="sidebarmenu"/>
+         <!-- <sidebarmenu class="sidebarmenu"/> -->
       
       <v-spacer></v-spacer>
       <v-flex xs4 mt-3 class="flex-avatar">
