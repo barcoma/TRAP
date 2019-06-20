@@ -47,7 +47,7 @@
         <v-list-tile >
           
         <v-list-tile-content >
-            <v-list-tile-title >Hi, Laura</v-list-tile-title>
+            <v-list-tile-title >Hi, Lisa</v-list-tile-title>
           </v-list-tile-content>
            <v-flex row class="flex-avatar">
             <v-avatar
