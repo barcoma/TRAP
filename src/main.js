@@ -16,6 +16,7 @@ import VueApollo from 'vue-apollo'
 import { typeDefs } from './queries.js'
 import { withClientState } from 'apollo-link-state';
 import { ApolloLink } from 'apollo-link'
+import { persistCache } from 'apollo-cache-persist';
 
 
 const httpLink = new HttpLink({
@@ -24,14 +25,18 @@ const httpLink = new HttpLink({
 })
 
 const cache = new InMemoryCache({
-    dataIdFromObject: object => object.name
+    dataIdFromObject: object => object.id
   });
 
-  const stateLink = withClientState({
-    cache,
-    typeDefs,
-  })
+const stateLink = withClientState({
+  cache,
+  typeDefs,
+})
 
+persistCache({
+  cache,
+  storage: window.localStorage,
+});
 
 const apolloClient = new ApolloClient({
   cache,
