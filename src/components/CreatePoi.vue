@@ -13,7 +13,7 @@
     <p class="POI-create" v-on:click="createPoi()">Hinzufügen</p>
     <div v-if="poiDescription" class="POI-desciption-container">
       <div class="POI-description">
-        <input type="text">
+        <input class="POI-name" type="text">
         <p class="POI-close" v-on:click="poiDescription = false">Abbrechen</p>
         <p class="POI-save" v-on:click="createPoi()">Speichern</p>
       </div>
