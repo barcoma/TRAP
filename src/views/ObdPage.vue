@@ -313,7 +313,7 @@ opacity: 0.7;
   grid-template-columns: 50% 50% ;
   grid-template-rows: 90% 90%;
   width: 100%;
-  margin-top: 5%;
+  margin-top: 2%;
   height:180px;
 
 }
