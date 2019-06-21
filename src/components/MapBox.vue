@@ -11,7 +11,7 @@
       <input class="POI-Input" type="text" v-on:change="querySearch($event.target.value)" v-bind:class="{ filter: active_filter }" placeholder="Hotel, Restaurant..."/>
       <p @click="resetFilter()" v-if="active_filter" class="POI-filter-active">Filter <b>x</b></p>
     </div>
-    <v-btn fab dark small color="white" class="POI-filter-btn" :to="{ name: 'poi'}">
+    <v-btn fab dark small color="white" class="POI-filter-btn" v-on:click="directToFilterPage">
       <v-icon dark>filter_list</v-icon>
     </v-btn>
     <v-btn fab dark small color="white" class="POI-search-btn"
@@ -75,7 +75,7 @@ import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
 import { setTimeout } from 'timers';
-import { poiQueries, poiFilterQuery, toggleNaviPoi } from '../queries'
+import { poiQueries, poiFilterQuery, toggleNaviPoi } from '../shared_data/queries'
 
 var markers = [];
 var userLong = 0;
@@ -88,8 +88,6 @@ var categoryArray = [
     ['hotels', '4bf58dd8d48988d1fa931735'],
     ['servicestations', '4bf58dd8d48988d113951735']
 ];
-
-
 
 export default {
   name: 'MapBox',
@@ -242,7 +240,6 @@ export default {
         }
       }).catch((response) => {
         console.log(response);
-        // console.log(pois.yelpPOI);
       });
     },
     addMarker: function(pois, color) {
@@ -430,6 +427,27 @@ export default {
       toggleNaviPoi.toggleActive();
       this.active_filter = false;
       eventBus.$emit('deleteFilter');
+    },
+    directToFilterPage: function() {
+      var center = this.mainMap.getBounds().getCenter();
+      var lat = center.lat;
+      var lng = center.lng;
+
+      var coordinates = {
+        longitude: lng,
+        latitude: lat
+      }
+      const coordinateMutation = gql`
+        mutation ($coordinates: Object) {
+            coordinateMutation(coordinates: $coordinates) @client
+        }`;
+      this.$apollo.mutate({
+        mutation: coordinateMutation,
+        variables: {coordinates} 
+      })
+
+      eventBus.$emit('poi_filter_coords', coordinates);
+      this.$router.push('poi');
     }
   },
   beforeDestroy () {
@@ -447,14 +465,7 @@ export default {
   mounted(){
   // eventBus.$on('locationFromHome', (newDest)=>{
   //   this.refresh(newDest[0], newDest[1]);
-  // });
-
-  eventBus.$on("poi_filter_selected", function (payLoad) {
-      console.log(payLoad)
-      this.category = payLoad.category;
-      this.source = payLoad.source;
-  });
-    
+  // });    
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this.lat = 48.218800;
   this.long = 11.624707;
