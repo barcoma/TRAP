@@ -19,7 +19,7 @@
             <input class="slider-input" type="range" min="0" max="50" step="1.0">
             <p class="slider-value">Anzahl: <span id="demo"></span></p>
         </div>
-        <div>
+        <div class="POI-search-amount">
             Es gibt mindestens {{amount.yelpAmount + amount.foursquareAmount}} Treffer mit deinen Einstellungen!
         </div>
         <button class="POI-filter-search" v-on:click="startSearch" :to="{ name: 'map'}">Suche starten</button>
