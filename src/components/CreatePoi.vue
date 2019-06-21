@@ -33,7 +33,8 @@
 <script>
 import { eventBus } from '../main.js';
 import mapboxgl from 'mapbox-gl'
-
+import { createPOIMutation } from '../shared_data/queries'
+ 
 export default {
   name: 'CreatePoi',
   data() {
@@ -79,13 +80,24 @@ export default {
       this.long = this.marker.getLngLat().lng;
     },
     savePoi: function() {
+      var category = this.category;
+      var keys = Object.keys(category);
+      var filteredKeys = keys.filter(function(key) {
+          return category[key];
+      });
+
+      var variables = {
+        latitude: this.lat,
+        longitude: this.long,
+        name: this.name,
+        description: this.description,
+        tags: filteredKeys
+      }
+      this.$apollo.mutate({
+        mutation: createPOIMutation,
+        variables: variables
+      });
       this.poiDescription = false;
-      console.log(this.lat);
-      console.log(this.long);
-      console.log(this.name);
-      console.log(this.description);
-      console.log(this.category);
-      // TODO: save name, description and categorys
     }
   },
   mounted(){

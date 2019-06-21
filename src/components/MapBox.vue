@@ -76,18 +76,19 @@ import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
 import { setTimeout } from 'timers';
 import { poiQueries, poiFilterQuery, toggleNaviPoi } from '../shared_data/queries'
+import { getCategories } from '../shared_data/data'
 
 var markers = [];
 var userLong = 0;
 var userLat = 0;
 
-var categoryArray = [
-    ['food', '4d4b7105d754a06374d81259'],
-    ['physicians', '4bf58dd8d48988d104941735'],
-    ['autorepair', '56aa371be4b08b9a8d5734d3'],
-    ['hotels', '4bf58dd8d48988d1fa931735'],
-    ['servicestations', '4bf58dd8d48988d113951735']
-];
+// var categoryArray = [
+//     ['food', '4d4b7105d754a06374d81259'],
+//     ['physicians', '4bf58dd8d48988d104941735'],
+//     ['autorepair', '56aa371be4b08b9a8d5734d3'],
+//     ['hotels', '4bf58dd8d48988d1fa931735'],
+//     ['servicestations', '4bf58dd8d48988d113951735']
+// ];
 
 export default {
   name: 'MapBox',
@@ -194,7 +195,7 @@ export default {
           query = poiQueries.CUSTOM_ONLY_QUERY;
       }
       if (category != null && category != undefined) {
-        var categories = this.getCategories(category);
+        var categories = getCategories(category);
       } else {
         var categories = {};
       }
@@ -205,7 +206,8 @@ export default {
       var variables = {
         latitude: lat,
         longitude: lng,
-        limit: 15
+        limit: 15,
+        radius: 40000
       }
 
       if (term != undefined && term != null) {
@@ -256,33 +258,33 @@ export default {
         markers.push(currentMarker);
       }
     },  
-    getCategories: function(category) {
-      var keys = Object.keys(category);
+    // getCategories: function(category) {
+    //   var keys = Object.keys(category);
 
-      var filteredKeys = keys.filter(function(key) {
-          return category[key] && key != "__typename";
-      });
+    //   var filteredKeys = keys.filter(function(key) {
+    //       return category[key] && key != "__typename";
+    //   });
 
-      var categoryMap = new Map(categoryArray);
+    //   var categoryMap = new Map(categoryArray);
 
-      var yelpCategories = "";
-      var foursquareCategories = "";
+    //   var yelpCategories = "";
+    //   var foursquareCategories = "";
 
-      filteredKeys.forEach(function(key) {
-          if (yelpCategories != "") {
-              yelpCategories += ",";
-              foursquareCategories += ",";
-          } 
-          yelpCategories += key;
-          foursquareCategories += categoryMap.get(key);
-      })
+    //   filteredKeys.forEach(function(key) {
+    //       if (yelpCategories != "") {
+    //           yelpCategories += ",";
+    //           foursquareCategories += ",";
+    //       } 
+    //       yelpCategories += key;
+    //       foursquareCategories += categoryMap.get(key);
+    //   })
 
-      var categories = {
-          yelpCategories: yelpCategories,
-          foursquareCategories: foursquareCategories
-      }; 
-      return categories;
-    },
+    //   var categories = {
+    //       yelpCategories: yelpCategories,
+    //       foursquareCategories: foursquareCategories
+    //   }; 
+    //   return categories;
+    // },
     clearMarkers: function() {
       for (var i  = 0; i < markers.length; i++) {
         markers[i].remove();
@@ -400,7 +402,7 @@ export default {
 
       this.mainMap.flyTo({
           bearing: degrees 
-        });
+      });
     },
     sleep: function(miliseconds) {
       var currentTime = new Date().getTime();

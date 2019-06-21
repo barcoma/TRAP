@@ -242,3 +242,15 @@ export const amountQueries = {
   CUSTOM_YELP_QUERY: getAmountQueryYelpCustom
 }
 
+export const createPOIMutation = gql`
+mutation ($name: String!, $description: String, $latitude: Float!, $longitude: Float!, $tags: [String]) {
+  createPOI (name: $name, description: $description, latitude: $latitude, longitude: $longitude, tags: $tags) {
+    name
+    description
+    coordinates {
+      latitude
+    	longitude
+    }
+  }
+}
+`
