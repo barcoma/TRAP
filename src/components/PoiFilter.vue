@@ -3,22 +3,24 @@
         <h1 class="POI-headline">Orte finden</h1>
         <p class="POI-source">Von wo sollen die Daten stammen?</p>
         <div class="bg source"></div>
-        <p @click="source.yelp = !source.yelp" v-bind:class="{ active: source.yelp }" class="toggleButton yelp">Yelp</p>
-        <p @click="source.foursquare = !source.foursquare" v-bind:class="{ active: source.foursquare }" class="toggleButton foursquare">Foursquare</p>
-        <p @click="source.custom = !source.custom" v-bind:class="{ active: source.custom }" class="toggleButton custom">Eigene</p>
+        <p @click="source.yelp = !source.yelp; getAmount()" v-bind:class="{ active: source.yelp }" class="toggleButton yelp">Yelp</p>
+        <p @click="source.foursquare = !source.foursquare; getAmount()" v-bind:class="{ active: source.foursquare }" class="toggleButton foursquare">Foursquare</p>
+        <p @click="source.custom = !source.custom; getAmount()" v-bind:class="{ active: source.custom }" class="toggleButton custom">Eigene</p>
         <p class="POI-category">In welchen Kategorien soll gesucht werden?</p>
          <div class="bg category"></div>
-        <p @click="category.autorepair = !category.autorepair" v-bind:class="{ active: category.autorepair }" class="toggleButton autorepair">Werkstatt</p>
-        <p @click="category.food = !category.food" v-bind:class="{ active: category.food }" class="toggleButton food">Restaurants</p>
-        <p @click="category.hotels = !category.hotels" v-bind:class="{ active: category.hotels }" class="toggleButton hotels">Hotels</p>
-        <p @click="category.servicestations = !category.servicestations" v-bind:class="{ active: category.servicestations }" class="toggleButton servicestations">Tankstelle</p>
-        <p @click="category.physicians = !category.physicians" v-bind:class="{ active: category.physicians }" class="toggleButton physicians">Ärzte</p>
+        <p @click="category.autorepair = !category.autorepair; getAmount()" v-bind:class="{ active: category.autorepair }" class="toggleButton autorepair">Werkstatt</p>
+        <p @click="category.food = !category.food; getAmount()" v-bind:class="{ active: category.food }" class="toggleButton food">Restaurants</p>
+        <p @click="category.hotels = !category.hotels; getAmount()" v-bind:class="{ active: category.hotels }" class="toggleButton hotels">Hotels</p>
+        <p @click="category.servicestations = !category.servicestations; getAmount()" v-bind:class="{ active: category.servicestations }" class="toggleButton servicestations">Tankstelle</p>
+        <p @click="category.physicians = !category.physicians; getAmount()" v-bind:class="{ active: category.physicians }" class="toggleButton physicians">Ärzte</p>
         
         <p class="POI-slider-text">Wie viele Orte sollen maximal angezeigt werden?</p>
         <div class="POI-slider">
             <input class="slider-input" type="range" min="0" max="50" step="1.0">
             <p class="slider-value">Anzahl: <span id="demo"></span></p>
-            <!-- <p>{{ sliderValue }}</p> -->
+        </div>
+        <div>
+            Es gibt mindestens {{amount.yelpAmount + amount.foursquareAmount}} Treffer mit deinen Einstellungen!
         </div>
         <button class="POI-filter-search" v-on:click="startSearch" :to="{ name: 'map'}">Suche starten</button>
     </div>
@@ -28,12 +30,8 @@
 <script>
 import { eventBus } from '../main.js'
 import gql from 'graphql-tag'
-import { poiFilterQuery } from  '../queries'
-    const updatePoiFilter = gql`
-        mutation($category: Object, $source: Object) {
-            updatePoiFilterParams(category: $category, source: $source) @client
-        }
-    `;
+import { poiFilterQuery, amountQueries, coordinateQuery, toggleNaviPoi, updatePoiFilter } from  '../shared_data/queries'
+import { getCategories } from '../shared_data/data'
 
 export default {
   name: 'PoiFilter',
@@ -51,13 +49,22 @@ export default {
             hotels: false,
             servicestations: false,
             physicians: false
+        },
+        coordinates: {
+            latitude: Number,
+            longitude: Number
+        },
+        amount: {
+            yelpAmount: 0,
+            foursquareAmount: 0,
+            customAmount: 0
         }
     };
   },
   created() {
   },
   methods: {
-      startSearch() {
+      startSearch: function() {
         const category = this.category;
         const source = this.source;
 
@@ -65,10 +72,130 @@ export default {
             mutation: updatePoiFilter,
             variables: { category, source }
         })
+        var defaultValues = true;
+        for (var key in this.source) {
+            if (key == false) {
+                defaultValues = false;
+            }
+        }
+        for (var key in this.category) {
+            if (key == true) {
+                defaultValues = false;
+            }
+        }
+        if (!defaultValues) {
+            toggleNaviPoi.toggleActive();
+        }
+        toggleNaviPoi.showPOI();
         this.$router.push('map');
+      },
+      resetFilter: function() {
+        for (var key in this.source) {
+            key = true;
+        }
+        for (var key in this.category) {
+            key = false;
+        }
+
+        const category = this.category;
+        const source = this.source;
+
+        this.$apollo.mutate({
+            mutation: updatePoiFilter,
+            variables: { category, source }
+        })
+      },
+      getAmount: function() {
+        var categories = getCategories(this.category);
+        var variables = {
+            longitude: this.coordinates.longitude,
+            latitude: this.coordinates.latitude,
+            radius: 40000,
+            yelpCategories: categories.yelpCategories,
+            foursquareCategories: categories.foursquareCategories
+        };
+        this.executeAmountQuery(variables);
+      },
+      getQuery() {
+        var source = this.source;
+        var query;
+        if (source.yelp) {
+            if (source.foursquare) {
+                if (source.custom) {
+                    query = amountQueries.ALL_QUERY;
+                } else {
+                    query = amountQueries.FS_YELP_QUERY;
+                }
+            } else if (source.custom) {
+                query = amountQueries.CUSTOM_YELP_QUERY;
+            } else {
+                query = amountQueries.YELP_ONLY_QUERY;
+            }
+        } else if (source.foursquare) {
+            if (source.custom) {
+                query = amountQueries.FS_CUSTOM_QUERY;
+            } else {
+                query = amountQueries.FS_ONLY_QUERY;
+            }
+        } else if (source.custom) {
+            query = amountQueries.CUSTOM_ONLY_QUERY;
+        }
+        return query;
+      },
+      executeAmountQuery(variables) {
+        var query = this.getQuery();
+        this.$apollo.query({
+            query: query,
+            variables: variables
+        }).then((response) => {
+            var amount = response.data.getAmount;
+            if (amount.yelpAmount != undefined) {
+                this.amount.yelpAmount = amount.yelpAmount;
+            } else {
+                this.amount.yelpAmount = 0;
+            }
+            if (amount.foursquareAmount != undefined) {
+                this.amount.foursquareAmount = amount.foursquareAmount;
+            } else {
+                this.amount.foursquareAmount = 0;
+            }
+            if (amount.customAmount != undefined) {
+                this.amount.customAmount = amount.customAmount;
+            } else {
+                this.amount.customAmount = 0;
+            }
+        }).catch(error => {
+            console.log(error);
+        })
       }
   },
   mounted() {
+    try {
+        const coordinatesResponse = this.$apollo.provider.defaultClient.readQuery({
+            query: gql` query coordinateQuery {
+                coordinateQuery @client {
+                    latitude
+                    longitude
+                }
+            }`
+        });
+        this.coordinates = {
+            latitude: coordinatesResponse.coordinateQuery.latitude,
+            longitude: coordinatesResponse.coordinateQuery.longitude
+        };
+        var categories = getCategories(this.category);
+        var variables = {
+            longitude: this.coordinates.longitude,
+            latitude: this.coordinates.latitude,
+            radius: 40000,
+            yelpCategories: categories.yelpCategories,
+            foursquareCategories: categories.foursquareCategories
+        };
+        this.executeAmountQuery(variables);
+    } catch (exception) {
+        console.log(exception)
+    }
+
     try {
         const filterParams = this.$apollo.provider.defaultClient.readQuery({
             query: poiFilterQuery
@@ -83,8 +210,11 @@ export default {
 
     slider.oninput = function() {
         output.innerHTML = this.value;
-        // this.sliderValue = this.value; // Did not work
     }
+
+    eventBus.$on("deleteFilter", e => {
+        this.resetFilter();
+    });
   }
 };
 </script>

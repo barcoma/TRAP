@@ -13,11 +13,10 @@ import { ApolloClient } from 'apollo-client'
 import { HttpLink } from 'apollo-link-http'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import VueApollo from 'vue-apollo'
-import { typeDefs } from './queries.js'
+import { typeDefs } from './shared_data/queries.js'
 import { withClientState } from 'apollo-link-state';
 import { ApolloLink } from 'apollo-link'
 import { persistCache } from 'apollo-cache-persist';
-
 
 const httpLink = new HttpLink({
   // URL to graphql server, you should use an absolute URL here
@@ -55,7 +54,21 @@ const apolloClient = new ApolloClient({
             };
             cache.writeData({ data });
             return data;
+        },
+        coordinateMutation: (_, {coordinates} , {cache}) => {
+          var latitude = coordinates.latitude;
+          var longitude = coordinates.longitude;
+          const data = {
+            coordinateQuery: {
+              __typename: "Coordinates",
+              latitude: latitude,
+              longitude: longitude
+            }
+          };
+          cache.writeData({data});
+          return data;
         } 
+
       }
     }
 })
