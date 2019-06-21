@@ -1,11 +1,47 @@
 <template lang="html">
-    <section class="OBD">
-        <button v-on:click="getDevices">Request devices</button>
-        <h1 color="black">{{currentRPM + obdCommandInfo[0].unit}}</h1>
-    </section>
+ <div class="obdbackground">
+    
+ 
+    <div class="ObdTop">
+        <v-toolbar class="topbar"> 
+      </v-toolbar>
+      
+      <h5>Fahrzeugdiagnose</h5>
+      <sidebarmenu class="sidebarmenu"/>
+    </div>   
+    <div class="ObdTopmid">
+     <!--<v-btn large round dark class=""><img src="../../public/img/icons/GrünerHaken.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Alles gut</p></v-btn> -->
+     <!--<v-btn large round dark class=""><img style="width:40px;"src="../../public/img/icons/Danger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Werkstatt aufsuchen</p></v-btn>-->
+     <v-btn large round dark class=""><img style="width:40px;"src="../../public/img/icons/mediumdanger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Achtung</p></v-btn>
+     </div>
+     <div class="Grid">
+      <div class="fensterobd">
+        <img  class="fensterobdcontentimg" src="../../public/img/icons/Tankstand.svg">
+        <p class="fensterobdcontenttext"> Tankstand: 60% </p>
+       </div>
+      <div class="fensterobd">
+        <img  class="fensterobdcontentimg" src="../../public/img/icons/speedmeter.svg">
+        <p class="fensterobdcontenttext"> Speed: 90km/h </p>
+       </div>
+      <div class="fensterobd">
+        <img  class="fensterobdcontentimg" src="../../public/img/icons/statistics.svg">
+        <p class="fensterobdcontenttext"> Verbrauch: 7l/100km</p>
+       </div>
+       <div class="fensterobd">
+        <img  class="fensterobdcontentimg" src="../../public/img/icons/thermometer.svg">
+        <p class="fensterobdcontenttext"> Außentemperatur: 24° </p>
+       </div>
+       </div>
+
+   
+      </div>
+
 </template>
 
 <script>
+
+import Sidebarmenu from '../components/Sidebarmenu.vue'
+
 var serviceUUID = "e7810a71-73ae-499d-8c15-faa9aef0c3f2";
 var charUUID = "bef8d6c9-9c21-4c9e-b632-bd58c1009f9f";
 var byteA;
@@ -26,15 +62,28 @@ var twoBytes = false;
 export default {
     name: "OBD",
     data() {
+        
         return{
             currentRPM: "0",
             pidResponse: [],
             byteCounter: 0,
             obdCommandInfo: [
                 {pid: "0C", bytes: 2, name: "rpm", unit: "rev/min", convertFunction: this.convertRPM(byteA, byteB)},
-            ]
-        }
-    }, 
+            ],
+             }
+        },
+  data: () => ({
+      cards: [
+        { title: 'Tankstatus',  img: "../../public/img/icons/Tankstand.svg", flex: 6 },
+        { title: 'Außentemperatur',flex: 6 },
+        { title: 'Verbrauch',flex: 6 },
+        { title: 'Geschwindigkeit', flex: 6 }
+      ],
+      
+    }),
+    
+         
+     /*
     methods: {
         getDevices: function() {
             navigator.bluetooth.requestDevice({
@@ -227,12 +276,122 @@ export default {
   //}, response => {
     // error callback
   //});
-}
-}
-</script>
+    }, */
+    components:{
+    Sidebarmenu
+    },
+} 
+</script> 
+<style lang="scss">
 
-<style scoped>
- h1{
-     color: black;
- }
+.obdbackground{
+  background: url('../../public/img/backgroundobd.png') no-repeat center center fixed; 
+  background-size: cover;
+  height:100%;
+  display:grid;
+  grid-template-columns: 100%;
+  grid-template-rows:10% 20% 50% 20%;
+}
+.ObdTopmid{
+grid-row-start:2;
+grid-row-end:3;
+height:100%;
+display:grid;
+grid-template-columns: 10% 80% 10%;
+}
+.Obdcards{
+ color: white;
+ opacity: 0.5;
+}
+.ObdTop{
+grid-row-start: 1;
+grid-row-end: 2;
+height:100%;
+}
+i.material-icons{
+    margin: 0% 5%;
+}
+.sidebarmenu{
+  z-index: 1000;
+  opacity: 1;
+}
+div.layout.layoutOBD{
+opacity: 0.7;
+}
+.headline.white--text{
+  opacity:1;
+  z-index: 10000;
+}
+.Grid{
+  display: grid;
+  grid-template-columns: 50% 50% ;
+  grid-template-rows: 50% 50%;
+  grid-row-start: 3;
+  grid-row-end: 4;
+  width: 100%;
+  margin-top: 2%;
+  height:100%;
+
+}
+.fensterobd{
+  display: grid;
+  grid-template-columns: 25% 50% 25%;
+    border-radius: 10px;
+  grid-template-rows: 20% 40% 40%;
+   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  background-color: #ffffff;
+  margin: 5% 5%;
+  opacity: 1;
+  height: 90%;
+}
+.fensterobdcontentimg{
+  grid-column-start: 2;
+  grid-column-end: 3;
+  grid-row-start: 2;
+  grid-row-end: 3;
+  width:100%;
+  height:70%;
+  justify-self: center;
+
+}
+.fensterobdcontenttext{
+  grid-column-start: 2;
+  grid-column-end: 3;
+  grid-row-start: 3;
+  grid-row-end: 3;
+  margin-bottom:0%;
+  justify-self: center;
+}
+
+button.v-btn.v-btn--large.v-btn--round.theme--dark{
+  height: 80%;
+  border-radius: 10px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  background-color: #ffffff;
+  margin-top: 5%;
+  opacity:1;
+  color: black;
+  grid-column-start: 2;
+  grid-column-end:3;
+}
+.topbar{
+   // background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
+    //background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
+    //background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); 
+    height:8%;
+    width: 100%;
+    opacity:0;
+}
+div.flex.xs12.align-end.flexbox{
+    opacity:0.5;
+    color: white;
+    background-color: white;
+}
+div.v-card.theme--light.white{
+  background-color: white;
+  color: balck;
+}
+.obdicons{
+  opacity: 1;
+}
 </style>
