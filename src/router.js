@@ -7,6 +7,7 @@ import GraphQl from './components/GraphQlTest.vue'
 import POIPage from './views/POIPage.vue'
 import lastdest from './views/lastdest.vue'
 import createPoiPage from './views/createPoiPage.vue'
+import welcome from './views/Welcome.vue'
 
 Vue.use(Router)
 
@@ -46,6 +47,11 @@ export default new Router({
       path: '/createPoi',
       name: 'createPoi',
       component: createPoiPage
+    },
+    {
+      path: '/welcome',
+      name: 'welcome',
+      component: welcome
     }
   ]
 })

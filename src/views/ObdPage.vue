@@ -1,18 +1,19 @@
 <template lang="html">
  <div class="obdbackground">
-    <section class="OBD">
+    
  
-
-        <v-toolbar extension-height class="topbar"> 
+    <div class="ObdTop">
+        <v-toolbar class="topbar"> 
       </v-toolbar>
       
       <h5>Fahrzeugdiagnose</h5>
       <sidebarmenu class="sidebarmenu"/>
-       
-    
+    </div>   
+    <div class="ObdTopmid">
      <!--<v-btn large round dark class=""><img src="../../public/img/icons/GrünerHaken.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Alles gut</p></v-btn> -->
      <!--<v-btn large round dark class=""><img style="width:40px;"src="../../public/img/icons/Danger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Werkstatt aufsuchen</p></v-btn>-->
      <v-btn large round dark class=""><img style="width:40px;"src="../../public/img/icons/mediumdanger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Achtung</p></v-btn>
+     </div>
      <div class="Grid">
       <div class="fensterobd">
         <img  class="fensterobdcontentimg" src="../../public/img/icons/Tankstand.svg">
@@ -32,7 +33,7 @@
        </div>
        </div>
 
-    </section>
+   
       </div>
 
 </template>
@@ -287,13 +288,26 @@ export default {
   background: url('../../public/img/backgroundobd.png') no-repeat center center fixed; 
   background-size: cover;
   height:100%;
-
+  display:grid;
+  grid-template-columns: 100%;
+  grid-template-rows:10% 20% 50% 20%;
+}
+.ObdTopmid{
+grid-row-start:2;
+grid-row-end:3;
+height:100%;
+display:grid;
+grid-template-columns: 10% 80% 10%;
 }
 .Obdcards{
  color: white;
  opacity: 0.5;
 }
-
+.ObdTop{
+grid-row-start: 1;
+grid-row-end: 2;
+height:100%;
+}
 i.material-icons{
     margin: 0% 5%;
 }
@@ -311,10 +325,12 @@ opacity: 0.7;
 .Grid{
   display: grid;
   grid-template-columns: 50% 50% ;
-  grid-template-rows: 90% 90%;
+  grid-template-rows: 50% 50%;
+  grid-row-start: 3;
+  grid-row-end: 4;
   width: 100%;
   margin-top: 2%;
-  height:180px;
+  height:100%;
 
 }
 .fensterobd{
@@ -326,6 +342,7 @@ opacity: 0.7;
   background-color: #ffffff;
   margin: 5% 5%;
   opacity: 1;
+  height: 90%;
 }
 .fensterobdcontentimg{
   grid-column-start: 2;
@@ -333,7 +350,7 @@ opacity: 0.7;
   grid-row-start: 2;
   grid-row-end: 3;
   width:100%;
-  height:35%;
+  height:70%;
   justify-self: center;
 
 }
@@ -347,14 +364,15 @@ opacity: 0.7;
 }
 
 button.v-btn.v-btn--large.v-btn--round.theme--dark{
-  width: 300px;
-  height: 96px;
+  height: 80%;
   border-radius: 10px;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
   background-color: #ffffff;
-  margin: 5% 0;
+  margin-top: 5%;
   opacity:1;
   color: black;
+  grid-column-start: 2;
+  grid-column-end:3;
 }
 .topbar{
    // background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
