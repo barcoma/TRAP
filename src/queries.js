@@ -148,14 +148,24 @@ query GetFilterParams {
     }
 }`
 
+export const updatePoiFilter = gql`
+mutation($category: Object, $source: Object) {
+    updatePoiFilterParams(category: $category, source: $source) @client
+}
+`
+
 export const toggleNaviPoi = {
   state: {
-    active_el: 1
+    active_el: 1,
+    active_filter: false
   },
   showPOI() {
     this.state.active_el = 2;
   },
   showNavi() {
     this.state.active_el = 1;
+  },
+  toggleActive() {
+    this.state.active_filter = !this.state.active_filter;
   }
 };

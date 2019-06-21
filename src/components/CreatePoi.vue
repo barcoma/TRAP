@@ -80,6 +80,8 @@ export default {
     },
     savePoi: function() {
       this.poiDescription = false;
+      console.log(this.lat);
+      console.log(this.long);
       console.log(this.name);
       console.log(this.description);
       console.log(this.category);

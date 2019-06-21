@@ -31,16 +31,6 @@
         color= #126DFF
         flat
         value="nearby"
-        to="/team"
-      >
-        <span>History</span>
-        <v-icon large>people</v-icon>
-      </v-btn>
-
-      <v-btn
-        color= #126DFF
-        flat
-        value="nearby"
         to="/obd"
       >
         <span>OBD</span>

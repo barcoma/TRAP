@@ -16,7 +16,6 @@
 
 <script>
 import MapBox from './components/MapBox.vue'
-import MapNav from './components/MapNav.vue'
 import TabNav from './components/TabNav.vue'
 import InstallPrompt from './components/InstallPrompt.vue'
 import mapboxgl from 'mapbox-gl'
@@ -30,7 +29,6 @@ export default {
   name: 'app',
   components: {
     MapBox,
-    MapNav,
     TabNav,
     InstallPrompt,
     PopUp,
@@ -82,4 +80,10 @@ body{
 #map-navigation{
   z-index: 10;
 }
+
+// Hamburger Icon
+.burger.v-btn {
+ top: 5px;
+}
+
 </style>

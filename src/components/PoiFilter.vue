@@ -18,7 +18,6 @@
         <div class="POI-slider">
             <input class="slider-input" type="range" min="0" max="50" step="1.0">
             <p class="slider-value">Anzahl: <span id="demo"></span></p>
-            <!-- <p>{{ sliderValue }}</p> -->
         </div>
         <button class="POI-filter-search" v-on:click="startSearch" :to="{ name: 'map'}">Suche starten</button>
     </div>
@@ -28,13 +27,8 @@
 <script>
 import { eventBus } from '../main.js'
 import gql from 'graphql-tag'
-import { poiFilterQuery, toggleNaviPoi } from  '../queries'
-    const updatePoiFilter = gql`
-        mutation($category: Object, $source: Object) {
-            updatePoiFilterParams(category: $category, source: $source) @client
-        }
-    `;
-
+import { poiFilterQuery, updatePoiFilter, toggleNaviPoi } from  '../queries'
+    
 export default {
   name: 'PoiFilter',
   data() {
@@ -57,7 +51,7 @@ export default {
   created() {
   },
   methods: {
-      startSearch() {
+      startSearch: function() {
         const category = this.category;
         const source = this.source;
 
@@ -65,10 +59,38 @@ export default {
             mutation: updatePoiFilter,
             variables: { category, source }
         })
-        // eventBus.$emit('showPOI', 2);
+        var defaultValues = true;
+        for (var key in this.source) {
+            if (key == false) {
+                defaultValues = false;
+            }
+        }
+        for (var key in this.category) {
+            if (key == true) {
+                defaultValues = false;
+            }
+        }
+        if (!defaultValues) {
+            toggleNaviPoi.toggleActive();
+        }
         toggleNaviPoi.showPOI();
-        eventBus.$emit('toogleNaviPoi');
         this.$router.push('map');
+      },
+      resetFilter: function() {
+        for (var key in this.source) {
+            key = true;
+        }
+        for (var key in this.category) {
+            key = false;
+        }
+
+        const category = this.category;
+        const source = this.source;
+
+        this.$apollo.mutate({
+            mutation: updatePoiFilter,
+            variables: { category, source }
+        })
       }
   },
   mounted() {
@@ -86,8 +108,11 @@ export default {
 
     slider.oninput = function() {
         output.innerHTML = this.value;
-        // this.sliderValue = this.value; // Did not work
     }
+
+    eventBus.$on("deleteFilter", e => {
+        this.resetFilter();
+    });
   }
 };
 </script>
