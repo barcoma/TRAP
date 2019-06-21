@@ -93,18 +93,20 @@
       return {
         drawer: null,
         items: [
+          { title: 'Karte', icon: 'map', href:"/map" },
           { title: 'Orte finden', icon: 'filter_list', href:"/poi" },
           { title: 'Orte hinzufügen', icon: 'add_location', href:"/createPoi" },
-          { title: 'Aktueller Standort', icon: 'my_location', href:"/map" },
           { title: 'Letzte Ziele', icon: 'access_time', href:"/map" },
-          { title: 'Favoriten', icon: 'star', href:"/map" },
-          { title: 'In der Nähe', icon: 'near_me', href:"/map" },
-          { title: 'Routenplanung', icon: 'navigation', href:"/map" },
-          { title: 'Offline Karten', icon: 'map', href:"/map" },
+          // { title: 'Favoriten', icon: 'star', href:"/map" },
+          // { title: 'In der Nähe', icon: 'near_me', href:"/map" },
+          // { title: 'Routenplanung', icon: 'navigation', href:"/map" },
+          // { title: 'Offline Karten', icon: 'map', href:"/map" },
           { title: 'Fahrzeug Diagnose', icon: 'directions_car', href:"/map" },
           { title: 'Hilfe und Feedback', icon: 'message', href:"/map" },
           { title: 'Info', icon: 'info', href:"/map" },
-          { title: 'Einstellungen', icon: 'settings', href:"/map" },
+          // { title: 'Einstellungen', icon: 'settings', href:"/map" },
+          { title: 'Impressum', icon: 'perm_identity', href:"/map" },
+          { title: 'Datenschutz', icon: 'lock', href:"/map" }
         ]
       }
     },
