@@ -124,7 +124,7 @@
                     <v-card-title>
                       <v-icon medium>location_on</v-icon>
                       <div class="carousel-text">
-                        <div class="carousel-tex-headline">Wolfang</div>
+                        <div class="carousel-tex-headline">Martin</div>
                         <div class="carousel-tex-subheader">Paris, France</div>
                       </div>
                     </v-card-title>                
@@ -180,7 +180,7 @@
                     <v-card-title>
                       <v-icon medium>location_on</v-icon>
                       <div class="carousel-text">
-                        <div class="carousel-tex-headline">Wolfang</div>
+                        <div class="carousel-tex-headline">Martin</div>
                         <div class="carousel-tex-subheader">Paris, France</div>
                       </div>
                     </v-card-title>                

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="44" height="44" viewBox="0 0 44 44">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        stroke: #707070;
+      }
+
+      .cls-2 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-3 {
+        fill: #6ac259;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <rect id="Rechteck_99" data-name="Rechteck 99" class="cls-1" width="44" height="44" transform="translate(7791 -1157)"/>
+    </clipPath>
+  </defs>
+  <g id="Gruppe_maskieren_46" data-name="Gruppe maskieren 46" class="cls-2" transform="translate(-7791 1157)">
+    <path id="checked" class="cls-3" d="M22,0A22,22,0,1,0,44,22,22,22,0,0,0,22,0ZM17.964,33.3,8.277,23.614l3.229-3.229,6.458,6.458,14.53-14.53,3.229,3.229Z" transform="translate(7791 -1157)"/>
+  </g>
+</svg>
