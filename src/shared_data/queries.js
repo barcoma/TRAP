@@ -101,9 +101,9 @@ export const poiQueries = {
 }
 
 export const typeDefs = gql`
-
     type Query {
         poiFilter: PoiFilter
+        coordinateQuery: Coordinates
     }
 
     type PoiFilter {
@@ -120,13 +120,19 @@ export const typeDefs = gql`
     type Category {
         autorepair: Boolean,
         food: Boolean,
-        hotels: Boolean,
+        hotelsQuery: Boolean,
         servicestations: Boolean,
         physicians: Boolean
     }
 
+    type Coordinates {
+      latitude: Float
+      longitude: Float
+    }
+
     type Mutation {
         updatePoiFilterParams(category: Category!, source: Source!): poiFilter
+        coordinateMutation(coordinates: Coordinates!): coordinateQuery
     }
 `
 
@@ -134,16 +140,82 @@ export const poiFilterQuery = gql`
 query GetFilterParams {
     poiFilter @client {
         category {
-            autorepair
-            food
-            hotels
-            servicestations
-            physicians
+          autorepair
+          food
+          hotels
+          servicestations
+          physicians
         }
         source {
-            yelp
-            foursquare
-            custom
+          yelp
+          foursquare
+          custom
         }
     }
 }`
+
+export const coordinateQuery = gql` 
+query coordinateQuery {
+  coordinateQuery @client {
+    latitude
+    longitude
+  }
+}`
+
+const getAmountQueryAll = gql` query getAmount ($latitude: Float!, $longitude: Float!, $radius: Int!, $foursquareCategories: String, $yelpCategories: String) {
+  getAmount (latitude: $latitude, longitude: $longitude, radius: $radius, foursquareCategories: $foursquareCategories, yelpCategories: $yelpCategories) {
+    foursquareAmount
+    yelpAmount
+    customAmount
+  }
+}`
+
+const getAmountQueryFSYelp = gql` query getAmount ($latitude: Float!, $longitude: Float!, $radius: Int!, $foursquareCategories: String, $yelpCategories: String) {
+  getAmount (latitude: $latitude, longitude: $longitude, radius: $radius, foursquareCategories: $foursquareCategories, yelpCategories: $yelpCategories) {
+    foursquareAmount
+    yelpAmount
+  }
+}`
+
+const getAmountQueryFS = gql` query getAmount ($latitude: Float!, $longitude: Float!, $radius: Int!, $foursquareCategories: String, $yelpCategories: String) {
+  getAmount (latitude: $latitude, longitude: $longitude, radius: $radius, foursquareCategories: $foursquareCategories, yelpCategories: $yelpCategories) {
+    foursquareAmount
+  }
+}`
+
+const getAmountQueryYelp = gql` query getAmount ($latitude: Float!, $longitude: Float!, $radius: Int!, $foursquareCategories: String, $yelpCategories: String) {
+  getAmount (latitude: $latitude, longitude: $longitude, radius: $radius, foursquareCategories: $foursquareCategories, yelpCategories: $yelpCategories) {
+    yelpAmount
+  }
+}`
+
+const getAmountQueryFSCustom = gql` query getAmount ($latitude: Float!, $longitude: Float!, $radius: Int!, $foursquareCategories: String, $yelpCategories: String) {
+  getAmount (latitude: $latitude, longitude: $longitude, radius: $radius, foursquareCategories: $foursquareCategories, yelpCategories: $yelpCategories) {
+    foursquareAmount
+    customAmount
+  }
+}`
+
+const getAmountQueryYelpCustom = gql` query getAmount ($latitude: Float!, $longitude: Float!, $radius: Int!, $foursquareCategories: String, $yelpCategories: String) {
+  getAmount (latitude: $latitude, longitude: $longitude, radius: $radius, foursquareCategories: $foursquareCategories, yelpCategories: $yelpCategories) {
+    customAmount
+    yelpAmount
+  }
+}`
+
+const getAmountQueryCustom = gql` query getAmount ($latitude: Float!, $longitude: Float!, $radius: Int!, $foursquareCategories: String, $yelpCategories: String) {
+  getAmount (latitude: $latitude, longitude: $longitude, radius: $radius, foursquareCategories: $foursquareCategories, yelpCategories: $yelpCategories) {
+    customAmount
+  }
+}`
+
+
+export const amountQueries = {
+  ALL_QUERY: getAmountQueryAll,
+  FS_YELP_QUERY: getAmountQueryFSYelp,
+  FS_CUSTOM_QUERY: getAmountQueryFSCustom,
+  FS_ONLY_QUERY: getAmountQueryFS,
+  YELP_ONLY_QUERY: getAmountQueryYelp,
+  CUSTOM_ONLY_QUERY: getAmountQueryCustom,
+  CUSTOM_YELP_QUERY: getAmountQueryYelpCustom
+}
