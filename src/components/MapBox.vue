@@ -52,8 +52,13 @@
       <v-icon dark>subdirectory_arrow_right</v-icon>
     </v-btn>
     <v-btn v-else fab dark small color="white" class="routing-button black--text"
+    v-bind:class="{ hidden: navigationMode }"
     v-on:click="closeRouting()"
-    v-bind:class="{ change : isVisible }"
+    >
+      <v-icon dark>close</v-icon>
+    </v-btn>
+    <v-btn v-if="navigationMode" fab dark small color="white" class="navigation-close-btn black--text"
+    v-on:click="closeNavigation()"
     >
       <v-icon dark>close</v-icon>
     </v-btn>
@@ -299,18 +304,14 @@ export default {
       this.directionsProfile.style.display = "block";
     },
     closeRouting: function() {
-      this.mapControl.style.height = "unset";
       this.isVisible = !this.isVisible;
-      this.navigationMode =!this.navigationMode;
-      this.directions.removeRoutes();
-      this.routeReady = false;
-      this.inputs.style.display = "block";
+      this.displayNavigation =!this.displayNavigation;
       this.destination.style.display = "none";
       this.directionsProfile.style.display = "none";
-      this.inputStart.value = null;
-      this.inputDestination.value = null;
-      document.getElementsByClassName("mapboxgl-ctrl-top-left")[0].style.backgroundImage = "linear-gradient(90deg, #4285f4, #00ebff)";
-      clearInterval(this.updateInstructions);
+      if (this.routeReady) {
+        this.routeReady = false;
+        this.directions.removeRoutes();
+      }
     },
     reverseDirections: function() {
       this.directions.reverse();
@@ -415,9 +416,9 @@ export default {
     },
     toggleNavigation: function() {
       if (this.active_el == 2) {
-        this.mainMap.removeControl(this.directions);
+        this.mapControl.style.display = "none";
       } else {
-        this.mainMap.addControl(this.directions, 'top-left');
+        this.mapControl.style.display = "block";
       }
     },
     showPopUp: function(title, text, color) {
@@ -448,6 +449,21 @@ export default {
 
       eventBus.$emit('poi_filter_coords', coordinates);
       this.$router.push('poi');
+    },
+    closeNavigation: function() {
+      this.directionsProfile.style.display = "none";
+      this.mapControl.style.height = "unset";
+      this.isVisible = !this.isVisible;
+      this.navigationMode = !this.navigationMode;
+      this.directions.removeRoutes();
+      this.routeReady = false;
+      this.inputs.style.display = "block";
+      this.destination.style.display = "none";
+      this.directionsProfile.style.display = "none";
+      this.inputStart.value = null;
+      this.inputDestination.value = null;
+      document.getElementsByClassName("mapboxgl-ctrl-top-left")[0].style.backgroundImage = "linear-gradient(90deg, #4285f4, #00ebff)";
+      clearInterval(this.updateInstructions);
     }
   },
   beforeDestroy () {
@@ -491,7 +507,6 @@ export default {
 
   this.directions.on("route", e => {
     this.routeReady = true;
-    console.log("route changed");
   })
 
   this.userLocation = new mapboxgl.GeolocateControl({
@@ -647,6 +662,12 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     z-index: 9;
     float: right;
     top: 3.2rem;
+}
+
+.navigation-close-btn {
+    z-index: 9;
+    float: right;
+    top: 0.3rem;
 }
 
 .route-switch-button {
@@ -1175,6 +1196,10 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
       }
     }
   }
+}
+
+.hidden {
+  display: none !important;
 }
 
 </style>

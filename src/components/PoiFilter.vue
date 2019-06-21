@@ -20,9 +20,10 @@
             <p class="slider-value">Anzahl: <span id="demo"></span></p>
         </div>
         <div class="POI-search-amount">
-            Es gibt mindestens {{amount.yelpAmount + amount.foursquareAmount}} Treffer mit deinen Einstellungen!
+        {{amount.yelpAmount + amount.foursquareAmount}} Treffer!
         </div>
-        <button class="POI-filter-search" v-on:click="startSearch" :to="{ name: 'map'}">Suche starten</button>
+        <button class="POI-filter-search" v-on:click="startSearch">Suche starten</button>
+        <button class="POI-filter-cancel" @click="resetFilter(), $router.push('map');">Abbrechen</button>
     </div>
 </template>
 
@@ -240,7 +241,7 @@ p {
     grid-template-rows: 5% 5% 5% 5% 5% 5% 5% 5% auto;
     grid-row-gap: 5px;
     grid-template-areas: 
-    "headline headline headline headline headline"
+    ". . headline headline ."
     ". POISource POISource POISource ."
     ". yelp foursquare custom ."
     ". category category category ."
@@ -248,13 +249,12 @@ p {
     ". servicestations physicians . ."
     ". slider-text slider-text slider-text ."
     ". slider slider slider ."
-    ". . search search .";
+    ". cancel amount search .";
 
         .POI-headline {
             grid-area: headline;
-            justify-self: start;
+            justify-self: end;
             align-self: end;
-            grid-column: 4;
         }
         .POI-slider {
             grid-area: slider;
@@ -372,6 +372,28 @@ p {
             padding: 0.5rem 0.9rem 0.5rem 0.9rem;
             border-radius: 50px;
             margin-bottom: 1rem;
+            box-shadow: 2px 2px 10px black;
+        }
+        .POI-search-amount {
+            grid-area: amount;
+            align-self: end;
+            justify-self: center;
+            padding: 0.5rem 0.9rem 0.5rem 0.9rem;
+            border-radius: 50px;
+            margin-bottom: 1rem;
+            background-color: #1C1C1C;
+            color: white;
+        }
+        .POI-filter-cancel {
+            grid-area: cancel;
+            align-self: end;
+            justify-self: start;
+            padding: 0.5rem 0.9rem 0.5rem 0.9rem;
+            border-radius: 50px;
+            margin-bottom: 1rem;
+            background-color: white;
+            color: black;
+            -webkit-box-shadow: 2px 2px 10px black;
             box-shadow: 2px 2px 10px black;
         }
     }
