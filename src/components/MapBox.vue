@@ -258,10 +258,13 @@ export default {
         })
         .setLngLat([poi.coordinates.longitude, poi.coordinates.latitude])
         .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-        .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3>'))
+        .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3><button class="poi-navigate" @click="navigateToPoi(' + poi.coordinates.longitude + ',' + poi.coordinates.latitude + ')">Navigieren</button>'))
         .addTo(this.mainMap);
         markers.push(currentMarker);
       }
+    },
+    navigateToPoi: function(long, lat) {
+      console.log(long + lat)
     },  
     // getCategories: function(category) {
     //   var keys = Object.keys(category);
@@ -921,6 +924,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
    
   .mapboxgl-popup {
     max-width: 200px;
+    min-width: 10rem;
   }
 
   .mapboxgl-popup-content {
@@ -1062,7 +1066,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   }
 
 .pop-up-text {
-  color: black;
+  color: white;
 }
 
 // GPS Icon
@@ -1172,6 +1176,16 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     width: 100%;
     top: 0;
     z-index: 16;
+}
+
+.poi-navigate {
+    background: -moz-linear-gradient(45deg, rgba(50,234,255,1) 0%, rgba(40,115,214,1) 0%, rgba(182,125,232,1) 100%, rgba(32,124,202,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    border-radius: 50px;
+    padding: 0.3rem 0.5rem 0.3rem 0.5rem;
+    width: 100%;
+    margin-top: 0.3rem;
 }
 
 @media screen and (max-width: 372px) {
