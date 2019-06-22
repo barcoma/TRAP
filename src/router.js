@@ -29,11 +29,6 @@ export default new Router({
       component: ObdPage
     },
     {
-      path: '/graphql',
-      name: 'graphql',
-      component: GraphQl
-    },
-    {
       path: '/poi',
       name: 'poi',
       component: POIPage
