@@ -102,11 +102,11 @@
           // { title: 'Routenplanung', icon: 'navigation', href:"/map" },
           // { title: 'Offline Karten', icon: 'map', href:"/map" },
           { title: 'Fahrzeug Diagnose', icon: 'directions_car', href:"/obd" },
-          { title: 'Hilfe und Feedback', icon: 'message', href:"/map" },
+          { title: 'Hilfe und Feedback', icon: 'message', href:"/help" },
           { title: 'Info', icon: 'info', href:"/welcome" },
           // { title: 'Einstellungen', icon: 'settings', href:"/map" },
-          { title: 'Impressum', icon: 'perm_identity', href:"/map" },
-          { title: 'Datenschutz', icon: 'lock', href:"/map" }
+          { title: 'Impressum', icon: 'perm_identity', href:"/imprint" },
+          { title: 'Datenschutz', icon: 'lock', href:"/privacy" }
         ]
       }
     },

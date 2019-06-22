@@ -9,7 +9,7 @@
     <v-btn color="white" dark fab small class="POI-createMarker" v-on:click="createMarker()">
       <v-icon dark>add_location</v-icon>
     </v-btn>
-    <p class="POI-create" v-on:click="createPoi()">Hinzufügen</p>
+    <button class="POI-create" v-on:click="createPoi()">Hinzufügen</button>
     <div v-if="poiDescription" class="POI-desciption-container">
       <div class="POI-description">
         <h1 class="POI-description-headline">Informationen eingeben</h1>
@@ -22,8 +22,8 @@
         <p @click="category.hotels = !category.hotels" v-bind:class="{ active: category.hotels }" class="toggleButton hotels">Hotels</p>
         <p @click="category.servicestations = !category.servicestations" v-bind:class="{ active: category.servicestations }" class="toggleButton servicestations">Tankstelle</p>
         <p @click="category.physicians = !category.physicians" v-bind:class="{ active: category.physicians }" class="toggleButton physicians">Ärzte</p>
-        <p class="POI-close" v-on:click="poiDescription = false">Abbrechen</p>
-        <p class="POI-save" v-on:click="savePoi()">Speichern</p>
+        <button class="POI-close" v-on:click="poiDescription = false">Abbrechen</button>
+        <button class="POI-save" v-on:click="savePoi()">Speichern</button>
       </div>
     </div>
   </div>
@@ -152,11 +152,10 @@ p {
     background: linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
     padding: 0.5rem 0.9rem 0.5rem 0.9rem;
     border-radius: 50px;
-    margin-bottom: 1rem;
     box-shadow: 2px 2px 10px black;
     color: white;
     z-index: 9;
-    align-self: end;
+    align-self: center;
     justify-self: center;
   }
   .POI-delete {
@@ -245,12 +244,15 @@ p {
       }
       .toggleButton {
         color: white;
-        padding: 0.5rem;
         border-radius: 50px;
         width: 90%;
         text-align: center;
         place-self: center;
-        }
+        height: 90%;
+        justify-self: center;
+        align-self: center;
+        padding-top: 6px;
+      }
       .bg {
         background: rgb(19,19,19);
         background: linear-gradient(180deg, rgba(19,19,19,1) 0%, rgba(51,51,51,0.9164040616246498) 100%);
@@ -297,26 +299,20 @@ p {
         background: -moz-linear-gradient(45deg, rgba(50,234,255,1) 0%, rgba(40,115,214,1) 0%, rgba(182,125,232,1) 100%, rgba(32,124,202,1) 100%); /* FF3.6-15 */
         background: -webkit-linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* Chrome10-25,Safari5.1-6 */
         background: linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-        padding: 0.5rem 0.9rem 0.5rem 0.9rem;
         border-radius: 50px;
         margin-bottom: 1rem;
         box-shadow: 2px 2px 10px black;
         color: white;
         z-index: 9;
-        // align-self: end;
-        // justify-self: end;
       }
       .POI-close {
         grid-area: closeButton;
-        padding: 0.5rem 0.9rem 0.5rem 0.9rem;
         border-radius: 50px;
         margin-bottom: 1rem;
         box-shadow: 2px 2px 10px rgba(104, 104, 104, 0.774);
         color: black;
         z-index: 9;
         background-color: white;
-        // align-self: end;
-        // justify-self: end;
       }
     }
 }
@@ -325,6 +321,20 @@ p {
     color: black !important;
 }
 
+@media (max-height: 700px) {
+  .POI-description {
+    grid-template-rows: 7% 10% 16% 10% 8% 8% auto 11% !important;
+  }
+  .createPOI-container {
+  grid-template-rows: 10% 74% 8% 8%;
+  }
+  .POI-delete, .POI-createMarker, .POI-create {
+    margin-bottom: 1rem;
+  }
+  .POI-delete {
+    margin-left: 0rem;
+  }
+}
 </style>
 <style>
 
