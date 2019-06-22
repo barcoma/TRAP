@@ -3,7 +3,6 @@ import Router from 'vue-router'
 import MapPage from './views/MapPage.vue'
 import Home from './views/Home.vue'
 import ObdPage from './views/ObdPage.vue'
-import GraphQl from './components/GraphQlTest.vue'
 import POIPage from './views/POIPage.vue'
 import lastdest from './views/lastdest.vue'
 import createPoiPage from './views/createPoiPage.vue'
@@ -27,11 +26,6 @@ export default new Router({
       path: '/obd',
       name: 'obd',
       component: ObdPage
-    },
-    {
-      path: '/graphql',
-      name: 'graphql',
-      component: GraphQl
     },
     {
       path: '/poi',
