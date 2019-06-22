@@ -73,29 +73,31 @@ export default {
             mutation: updatePoiFilter,
             variables: { category, source }
         })
+
         var defaultValues = true;
-        for (var key in this.source) {
-            if (key == false) {
+        for (var index in this.source) { 
+            var attr = this.source[index]; 
+            if (attr == false) {
                 defaultValues = false;
             }
         }
-        for (var key in this.category) {
-            if (key == true) {
+        for (var index in this.category) { 
+            var attr = this.category[index]; 
+            if (attr == true) {
                 defaultValues = false;
             }
         }
-        if (!defaultValues) {
-            toggleNaviPoi.toggleActive();
-        }
+
+        toggleNaviPoi.toggleActive(defaultValues);
         toggleNaviPoi.showPOI();
         this.$router.push('map');
       },
       resetFilter: function() {
-        for (var key in this.source) {
-            key = true;
+        for (var index in this.source) { 
+            this.source[index] = true;
         }
-        for (var key in this.category) {
-            key = false;
+        for (var index in this.category) { 
+            this.category[index] = false;
         }
 
         const category = this.category;

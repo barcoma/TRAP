@@ -171,8 +171,12 @@ export const toggleNaviPoi = {
   showNavi() {
     this.state.active_el = 1;
   },
-  toggleActive() {
-    this.state.active_filter = !this.state.active_filter;
+  toggleActive(defaultValues) {
+    if (defaultValues) {
+      this.state.active_filter = false;
+    } else {
+      this.state.active_filter = true;
+    }
   }
 };
 
