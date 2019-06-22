@@ -119,7 +119,7 @@ export default {
       },
       getQuery() {
         var source = this.source;
-        var query;
+        var query = null;
         if (source.yelp) {
             if (source.foursquare) {
                 if (source.custom) {
@@ -145,6 +145,13 @@ export default {
       },
       executeAmountQuery(variables) {
         var query = this.getQuery();
+        if (query == null) {
+            this.amount.customAmount = 0;
+            this.amount.yelpAmount = 0;
+            this.amount.foursquareAmount = 0;
+            return;
+        }
+
         this.$apollo.query({
             query: query,
             variables: variables
