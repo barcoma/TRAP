@@ -42,7 +42,7 @@ export default {
 .popUp-container {
     position: relative;
     background-color: rgba(0, 0, 0, 0.8);
-    top: 45%;
+    top: 9.5rem;
     z-index: 9999999999999;
     width: 96%;
     margin-left: 2%;
@@ -76,6 +76,7 @@ export default {
         left: 5.5rem; 
         top: 1rem;
         text-align: left;
+        margin-right: 1rem;
     }
 }
 </style>

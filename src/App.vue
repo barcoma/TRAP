@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <sidebarmenu class="sidebarmenu"/>
     <install-prompt></install-prompt>
     <pop-up></pop-up>
     <section class="app-content">
@@ -15,11 +16,11 @@
 
 <script>
 import MapBox from './components/MapBox.vue'
-import MapNav from './components/MapNav.vue'
 import TabNav from './components/TabNav.vue'
 import InstallPrompt from './components/InstallPrompt.vue'
 import mapboxgl from 'mapbox-gl'
 import PopUp from './components/PopUp.vue'
+import Sidebarmenu from './components/Sidebarmenu.vue'
 
 
 
@@ -28,10 +29,10 @@ export default {
   name: 'app',
   components: {
     MapBox,
-    MapNav,
     TabNav,
     InstallPrompt,
-    PopUp
+    PopUp,
+    Sidebarmenu
   },
   methods: {
     removeGeocode: function(){
@@ -79,4 +80,10 @@ body{
 #map-navigation{
   z-index: 10;
 }
+
+// Hamburger Icon
+.burger.v-btn {
+ top: 5px;
+}
+
 </style>

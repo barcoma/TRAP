@@ -5,13 +5,12 @@
       class="main-map"
       />
       <!-- <map-nav id="map-navigation"></map-nav> -->
-      <sidebarmenu class="sidebarmenu"/>
+      <!-- <sidebarmenu class="sidebarmenu"/> -->
     </section>
 </template>
 
 <script>
 import MapBox from '../components/MapBox.vue'
-import MapNav from '../components/MapNav.vue'
 import TabNav from '../components/TabNav.vue'
 import Sidebarmenu from '../components/Sidebarmenu.vue'
 import mapboxgl from 'mapbox-gl'
@@ -23,7 +22,6 @@ export default {
   name: 'MapPage',
   components: {
     MapBox,
-    MapNav,
     TabNav,
     Sidebarmenu
   },

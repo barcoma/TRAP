@@ -47,7 +47,7 @@
         <v-list-tile >
           
         <v-list-tile-content >
-            <v-list-tile-title >Hi, Laura</v-list-tile-title>
+            <v-list-tile-title >Hi, Lisa</v-list-tile-title>
           </v-list-tile-content>
            <v-flex row class="flex-avatar">
             <v-avatar
@@ -69,6 +69,7 @@
         <v-list-tile
           v-for="item in items"
           :key="item.title"
+          :to="item.href"
         >
           <v-list-tile-action>
             <v-icon>{{ item.icon }}</v-icon>
@@ -87,22 +88,25 @@
 </template>
 
 <script>
-
   export default {
     data () {
       return {
         drawer: null,
         items: [
-          { title: 'Aktueller Standort', icon: 'my_location' },
-          { title: 'Letzte Ziele', icon: 'access_time' },
-          { title: 'Favoriten', icon: 'star' },
-          { title: 'In der Nähe', icon: 'near_me' },
-          { title: 'Routenplanung', icon: 'navigation' },
-          { title: 'Offline Karten', icon: 'map' },
-          { title: 'Fahrzeug Diagnose', icon: 'directions_car' },
-          { title: 'Hilfe und Feedback', icon: 'message' },
-          { title: 'Info', icon: 'info' },
-          { title: 'Einstellungen', icon: 'settings' },
+          { title: 'Karte', icon: 'map', href:"/map" },
+          { title: 'Orte finden', icon: 'filter_list', href:"/poi" },
+          { title: 'Orte hinzufügen', icon: 'add_location', href:"/createPoi" },
+          { title: 'Letzte Ziele', icon: 'access_time', href:"/lastdest" },
+          // { title: 'Favoriten', icon: 'star', href:"/map" },
+          // { title: 'In der Nähe', icon: 'near_me', href:"/map" },
+          // { title: 'Routenplanung', icon: 'navigation', href:"/map" },
+          // { title: 'Offline Karten', icon: 'map', href:"/map" },
+          { title: 'Fahrzeug Diagnose', icon: 'directions_car', href:"/obd" },
+          { title: 'Hilfe und Feedback', icon: 'message', href:"/map" },
+          { title: 'Info', icon: 'info', href:"/welcome" },
+          // { title: 'Einstellungen', icon: 'settings', href:"/map" },
+          { title: 'Impressum', icon: 'perm_identity', href:"/map" },
+          { title: 'Datenschutz', icon: 'lock', href:"/map" }
         ]
       }
     },
@@ -116,7 +120,7 @@ div.v-list__tile__title {
    font-weight: 300;
    font-size: 20px;
    opacity: 1 !important;
-   color:white;
+   color:white !important;
 }
 .burger.v-btn{
  top : 20px;
@@ -130,9 +134,12 @@ button.burger.v-btn.v-btn.theme--dark{
     position: absolute;
 }
 aside.v-navigation-drawer.v-navigation-drawer--temporary.theme--dark{
-  background-color: black;
-   background: -webkit-linear-gradient(to right, #4285f4, #00ebff); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #4285f4, #00ebff); 
+  // background-color: black;
+  // background: -webkit-linear-gradient(to right, #4285f4, #00ebff); /* Chrome 10-25, Safari 5.1-6 */
+  // background: linear-gradient(to right, #4285f4, #00ebff); 
+  background-image: url("/img/bg/trap_sidebarmenu_hintergrund_3.jpg");
+  background-position: right;
+  background-size: cover;
   height:100%;
 }
 aside.v-navigation-drawer.bg-image--absolute{
@@ -149,6 +156,7 @@ aside.v-navigation-drawer.v-navigation-drawer--absolute{
 }
   .bg-image {
  background-image: linear-gradient(129deg, #4285f4, var(--neon-blue));
+
  position: absolute;
   
   filter: blur(20px);

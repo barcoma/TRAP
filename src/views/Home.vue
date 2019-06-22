@@ -5,7 +5,7 @@
     <v-layout align-center row wrap class="top-area">
 
       
-         <sidebarmenu class="sidebarmenu"/>
+         <!-- <sidebarmenu class="sidebarmenu"/> -->
       
       <v-spacer></v-spacer>
       <v-flex xs4 mt-3 class="flex-avatar">
@@ -124,7 +124,7 @@
                     <v-card-title>
                       <v-icon medium>location_on</v-icon>
                       <div class="carousel-text">
-                        <div class="carousel-tex-headline">Wolfang</div>
+                        <div class="carousel-tex-headline">Martin</div>
                         <div class="carousel-tex-subheader">Paris, France</div>
                       </div>
                     </v-card-title>                
@@ -180,7 +180,7 @@
                     <v-card-title>
                       <v-icon medium>location_on</v-icon>
                       <div class="carousel-text">
-                        <div class="carousel-tex-headline">Wolfang</div>
+                        <div class="carousel-tex-headline">Martin</div>
                         <div class="carousel-tex-subheader">Paris, France</div>
                       </div>
                     </v-card-title>                
