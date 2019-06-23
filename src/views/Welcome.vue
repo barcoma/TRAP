@@ -17,7 +17,7 @@ export default {
 
 } 
 </script> 
-<style scoped lang="scss">
+<style lang="scss">
 
 .welcomebackground{
  background: url('../../public/img/backgroundobd.png') no-repeat center center fixed; 
@@ -25,10 +25,6 @@ export default {
   height:100%;
   display:grid;
   grid-template-rows: 40% 40% 20%;
-}
-
-.app-content {
-    height: 100%;
 }
 
 </style>
