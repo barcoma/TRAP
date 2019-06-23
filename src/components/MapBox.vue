@@ -251,20 +251,35 @@ export default {
     },
     addMarker: function(pois, color) {
       for (var i = 0; i < pois.length; i++) {
-        var poi = pois[i];
+        let poi = pois[i];
+        let div = window.document.createElement('div');
+        let title = window.document.createElement('h3');
+        title.innerHTML = poi.name;
+        let button = window.document.createElement('button');
+        button.className = "poi-navigate";
+        button.innerHTML = "Navigieren";
+        button.addEventListener("click", () => {
+          this.navigateToPoi(poi.coordinates.longitude, poi.coordinates.latitude);
+        });
+        div.appendChild(title);
+        div.appendChild(button);
         var currentMarker = new mapboxgl.Marker({
           draggable: false,
           color: color
         })
         .setLngLat([poi.coordinates.longitude, poi.coordinates.latitude])
-        .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-        .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3><button class="poi-navigate" @click="navigateToPoi(' + poi.coordinates.longitude + ',' + poi.coordinates.latitude + ')">Navigieren</button>'))
+        .setPopup(new mapboxgl.Popup({ offset: 25 }).setDOMContent(div)) // add popups
+        // .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3><button class="poi-navigate">Navigieren</button>'))
         .addTo(this.mainMap);
         markers.push(currentMarker);
       }
     },
     navigateToPoi: function(long, lat) {
-      console.log(long + lat)
+      this.clearMarkers();
+      this.active_el = 1;
+      this.mapControl.style.display = "block";
+      this.directions.removeRoutes();
+      this.directions.setOrigin([long, lat]);
     },  
     // getCategories: function(category) {
     //   var keys = Object.keys(category);
@@ -354,11 +369,15 @@ export default {
     },
     setUserLocation: function() {
       this.directions.setDestination(this.inputStart.value);
-      if (userLong != 0 && userLat != 0) {
+      if (userLong != 0 && userLat != 0 && userLong != null && userLat != null) {
         this.directions.setOrigin([userLong, userLat]);
         this.inputStart.value = "Aktueller Standpunkt";
         return true;
       } else {
+        this.directions.removeRoutes();
+        this.inputStart.value = null;
+        this.inputStart.placeholder = "Startpunkt wählen";
+        this.directions.setDestination(this.inputStart.value);
         return false;
       }
     },
@@ -474,7 +493,7 @@ export default {
   beforeDestroy () {
     clearInterval(this.polling)
   },
-  created(){
+  created() {
     // eventBus.$on('toggleDirections', (isVisible) => {
     //   if(isVisible == true){
     //     this.mainMap.addControl(this.directions, 'bottom-left');
@@ -483,10 +502,8 @@ export default {
     //   }
     // });
   },
-  mounted(){
-  // eventBus.$on('locationFromHome', (newDest)=>{
-  //   this.refresh(newDest[0], newDest[1]);
-  // });    
+  mounted() {
+
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this.lat = 48.218800;
   this.long = 11.624707;
@@ -512,7 +529,7 @@ export default {
 
   this.directions.on("route", e => {
     this.routeReady = true;
-  })
+  });
 
   this.userLocation = new mapboxgl.GeolocateControl({
     positionOptions: {
@@ -524,11 +541,11 @@ export default {
 
   this.mainMap
     .addControl(this.userLocation, 'bottom-right')
-    .addControl(this.directions, 'top-left')
+    .addControl(this.directions, 'top-left');
 
   this.mainMap.on("load", e => {
     this.userLocation.trigger();
-  })
+  });
 
   this.userLocation.on('geolocate', function(e) {
       userLong = e.coords.longitude;
@@ -542,12 +559,27 @@ export default {
   this.inputStart = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[0].childNodes[1];
   this.inputStart.placeholder = "Wo möchten Sie hin?";
   this.inputDestination = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[1].childNodes[1];
-  this.inputDestination.placeholder = "Wo möchten Sie hin?"
+  this.inputDestination.placeholder = "Wo möchten Sie hin?";
   this.mapControl = document.getElementsByClassName('mapboxgl-ctrl-top-left')[0];
 
   // this.geocoder.on('result', this.updateMarker);
+
+  eventBus.$on('locationFromHome', (newDest, newDestName) => {
+    this.directions.removeRoutes();
+    this.directions.setOrigin([newDest[0], newDest[1]]);
+    this.inputStart.value = newDestName;
+    this.mainMap.flyTo({
+      center: [
+        newDest[0],
+        newDest[1]
+      ],
+      zoom: 15,
+      bearing: 0
+    })
+  });    
   }
 }
+
 </script>
 
 

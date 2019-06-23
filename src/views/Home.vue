@@ -13,6 +13,8 @@
           :size="64"
           color="grey lighten-4"
         >
+        <v-icon large color="darkgrey">person</v-icon>
+        <!-- <i class="material-icons md-36">person</i> -->
           <!-- <img src="https://i1.rgstatic.net/ii/profile.image/390911189110788-1470211898704_Q512/Wolfgang_Taube2.jpg" alt="avatar"> -->
         </v-avatar>
       </v-flex>
@@ -45,8 +47,8 @@
             solo
           >
             <template slot="append">
-                <v-icon v-on:click="locationSearch()">check</v-icon>
-                <v-icon v-on:click="locationSearch2()">directions</v-icon>
+                <!-- <v-icon v-on:click="locationSearch()">check</v-icon> -->
+                <v-icon v-on:click="locationSearch()">directions</v-icon>
             </template>
           </v-autocomplete>      
           </v-flex>
@@ -189,6 +191,59 @@
               </slide>
             </carousel>
 
+            <carousel v-if="i == 3"
+            :paginationEnabled="false"
+            >
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Uhrenmuseum</div>
+                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Kebab-Treff</div>
+                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://picsum.photos/510/300?random"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Martin</div>
+                        <div class="carousel-tex-subheader">Paris, France</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+            </carousel>
+
           </v-tab-item>
         </v-tabs>
       </div>
@@ -224,15 +279,17 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
       isLoading: false,
       model: null,
       search: null,
-      newDestination: Object
+      newDestination: Object,
+      newDestName: ''
     }),
     methods: {
       locationSearch: function(event){ 
         this.$router.push('map');
         var newDest = this.newDestination
+        var newDestName = this.newDestName;
         setTimeout(function(){
-          eventBus.$emit('locationFromHome', newDest); 
-        }, 10);
+          eventBus.$emit('locationFromHome', newDest, newDestName); 
+        }, 4000);
         },
         locationSearch2: function(){
          // console.log('B')
@@ -241,6 +298,7 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
           this.items.map(item => {
           if(item.id == event){
           this.newDestination = item.geometry.coordinates;
+          this.newDestName = item.place_name_de;
           }});
         }
       },
