@@ -3,9 +3,6 @@
   <v-container>
 
     <v-layout align-center row wrap class="top-area">
-
-      
-         <!-- <sidebarmenu class="sidebarmenu"/> -->
       
       <v-spacer></v-spacer>
       <v-flex xs4 mt-3 class="flex-avatar">
@@ -14,8 +11,6 @@
           color="grey lighten-4"
         >
         <v-icon large color="darkgrey">person</v-icon>
-        <!-- <i class="material-icons md-36">person</i> -->
-          <!-- <img src="https://i1.rgstatic.net/ii/profile.image/390911189110788-1470211898704_Q512/Wolfgang_Taube2.jpg" alt="avatar"> -->
         </v-avatar>
       </v-flex>
       <v-flex class="text-xs-left" xs12 offset-xs1>
@@ -29,8 +24,7 @@
       </v-flex>
 
       <v-flex class="text-xs-left" xs10>
-        <p>Wilhemstraße 22</p>
-        <p>Furtwangen im Schwarzwald</p>
+        <p>{{ currentLocation }}</p>
       </v-flex>
      </v-layout>
 
@@ -52,202 +46,17 @@
             </template>
           </v-autocomplete>      
           </v-flex>
-
     </v-layout>
-
-    <v-layout row>
-
-      <div>
-        <v-tabs
-          v-model="active"
-          color="white"
-          light
-          centered
-          grow
-          active-class="active-tab"
-        >
-          <v-tab href="#tab-1">
-            Letzte Ziele
-          </v-tab>
-          <v-tab href="#tab-2">
-            Favoriten
-          </v-tab>
-          <v-tab href="#tab-3">
-            Entdecken
-          </v-tab>
-          <v-tab-item
-                v-for="i in 3"
-                :key="i"
-                :value="'tab-' + i"
-                lazy
-          >
-
-            <carousel v-if="i == 1"
-            :paginationEnabled="false"
-            >
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://images.unsplash.com/photo-1436637706755-81d219b36e29?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Eifelturm</div>
-                        <div class="carousel-tex-subheader">Paris, France</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://images.unsplash.com/photo-1486247496048-cc4ed929f7cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Louvre</div>
-                        <div class="carousel-tex-subheader">Paris, France</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://picsum.photos/510/300?random"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Martin</div>
-                        <div class="carousel-tex-subheader">Paris, France</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-            </carousel>
-
-
-
-
-            <carousel v-if="i == 2"
-            :paginationEnabled="false"
-            >
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Uhrenmuseum</div>
-                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Kebab-Treff</div>
-                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://picsum.photos/510/300?random"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Martin</div>
-                        <div class="carousel-tex-subheader">Paris, France</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-            </carousel>
-
-            <carousel v-if="i == 3"
-            :paginationEnabled="false"
-            >
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Uhrenmuseum</div>
-                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Kebab-Treff</div>
-                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://picsum.photos/510/300?random"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Martin</div>
-                        <div class="carousel-tex-subheader">Paris, France</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-            </carousel>
-
-          </v-tab-item>
-        </v-tabs>
-      </div>
-    </v-layout>
+    <div v-if="weather" class="weather-container">
+      <h3 class="weather-location">{{ currentLocation }}</h3>
+      <p class="weather-temp"><span class="weather-temp-current">{{ temp }}&deg;C</span><br>{{ temp_max }}&deg;C / {{ temp_min }}&deg;C</p>
+      <!-- <p>Regen: {{ rain }}%</p> -->
+      <div class="weather-icon-container"><img :src="weatherIcon" class="weather-icon" alt="Weather icon"></div>
+    </div>
+    <div v-else>
+      <p>Wetter konnte nicht geladen werden</p>
+    </div>
+   
   </v-container>  
   </v-app>
 </template>
@@ -280,7 +89,14 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
       model: null,
       search: null,
       newDestination: Object,
-      newDestName: ''
+      newDestName: '',
+      currentLocation: '',
+      weather: true,
+      weatherIcon: '',
+      temp: '',
+      temp_max: '',
+      temp_min: '',
+      rain: ''
     }),
     methods: {
       locationSearch: function(event){ 
@@ -300,9 +116,48 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
           this.newDestination = item.geometry.coordinates;
           this.newDestName = item.place_name_de;
           }});
+        },
+        getLocation: function() {
+          navigator.geolocation.getCurrentPosition(function(location) {
+            let lat = location.coords.latitude;
+            let long = location.coords.longitude;
+
+          })
+        },
+        getWeather: function(position) {
+          let lat = position.coords.latitude
+          let lon = position.coords.longitude
+          axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
+              this.weather = true;
+              this.weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
+              this.currentLocation = response.data.name;
+              this.temp = Math.round(response.data.main.temp);
+              this.temp_max = Math.round(response.data.main.temp_max);
+              this.temp_min = Math.round(response.data.main.temp_min);
+              // this.rain = response.data.clouds.all;
+              console.log(response);
+            }, error => {
+              this.weather = false;
+              console.log("Weater API error");
+            })
         }
       },
-
+    beforeCreate() {
+      if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+          this.getWeather(position)
+          // this.startClock()
+          console.log(position.coords.latitude);
+          console.log(position.coords.longitude);
+        }, (error) => {
+          console.log("location error");
+        }
+      )
+    } else console.log("Your browser does not support me.")
+    },
+    mounted() {
+    
+    },
     computed: {
       items () {
         return this.entries.map(entry => {
@@ -448,5 +303,39 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
   background: none !important;
   font-size: 1rem !important;
 }
+
+.weather-container {
+  p {
+    color: white;
+    margin-bottom: 0;
+  }
+  background-color: rgba(0,0,0, 0.6);
+  margin-left: 1rem;
+  margin-right: 1rem;
+  border-radius: 16px;
+  height: 8rem;
+  display: grid;
+  grid-template-columns: 5% 10% 50% 30% 5%;
+   grid-template-areas: 
+  ". weatherIcon weatherLocation weatherTemp .";
+  .weather-location {
+    grid-area: weatherLocation;
+    align-self: center;
+  }
+  .weather-icon-container {
+    grid-area: weatherIcon;
+    align-self: center;
+  }
+  .weather-temp {
+    grid-area: weatherTemp;
+    line-height: 1.1;
+    align-self: center;
+    .weather-temp-current {
+      font-size: 25pt;
+    }
+  }
+}
+
+
 
 </style>
