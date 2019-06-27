@@ -41,21 +41,29 @@
             solo
           >
             <template slot="append">
-                <!-- <v-icon v-on:click="locationSearch()">check</v-icon> -->
                 <v-icon v-on:click="locationSearch()">directions</v-icon>
             </template>
           </v-autocomplete>      
           </v-flex>
     </v-layout>
-    <div v-if="weather" class="weather-container">
-      <h3 class="weather-location">{{ currentLocation }}</h3>
-      <p class="weather-temp"><span class="weather-temp-current">{{ temp }}&deg;C</span><br>{{ temp_max }}&deg;C / {{ temp_min }}&deg;C</p>
-      <div class="weather-icon-container"><img :src="weatherIcon" class="weather-icon" alt="Weather icon"></div>
+
+    <div class="last-destinations-container">
+      <div v-if="weather" class="weather-container">
+        <h3 class="weather-location">{{ currentLocation }}</h3>
+        <p class="weather-temp"><span class="weather-temp-current">{{ temp }}&deg;C</span><br>{{ temp_max }}&deg;C / {{ temp_min }}&deg;C</p>
+        <div v-if="weather.weatherIcon != ''" class="weather-icon-container"><img :src="weatherIcon" class="weather-icon" alt="Weather icon"></div>
+      </div>
+      <div v-else>
+        <p>Wetter konnte nicht geladen werden</p>
+      </div>
+      <h3 class="last-destinations">Letzte Ziele</h3>
+      <ul class="last-locations-list">
+        <li v-for="item in lastLocations" :key="item.id">
+          <v-icon color="white">near_me</v-icon> {{ item.location }}
+        </li>
+      </ul>
+      <hr class="spacer"/>
     </div>
-    <div v-else>
-      <p>Wetter konnte nicht geladen werden</p>
-    </div>
-   
   </v-container>  
   </v-app>
 </template>
@@ -96,7 +104,12 @@ import { weather } from '../shared_data/queries'
       temp: weather.temp,
       temp_max: weather.temp_max,
       temp_min: weather.temp_min,
-      rain: ''
+      lastLocations: [
+        { location: 'Furtwangen' },
+        { location: 'Stuttgart' },
+        { location: 'Freiburg' },
+        { location: 'Köln' }
+      ]
     }),
     methods: {
       locationSearch: function(event){ 
@@ -104,11 +117,8 @@ import { weather } from '../shared_data/queries'
         var newDest = this.newDestination
         var newDestName = this.newDestName;
         setTimeout(function(){
-          eventBus.$emit('locationFromHome', newDest, newDestName); 
-        }, 4000);
-        },
-        locationSearch2: function(){
-         // console.log('B')
+            eventBus.$emit('locationFromHome', newDest, newDestName); 
+          }, 4000);
         },
         getDestination: function(event){
           this.items.map(item => {
@@ -149,9 +159,6 @@ import { weather } from '../shared_data/queries'
       if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
           this.getWeather(position)
-          // this.startClock()
-          // console.log(position.coords.latitude);
-          // console.log(position.coords.longitude);
         }, (error) => {
           console.log("location error");
         }
@@ -208,6 +215,7 @@ import { weather } from '../shared_data/queries'
 
 
 <style lang="scss">
+
   h1,h2,h3,h4 p {
     color: white;
     font-family: 'Roboto Slab', serif;
@@ -218,6 +226,7 @@ import { weather } from '../shared_data/queries'
 
   .container {
     padding: 0 !important;
+    overflow: scroll;
   }
 
   .top-area {
@@ -309,7 +318,7 @@ import { weather } from '../shared_data/queries'
     color: white;
     margin-bottom: 0;
   }
-  background-color: rgba(0,0,0, 0.6);
+  background-color: rgba(0,0,0, 0.4);
   margin-left: 1rem;
   margin-right: 1rem;
   border-radius: 16px;
@@ -337,5 +346,41 @@ import { weather } from '../shared_data/queries'
 }
 
 
+.last-locations-list {
+  margin-left: 1rem;
+  margin-right: 1rem;
+  padding-left: 0;
+  li {
+    background-color: rgba(0,0,0, 0.4);
+    border-radius: 17px;
+    margin-bottom: 0.2rem;
+    margin-top: 0.2rem;
+    padding: 2rem;
+    list-style: none;
+    color: white;
+  }
+}
+
+.last-destinations {
+  color: white;
+  text-align: left;
+  padding-left: 2rem;
+  padding-top: 1rem;
+}
+
+hr.spacer {
+    height: 6rem;
+    opacity: 0;
+}
+
+.last-destinations-container {
+    background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    border-radisu: 17px;
+    border-radius: 22px;
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
 
 </style>
