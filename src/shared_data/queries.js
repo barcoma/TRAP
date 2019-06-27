@@ -180,6 +180,21 @@ export const toggleNaviPoi = {
   }
 };
 
+export const weather = {
+  location: 'Wird geladen...',
+  weatherIcon: '01d',
+  temp: '',
+  temp_max: '',
+  temp_min: '',
+  updateWeatherData(location, weatherIcon, temp, temp_max, temp_min) {
+    this.location = location;
+    this.weatherIcon = weatherIcon;
+    this.temp = temp;
+    this.temp_max = temp_max;
+    this.temp_min = temp_min;
+  }
+}
+
 export const coordinateQuery = gql` 
 query coordinateQuery {
   coordinateQuery @client {

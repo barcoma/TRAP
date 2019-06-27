@@ -50,7 +50,6 @@
     <div v-if="weather" class="weather-container">
       <h3 class="weather-location">{{ currentLocation }}</h3>
       <p class="weather-temp"><span class="weather-temp-current">{{ temp }}&deg;C</span><br>{{ temp_max }}&deg;C / {{ temp_min }}&deg;C</p>
-      <!-- <p>Regen: {{ rain }}%</p> -->
       <div class="weather-icon-container"><img :src="weatherIcon" class="weather-icon" alt="Weather icon"></div>
     </div>
     <div v-else>
@@ -70,6 +69,7 @@ import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import Sidebarmenu from '../components/Sidebarmenu.vue'
+import { weather } from '../shared_data/queries'
 
 
   export default {
@@ -90,12 +90,12 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
       search: null,
       newDestination: Object,
       newDestName: '',
-      currentLocation: '',
+      currentLocation: weather.location,
       weather: true,
-      weatherIcon: '',
-      temp: '',
-      temp_max: '',
-      temp_min: '',
+      weatherIcon: weather.weatherIcon,
+      temp: weather.temp,
+      temp_max: weather.temp_max,
+      temp_min: weather.temp_min,
       rain: ''
     }),
     methods: {
@@ -129,34 +129,34 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
           let lon = position.coords.longitude
           axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
               this.weather = true;
-              this.weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
               this.currentLocation = response.data.name;
+              this.weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
               this.temp = Math.round(response.data.main.temp);
               this.temp_max = Math.round(response.data.main.temp_max);
               this.temp_min = Math.round(response.data.main.temp_min);
-              // this.rain = response.data.clouds.all;
-              console.log(response);
+              var weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
+              var temp = Math.round(response.data.main.temp);
+              var temp_max = Math.round(response.data.main.temp_max);
+              var temp_min = Math.round(response.data.main.temp_min);
+              weather.updateWeatherData(response.data.name, weatherIcon, temp, temp_max, temp_min);
             }, error => {
               this.weather = false;
               console.log("Weater API error");
             })
         }
       },
-    beforeCreate() {
+    mounted() {
       if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
           this.getWeather(position)
           // this.startClock()
-          console.log(position.coords.latitude);
-          console.log(position.coords.longitude);
+          // console.log(position.coords.latitude);
+          // console.log(position.coords.longitude);
         }, (error) => {
           console.log("location error");
         }
       )
     } else console.log("Your browser does not support me.")
-    },
-    mounted() {
-    
     },
     computed: {
       items () {
