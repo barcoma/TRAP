@@ -104,11 +104,18 @@ export const typeDefs = gql`
     type Query {
         poiFilter: PoiFilter
         coordinateQuery: Coordinates
+        lastDestination: [Destination]
     }
 
     type PoiFilter {
         category: Category
         source: Source
+    }
+
+    type Destination {
+      id: Int
+      coordinates: Coordinates
+      name: String
     }
 
     type Source {
@@ -133,32 +140,45 @@ export const typeDefs = gql`
     type Mutation {
         updatePoiFilterParams(category: Category!, source: Source!): poiFilter
         coordinateMutation(coordinates: Coordinates!): coordinateQuery
+        updateLastDestination(coordinates: Coordinates!, name: String!): lastDestination
     }
 `
 
 export const poiFilterQuery = gql` 
-query GetFilterParams {
-    poiFilter @client {
-        category {
-          autorepair
-          food
-          hotels
-          servicestations
-          physicians
-        }
-        source {
-          yelp
-          foursquare
-          custom
-        }
-    }
-}`
+  query GetFilterParams {
+      poiFilter @client {
+          category {
+            autorepair
+            food
+            hotels
+            servicestations
+            physicians
+          }
+          source {
+            yelp
+            foursquare
+            custom
+          }
+      }
+  }`
 
 export const updatePoiFilter = gql`
-mutation($category: Object, $source: Object) {
-    updatePoiFilterParams(category: $category, source: $source) @client
-}
-`
+  mutation($category: Object, $source: Object) {
+      updatePoiFilterParams(category: $category, source: $source) @client
+  }`
+
+export const getLastDestination = gql`
+  query lastDestination {
+    lastDestination @client {
+      id
+      name
+      coordinates {
+        latitude
+        longitude
+      }
+    }
+  }
+`   
 
 export const toggleNaviPoi = {
   state: {
@@ -171,10 +191,29 @@ export const toggleNaviPoi = {
   showNavi() {
     this.state.active_el = 1;
   },
-  toggleActive() {
-    this.state.active_filter = !this.state.active_filter;
+  toggleActive(defaultValues) {
+    if (defaultValues) {
+      this.state.active_filter = false;
+    } else {
+      this.state.active_filter = true;
+    }
   }
 };
+
+export const weather = {
+  location: 'Wird geladen...',
+  weatherIcon: '01d',
+  temp: '',
+  temp_max: '',
+  temp_min: '',
+  updateWeatherData(location, weatherIcon, temp, temp_max, temp_min) {
+    this.location = location;
+    this.weatherIcon = weatherIcon;
+    this.temp = temp;
+    this.temp_max = temp_max;
+    this.temp_min = temp_min;
+  }
+}
 
 export const coordinateQuery = gql` 
 query coordinateQuery {
@@ -242,3 +281,15 @@ export const amountQueries = {
   CUSTOM_YELP_QUERY: getAmountQueryYelpCustom
 }
 
+export const createPOIMutation = gql`
+mutation ($name: String!, $description: String, $latitude: Float!, $longitude: Float!, $tags: [String]) {
+  createPOI (name: $name, description: $description, latitude: $latitude, longitude: $longitude, tags: $tags) {
+    name
+    description
+    coordinates {
+      latitude
+    	longitude
+    }
+  }
+}
+`

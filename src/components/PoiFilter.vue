@@ -19,10 +19,11 @@
             <input class="slider-input" type="range" min="0" max="50" step="1.0">
             <p class="slider-value">Anzahl: <span id="demo"></span></p>
         </div>
-        <div>
-            Es gibt mindestens {{amount.yelpAmount + amount.foursquareAmount}} Treffer mit deinen Einstellungen!
+        <div class="POI-search-amount">
+        {{amount.yelpAmount + amount.foursquareAmount}} Treffer!
         </div>
-        <button class="POI-filter-search" v-on:click="startSearch" :to="{ name: 'map'}">Suche starten</button>
+        <button class="POI-filter-search" v-on:click="startSearch">Suche starten</button>
+        <button class="POI-filter-cancel" @click="resetFilter(), $router.push('map');">Abbrechen</button>
     </div>
 </template>
 
@@ -72,29 +73,31 @@ export default {
             mutation: updatePoiFilter,
             variables: { category, source }
         })
+
         var defaultValues = true;
-        for (var key in this.source) {
-            if (key == false) {
+        for (var index in this.source) { 
+            var attr = this.source[index]; 
+            if (attr == false) {
                 defaultValues = false;
             }
         }
-        for (var key in this.category) {
-            if (key == true) {
+        for (var index in this.category) { 
+            var attr = this.category[index]; 
+            if (attr == true) {
                 defaultValues = false;
             }
         }
-        if (!defaultValues) {
-            toggleNaviPoi.toggleActive();
-        }
+
+        toggleNaviPoi.toggleActive(defaultValues);
         toggleNaviPoi.showPOI();
         this.$router.push('map');
       },
       resetFilter: function() {
-        for (var key in this.source) {
-            key = true;
+        for (var index in this.source) { 
+            this.source[index] = true;
         }
-        for (var key in this.category) {
-            key = false;
+        for (var index in this.category) { 
+            this.category[index] = false;
         }
 
         const category = this.category;
@@ -118,7 +121,7 @@ export default {
       },
       getQuery() {
         var source = this.source;
-        var query;
+        var query = null;
         if (source.yelp) {
             if (source.foursquare) {
                 if (source.custom) {
@@ -144,6 +147,13 @@ export default {
       },
       executeAmountQuery(variables) {
         var query = this.getQuery();
+        if (query == null) {
+            this.amount.customAmount = 0;
+            this.amount.yelpAmount = 0;
+            this.amount.foursquareAmount = 0;
+            return;
+        }
+
         this.$apollo.query({
             query: query,
             variables: variables
@@ -227,7 +237,7 @@ export default {
 
 p {
     text-align: left;
-    padding-left: 1rem;
+    // padding-left: 1rem;
     margin-bottom: 0;
 }
 .POI-container {
@@ -240,7 +250,7 @@ p {
     grid-template-rows: 5% 5% 5% 5% 5% 5% 5% 5% auto;
     grid-row-gap: 5px;
     grid-template-areas: 
-    "headline headline headline headline headline"
+    ". . headline headline ."
     ". POISource POISource POISource ."
     ". yelp foursquare custom ."
     ". category category category ."
@@ -248,13 +258,12 @@ p {
     ". servicestations physicians . ."
     ". slider-text slider-text slider-text ."
     ". slider slider slider ."
-    ". . search search .";
+    ". cancel amount search .";
 
         .POI-headline {
             grid-area: headline;
-            justify-self: start;
+            justify-self: end;
             align-self: end;
-            grid-column: 4;
         }
         .POI-slider {
             grid-area: slider;
@@ -325,14 +334,15 @@ p {
             border-radius: 16px;
         }
         .toggleButton {
-            // background: rgba(134, 134, 134, 0.507);
-            // background: linear-gradient(0deg, rgba(134,134,134,1) 0%, rgba(85,85,85,1) 41%, rgba(0,0,0,1) 100%);
             color: white;
-            padding: 0.5rem;
             border-radius: 50px;
             width: 90%;
             text-align: center;
             place-self: center;
+            height: 90%;
+            justify-self: center;
+            align-self: center;
+            padding-top: 6px;
         }
         .yelp {
             grid-area: yelp;
@@ -374,10 +384,38 @@ p {
             margin-bottom: 1rem;
             box-shadow: 2px 2px 10px black;
         }
+        .POI-search-amount {
+            grid-area: amount;
+            align-self: end;
+            justify-self: center;
+            padding: 0.5rem 0.9rem 0.5rem 0.9rem;
+            border-radius: 50px;
+            margin-bottom: 1rem;
+            background-color: #1C1C1C;
+            color: white;
+        }
+        .POI-filter-cancel {
+            grid-area: cancel;
+            align-self: end;
+            justify-self: start;
+            padding: 0.5rem 0.9rem 0.5rem 0.9rem;
+            border-radius: 50px;
+            margin-bottom: 1rem;
+            background-color: white;
+            color: black;
+            -webkit-box-shadow: 2px 2px 10px black;
+            box-shadow: 2px 2px 10px black;
+        }
     }
     .active {
         background-color: dodgerblue !important;
 
     }
+
+@media (max-height: 700px) {
+    .POI-container {
+        grid-template-rows: 8% 5% 7% 5% 7% 7% 10% 7% auto;
+    }
+}
 
 </style>

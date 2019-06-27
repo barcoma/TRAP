@@ -3,9 +3,6 @@
   <v-container>
 
     <v-layout align-center row wrap class="top-area">
-
-      
-         <!-- <sidebarmenu class="sidebarmenu"/> -->
       
       <v-spacer></v-spacer>
       <v-flex xs4 mt-3 class="flex-avatar">
@@ -13,7 +10,7 @@
           :size="64"
           color="grey lighten-4"
         >
-          <!-- <img src="https://i1.rgstatic.net/ii/profile.image/390911189110788-1470211898704_Q512/Wolfgang_Taube2.jpg" alt="avatar"> -->
+        <v-icon large color="darkgrey">person</v-icon>
         </v-avatar>
       </v-flex>
       <v-flex class="text-xs-left" xs12 offset-xs1>
@@ -27,8 +24,7 @@
       </v-flex>
 
       <v-flex class="text-xs-left" xs10>
-        <p>Wilhemstraße 22</p>
-        <p>Furtwangen im Schwarzwald</p>
+        <p>{{ currentLocation }}</p>
       </v-flex>
      </v-layout>
 
@@ -45,8 +41,8 @@
             solo
           >
             <template slot="append">
-                <v-icon v-on:click="locationSearch()">check</v-icon>
-                <v-icon v-on:click="locationSearch2()">directions</v-icon>
+                <!-- <v-icon v-on:click="locationSearch()">check</v-icon> -->
+                <v-icon v-on:click="locationSearch()">directions</v-icon>
             </template>
           </v-autocomplete>      
           </v-flex>
@@ -54,6 +50,12 @@
     </v-layout>
 
     <v-layout row>
+      <div>
+        <li v-for="destination in lastDestination" v-bind:key="destination.id">
+          {{destination.name}} 
+        </li>
+
+      </div>
 
       <div>
         <v-tabs
@@ -246,6 +248,15 @@
         </v-tabs>
       </div>
     </v-layout>
+    <div v-if="weather" class="weather-container">
+      <h3 class="weather-location">{{ currentLocation }}</h3>
+      <p class="weather-temp"><span class="weather-temp-current">{{ temp }}&deg;C</span><br>{{ temp_max }}&deg;C / {{ temp_min }}&deg;C</p>
+      <div class="weather-icon-container"><img :src="weatherIcon" class="weather-icon" alt="Weather icon"></div>
+    </div>
+    <div v-else>
+      <p>Wetter konnte nicht geladen werden</p>
+    </div>
+   
   </v-container>  
   </v-app>
 </template>
@@ -259,7 +270,8 @@ import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import Sidebarmenu from '../components/Sidebarmenu.vue'
-
+import { weather } from '../shared_data/queries'
+import { getLastDestination } from '../shared_data/queries'
 
   export default {
     components: {
@@ -277,15 +289,28 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
       isLoading: false,
       model: null,
       search: null,
-      newDestination: Object
+      newDestination: Object,
+      newDestName: '',
+      currentLocation: weather.location,
+      weather: true,
+      weatherIcon: weather.weatherIcon,
+      temp: weather.temp,
+      temp_max: weather.temp_max,
+      temp_min: weather.temp_min,
+      rain: '',
+      lastDestination: [{
+        "name": "Keine letzten Ziele gefunden!",
+        id: 0
+      }]
     }),
     methods: {
       locationSearch: function(event){ 
         this.$router.push('map');
         var newDest = this.newDestination
+        var newDestName = this.newDestName;
         setTimeout(function(){
-          eventBus.$emit('locationFromHome', newDest); 
-        }, 10);
+          eventBus.$emit('locationFromHome', newDest, newDestName); 
+        }, 4000);
         },
         locationSearch2: function(){
          // console.log('B')
@@ -294,15 +319,63 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
           this.items.map(item => {
           if(item.id == event){
           this.newDestination = item.geometry.coordinates;
+          this.newDestName = item.place_name_de;
           }});
+        },
+        getLocation: function() {
+          navigator.geolocation.getCurrentPosition(function(location) {
+            let lat = location.coords.latitude;
+            let long = location.coords.longitude;
+
+          })
+        },
+        getWeather: function(position) {
+          let lat = position.coords.latitude
+          let lon = position.coords.longitude
+          axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
+              this.weather = true;
+              this.currentLocation = response.data.name;
+              this.weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
+              this.temp = Math.round(response.data.main.temp);
+              this.temp_max = Math.round(response.data.main.temp_max);
+              this.temp_min = Math.round(response.data.main.temp_min);
+              var weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
+              var temp = Math.round(response.data.main.temp);
+              var temp_max = Math.round(response.data.main.temp_max);
+              var temp_min = Math.round(response.data.main.temp_min);
+              weather.updateWeatherData(response.data.name, weatherIcon, temp, temp_max, temp_min);
+            }, error => {
+              this.weather = false;
+              console.log("Weater API error");
+            })
         }
       },
-
+    mounted() {
+      if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+          this.getWeather(position)
+          // this.startClock()
+          // console.log(position.coords.latitude);
+          // console.log(position.coords.longitude);
+        }, (error) => {
+          console.log("location error");
+        }
+      )
+    } else console.log("Your browser does not support me.")
+      this.$apollo.query({
+        query: getLastDestination
+      }).then(response => {
+        console.log(response);
+        if(response.data) {
+          this.lastDestination = response.data.lastDestination;
+        }
+      })
+    },
     computed: {
       items () {
         return this.entries.map(entry => {
           if(entry.relevance > .1){
-          return  Object.assign({}, entry);
+            return  Object.assign({}, entry);
           }
         })
       }
@@ -443,5 +516,39 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
   background: none !important;
   font-size: 1rem !important;
 }
+
+.weather-container {
+  p {
+    color: white;
+    margin-bottom: 0;
+  }
+  background-color: rgba(0,0,0, 0.6);
+  margin-left: 1rem;
+  margin-right: 1rem;
+  border-radius: 16px;
+  height: 8rem;
+  display: grid;
+  grid-template-columns: 5% 10% 50% 30% 5%;
+   grid-template-areas: 
+  ". weatherIcon weatherLocation weatherTemp .";
+  .weather-location {
+    grid-area: weatherLocation;
+    align-self: center;
+  }
+  .weather-icon-container {
+    grid-area: weatherIcon;
+    align-self: center;
+  }
+  .weather-temp {
+    grid-area: weatherTemp;
+    line-height: 1.1;
+    align-self: center;
+    .weather-temp-current {
+      font-size: 25pt;
+    }
+  }
+}
+
+
 
 </style>
