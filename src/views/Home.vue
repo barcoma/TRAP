@@ -46,6 +46,154 @@
             </template>
           </v-autocomplete>      
           </v-flex>
+
+    </v-layout>
+
+    <v-layout row>
+      <div>
+        <li v-for="destination in lastDestination" v-bind:key="destination.id">
+          {{destination.name}} 
+        </li>
+
+      </div>
+
+      <div>
+        <v-tabs
+          v-model="active"
+          color="white"
+          light
+          centered
+          grow
+          active-class="active-tab"
+        >
+          <v-tab href="#tab-1">
+            Letzte Ziele
+          </v-tab>
+          <v-tab href="#tab-2">
+            Favoriten
+          </v-tab>
+          <v-tab href="#tab-3">
+            Entdecken
+          </v-tab>
+          <v-tab-item
+                v-for="i in 3"
+                :key="i"
+                :value="'tab-' + i"
+                lazy
+          >
+
+            <carousel v-if="i == 1"
+            :paginationEnabled="false"
+            >
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://images.unsplash.com/photo-1436637706755-81d219b36e29?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Eifelturm</div>
+                        <div class="carousel-tex-subheader">Paris, France</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://images.unsplash.com/photo-1486247496048-cc4ed929f7cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Louvre</div>
+                        <div class="carousel-tex-subheader">Paris, France</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://picsum.photos/510/300?random"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Martin</div>
+                        <div class="carousel-tex-subheader">Paris, France</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+            </carousel>
+
+
+
+
+            <carousel v-if="i == 2"
+            :paginationEnabled="false"
+            >
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Uhrenmuseum</div>
+                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Kebab-Treff</div>
+                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://picsum.photos/510/300?random"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Martin</div>
+                        <div class="carousel-tex-subheader">Paris, France</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+            </carousel>
+
+          </v-tab-item>
+        </v-tabs>
+      </div>
     </v-layout>
     <div v-if="weather" class="weather-container">
       <h3 class="weather-location">{{ currentLocation }}</h3>
@@ -70,7 +218,7 @@ import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import Sidebarmenu from '../components/Sidebarmenu.vue'
 import { weather } from '../shared_data/queries'
-
+import { getLastDestination } from '../shared_data/queries'
 
   export default {
     components: {
@@ -96,7 +244,11 @@ import { weather } from '../shared_data/queries'
       temp: weather.temp,
       temp_max: weather.temp_max,
       temp_min: weather.temp_min,
-      rain: ''
+      rain: '',
+      lastDestination: [{
+        "name": "Keine letzten Ziele gefunden!",
+        id: 0
+      }]
     }),
     methods: {
       locationSearch: function(event){ 
@@ -157,12 +309,20 @@ import { weather } from '../shared_data/queries'
         }
       )
     } else console.log("Your browser does not support me.")
+      this.$apollo.query({
+        query: getLastDestination
+      }).then(response => {
+        console.log(response);
+        if(response.data) {
+          this.lastDestination = response.data.lastDestination;
+        }
+      })
     },
     computed: {
       items () {
         return this.entries.map(entry => {
           if(entry.relevance > .1){
-          return  Object.assign({}, entry);
+            return  Object.assign({}, entry);
           }
         })
       }
