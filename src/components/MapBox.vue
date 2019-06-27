@@ -80,20 +80,12 @@ import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
 import { setTimeout } from 'timers';
-import { poiQueries, poiFilterQuery, toggleNaviPoi } from '../shared_data/queries'
+import { poiQueries, poiFilterQuery, toggleNaviPoi, getLastDestination } from '../shared_data/queries'
 import { getCategories } from '../shared_data/data'
 
 var markers = [];
 var userLong = 0;
 var userLat = 0;
-
-// var categoryArray = [
-//     ['food', '4d4b7105d754a06374d81259'],
-//     ['physicians', '4bf58dd8d48988d104941735'],
-//     ['autorepair', '56aa371be4b08b9a8d5734d3'],
-//     ['hotels', '4bf58dd8d48988d1fa931735'],
-//     ['servicestations', '4bf58dd8d48988d113951735']
-// ];
 
 export default {
   name: 'MapBox',
@@ -281,33 +273,6 @@ export default {
       this.directions.removeRoutes();
       this.directions.setOrigin([long, lat]);
     },  
-    // getCategories: function(category) {
-    //   var keys = Object.keys(category);
-
-    //   var filteredKeys = keys.filter(function(key) {
-    //       return category[key] && key != "__typename";
-    //   });
-
-    //   var categoryMap = new Map(categoryArray);
-
-    //   var yelpCategories = "";
-    //   var foursquareCategories = "";
-
-    //   filteredKeys.forEach(function(key) {
-    //       if (yelpCategories != "") {
-    //           yelpCategories += ",";
-    //           foursquareCategories += ",";
-    //       } 
-    //       yelpCategories += key;
-    //       foursquareCategories += categoryMap.get(key);
-    //   })
-
-    //   var categories = {
-    //       yelpCategories: yelpCategories,
-    //       foursquareCategories: foursquareCategories
-    //   }; 
-    //   return categories;
-    // },
     clearMarkers: function() {
       for (var i  = 0; i < markers.length; i++) {
         markers[i].remove();
@@ -464,7 +429,7 @@ export default {
       }
       const coordinateMutation = gql`
         mutation ($coordinates: Object) {
-            coordinateMutation(coordinates: $coordinates) @client
+            coordinateMutation(coordinates: $coordinates) @client 
         }`;
       this.$apollo.mutate({
         mutation: coordinateMutation,
@@ -529,6 +494,32 @@ export default {
 
   this.directions.on("route", e => {
     this.routeReady = true;
+  });
+
+  this.directions.on("origin", e => {
+    var lng = e.feature.geometry.coordinates[0];
+    var lat = e.feature.geometry.coordinates[1];
+    var isDuplicate = false;
+    var name = this.inputStart.value;
+    var coordinates = {
+      latitude: lat,
+      longitude: lng
+    };
+    const mutation = gql`
+        mutation updateLastDestination ($coordinates: Object, $name: String) {
+          updateLastDestination(coordinates: $coordinates, name: $name) @client {
+            name
+            coordinates {
+              latitude
+              longitude
+            }
+          }
+        }
+      `
+    this.$apollo.mutate({
+      mutation: mutation,
+      variables: { name, coordinates }
+    }).then(response => {console.log(response)})
   });
 
   this.userLocation = new mapboxgl.GeolocateControl({

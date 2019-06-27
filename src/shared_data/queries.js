@@ -104,11 +104,18 @@ export const typeDefs = gql`
     type Query {
         poiFilter: PoiFilter
         coordinateQuery: Coordinates
+        lastDestination: [Destination]
     }
 
     type PoiFilter {
         category: Category
         source: Source
+    }
+
+    type Destination {
+      id: Int
+      coordinates: Coordinates
+      name: String
     }
 
     type Source {
@@ -133,32 +140,45 @@ export const typeDefs = gql`
     type Mutation {
         updatePoiFilterParams(category: Category!, source: Source!): poiFilter
         coordinateMutation(coordinates: Coordinates!): coordinateQuery
+        updateLastDestination(coordinates: Coordinates!, name: String!): lastDestination
     }
 `
 
 export const poiFilterQuery = gql` 
-query GetFilterParams {
-    poiFilter @client {
-        category {
-          autorepair
-          food
-          hotels
-          servicestations
-          physicians
-        }
-        source {
-          yelp
-          foursquare
-          custom
-        }
-    }
-}`
+  query GetFilterParams {
+      poiFilter @client {
+          category {
+            autorepair
+            food
+            hotels
+            servicestations
+            physicians
+          }
+          source {
+            yelp
+            foursquare
+            custom
+          }
+      }
+  }`
 
 export const updatePoiFilter = gql`
-mutation($category: Object, $source: Object) {
-    updatePoiFilterParams(category: $category, source: $source) @client
-}
-`
+  mutation($category: Object, $source: Object) {
+      updatePoiFilterParams(category: $category, source: $source) @client
+  }`
+
+export const getLastDestination = gql`
+  query lastDestination {
+    lastDestination @client {
+      id
+      name
+      coordinates {
+        latitude
+        longitude
+      }
+    }
+  }
+`   
 
 export const toggleNaviPoi = {
   state: {
