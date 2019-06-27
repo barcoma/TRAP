@@ -189,6 +189,59 @@
               </slide>
             </carousel>
 
+            <carousel v-if="i == 3"
+            :paginationEnabled="false"
+            >
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Uhrenmuseum</div>
+                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Kebab-Treff</div>
+                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+              <slide>
+                <v-flex mr-1 ml-1>
+                  <v-card dark tile flat
+                  img="https://picsum.photos/510/300?random"
+                  height="30vh"
+                  >        
+                    <v-card-title>
+                      <v-icon medium>location_on</v-icon>
+                      <div class="carousel-text">
+                        <div class="carousel-tex-headline">Martin</div>
+                        <div class="carousel-tex-subheader">Paris, France</div>
+                      </div>
+                    </v-card-title>                
+                  </v-card>
+                </v-flex>
+              </slide>
+            </carousel>
+
           </v-tab-item>
         </v-tabs>
       </div>
