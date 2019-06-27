@@ -4,6 +4,7 @@ import MapPage from './views/MapPage.vue'
 import Home from './views/Home.vue'
 import ObdPage from './views/ObdPage.vue'
 import GraphQl from './components/GraphQlTest.vue'
+import Settings from './views/Settings.vue'
 
 Vue.use(Router)
 
@@ -28,6 +29,11 @@ export default new Router({
       path: '/graphql',
       name: 'graphql',
       component: GraphQl
+    },
+    {
+      path: '/settings',
+      name: 'Settings',
+      component: Settings
     }
   ]
 })

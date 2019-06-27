@@ -171,7 +171,7 @@ import { Carousel, Slide } from 'vue-carousel';
 }
 </script>
  
-<style lang="scss">
+<style scoped lang="scss">
 
 .v-card {
     border-radius: 8px !important;

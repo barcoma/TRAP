@@ -1,7 +1,15 @@
 <template lang="html">
     <section class="OBD">
-        <button v-on:click="startWorker">Request devices</button>
-        <h1 color="black">{{currentRPM + obdCommandInfo[0].unit}}</h1>
+        <v-btn color=blue light v-on:click="startWorker">Request devices</v-btn>
+        <!-- <h1 color="black">{{obdCommandInfo[0].name + obdCommandInfo[0].unit}}</h1> -->
+
+        <v-list>
+          <v-list-tile v-for="obd in obdCommandInfo">
+            <v-list-tile-content>
+              <v-list-tile-title>{{obd.name}} : {{obd.value}} {{obd.unit}}</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
     </section>
 </template>
 
@@ -31,17 +39,20 @@ export default {
             pidResponse: [],
             byteCounter: 0,
             obdCommandInfo: [
-                {service: "010C1\r", pid: "0C", bytes: 2, name: "rpm", unit: "rev/min"},
-                {service: "0105\r", pid: "05", bytes: 1, name: "engCoolant", unit: "degree"},
-                {service: "0146\r", pid: "46", bytes: 1, name: "airTemp", unit: "degree"},
-                {service: "015C\r", pid: "5C", bytes: 1, name: "oilTemp", unit: "degree"},
-                {service: "015E\r", pid: "5E", bytes: 1, name: "fuelRate", unit: "L/h"},
-                {service: "012F\r", pid: "5E", bytes: 1, name: "fuelRate", unit: "percent"},
+                {service: "010C1\r", pid: "0C", bytes: 2, name: "Drehzahl", unit: "U/min", value: 0},
+                {service: "01051\r", pid: "05", bytes: 1, name: "Engine Coolant", unit: "Grad", value: 0},
+                // {service: "01461\r", pid: "46", bytes: 1, name: "Ambient Air Temp", unit: "Grad", value: 0},
+                {service: "015C1\r", pid: "5C", bytes: 1, name: "Oil Temp", unit: "Grad", value: 0},
+                {service: "015E1\r", pid: "5E", bytes: 1, name: "fuelRate", unit: "L/h", value: 0},
+                {service: "012F1\r", pid: "5E", bytes: 1, name: "fuelPercentage", unit: "%", value: 0},
             ],
             testCount: 0,
             lastBuffer: ArrayBuffer,
-            queue: ["010C1\r", "01051\r", "01461\r", "015C\r", "015E\r"],
-            lastCommandSent: String
+            queue: ["010C1\r", "01051\r", "015C1\r", "015E1\r"],
+            lastCommandSent: String,
+            replyBytes: Number,
+            repliedCommand: null
+
         }
     },
     computed: {
@@ -81,29 +92,20 @@ export default {
                 
                 characteristic.addEventListener('characteristicvaluechanged',
                 this.handleCharacteristicValueChanged);
+                
+                var encodedCommands = [];
+                this.queue.forEach(el => {encodedCommands.push(this.encodeCommand(el));});
 
-                var obdCommand = "010C1\r";
-                var testArray = this.encodeCommand(obdCommand);  
+                var queueIndex = -1;
+                this.lastCommandSent = this.queue[queueIndex];
 
-                // setInterval(function(){
-                //     return characteristic.writeValue(testArray);
-                // }, 3000);
-
-                var commandToSend = this.encodeCommand(this.queue[0]);
-                this.lastCommandSent = commandToSend;
-                // if(queueCount >= this.queue.length){
-                //     queueCount = 0;
-                // };
                 setInterval(function(){
-                    return characteristic.writeValue(commandToSend);
+                    queueIndex++;
+                    if(queueIndex > 1){
+                        queueIndex = 0;
+                    }
+                    return characteristic.writeValue(encodedCommands[queueIndex]);
                 }, 3000);
-                        // for(i = 0; i < this.queue.length; i++){
-                        //     var commandToSend = this.encodeCommand(this.queue[i]);
-                        //     characteristic.writeValue();
-                        //     if (i=this.queue.length){
-
-                        //     }
-                        // }            
             })
             .then(value => {
                 console.log(value);
@@ -115,21 +117,27 @@ export default {
         handleCharacteristicValueChanged: function(event) {
             let value = event.target.value;
             var decoder = new TextDecoder('ascii');
-            var command = decoder.decode(this.lastCommandSent);
-            // var replyBytes = this.obdCommandInfo.find(function(service){
-            //     return service == command;
-            // });
-            var replyBytes = 2;
             var currentBufferDecoded = decoder.decode(value.buffer);
+            console.log(currentBufferDecoded);
             if(this.lastBuffer.byteLength > 0){
             var lastBufferDecoded = decoder.decode(this.lastBuffer);
+            } 
+            if(!this.repliedCommand){
+            this.repliedCommand = this.obdCommandInfo.find(obj =>{
+            return obj.service == currentBufferDecoded;
+            });
             }
-            if ( lastBufferDecoded == command){
+            //var obj = this.obdCommandInfo.find(obj => obj.service == command);
+            if (this.repliedCommand){
                 this.setupDone = true;
+                this.replyBytes = this.obdCommandInfo.find(obj =>{
+                return obj.service == this.repliedCommand.service;
+            });
             }
             if(this.setupDone == true){
                 if(currentBufferDecoded == "41"){
-                    this.byteCounter = replyBytes + 2;
+                    this.byteCounter = this.replyBytes.bytes + 2;
+                    console.log(currentBufferDecoded);
                 }
                 if (this.byteCounter > 0){
                     this.pidResponse.push(currentBufferDecoded);
@@ -137,12 +145,9 @@ export default {
                     if(this.byteCounter == 0){
                         this.pidResponse.splice(0,2);
                         var reply = this.convertValue(this.pidResponse);
-                        console.log("pid: " +command + 'value:' +reply);
-
-                        //this.obdCommandInfo[0].convertFunction(this.pidResponse[3], this.pidResponse[4])
-                        // this.currentRPM = this.convertRPM(this.pidResponse[2], this.pidResponse[3]);
-                        // console.log(this.currentRPM);
+                        console.log("pid: " +this.repliedCommand.name + '  value: ' +reply);
                         this.pidResponse = [];
+                        this.repliedCommand = null;
                     }
                 }
             }
@@ -151,6 +156,11 @@ export default {
         sleep: function(delay) {
             var start = new Date().getTime();
             while (new Date().getTime() < start + delay);
+
+            //return new Promise(resolve => setTimeout(resolve, delay));
+            // const sleep = (delay) => {
+            //     return new Promise(resolve => setTimeout(resolve, delay))
+            // }
         },    
         sendCommands: function(char, commands) {
             let encoder = new TextEncoder('utf-8');
@@ -167,6 +177,7 @@ export default {
                     char.writeValue(commands[i]);
                     i++;
                     this.sleep(500);
+                    //await this.sleep(500) wenn mit sleep-Funktion mit Promise 
                 //})
                 //this.sleep(1000);
             }
@@ -227,5 +238,16 @@ export default {
 <style scoped>
  h1{
      color: black;
+ }
+
+ .OBD{
+     width: 100%;
+ }
+
+ .OBD-list{
+     list-style-type: none;
+     font-weight: 800;
+     text-align: left;
+     margin-top: 5vh;
  }
 </style>
