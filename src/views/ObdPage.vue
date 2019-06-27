@@ -53,11 +53,9 @@ var correctReply = false;
 var commandAccepted = false;
 var numberOfBytes;
 var twoBytes = false;
-
-
-// var obdCommandInfo = [
-//     {pid: "0C", bytes: 2, name: "rpm", unit: "rev/min", convertFunction: convertRPM(byteA, byteB)},
-// ]
+ 
+import OBDLogic from '../components/OBDLogic.vue' 
+import OBDCard from '../components/OBDCard.vue' 
 
 export default {
     name: "OBD",

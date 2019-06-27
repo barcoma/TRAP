@@ -62,21 +62,17 @@
 </template>
 
 <script>
-
-import { Carousel, Slide } from 'vue-carousel';
 import {eventBus} from '../main.js';
 
 import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
-import Sidebarmenu from '../components/Sidebarmenu.vue'
+import HomeSlider from '../components/HomeSlider.vue'
 
 
   export default {
     components: {
-      Carousel,
-      Slide,
-      Sidebarmenu
+      HomeSlider
     },
     data: () => ({
       lorem: `Lorem ipsum dolor sit amet, mel at clita quando. Te sit oratio vituperatoribus, nam ad ipsum posidonium mediocritatem, explicari dissentiunt cu mea. Repudiare disputationi vim in, mollis iriure nec cu, alienum argumentum ius ad. Pri eu justo aeque torquatos.`,
@@ -261,41 +257,6 @@ import Sidebarmenu from '../components/Sidebarmenu.vue'
       line-height: 1rem;
     }
   }
-
-  .v-card {
-    border-radius: 8px !important;
-  }
-  .d-flex {
-    height: 10rem;
-  }
-
-  .v-tabs, .v-tabs__bar{
-    margin-bottom: 2rem;
-    font-family: 'Roboto Slab', serif;
-  }
-
-  a{
-    text-transform: none !important;
-  }
-
-  .active-tab{
-    font-weight: 800;
-    border-bottom: 5px solid #ffc400;
-  }
-
-.VueCarousel {
-    width: 100%;
-}
-
-.carousel-text{
-  font-family: 'Roboto Slab', serif;
-  .carousel-tex-headline{
-    font-size: 1rem;
-  }
-  .carousel-tex-subheader{
-    font-size: .75rem
-  }
-} 
 
 
 .v-list__tile__title, .theme--light.v-list .v-list__tile__mask{
