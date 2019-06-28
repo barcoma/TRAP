@@ -18,11 +18,8 @@
             <h3>Datenschutz</h3> 
             <p>Die Betreiber dieser Seiten nehmen den Schutz Ihrer pers&ouml;nlichen Daten sehr ernst. Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerkl&auml;rung.</p> <p>Wenn Sie diese Website benutzen, werden verschiedene personenbezogene Daten erhoben. Personenbezogene Daten sind Daten, mit denen Sie pers&ouml;nlich identifiziert werden k&ouml;nnen. Die vorliegende Datenschutzerkl&auml;rung erl&auml;utert, welche Daten wir erheben und wof&uuml;r wir sie nutzen. Sie erl&auml;utert auch, wie und zu welchem Zweck das geschieht.</p> <p>Wir weisen darauf hin, dass die Daten&uuml;bertragung im Internet (z.&nbsp;B. bei der Kommunikation per E-Mail) Sicherheitsl&uuml;cken aufweisen kann. Ein l&uuml;ckenloser Schutz der Daten vor dem Zugriff durch Dritte ist nicht m&ouml;glich.</p>
             <h3>Hinweis zur verantwortlichen Stelle</h3> 
-            <p>Die verantwortliche Stelle f&uuml;r die Datenverarbeitung auf dieser Website ist:</p> <p>Beispielfirma<br />
-            Musterweg 10<br />
-            90210 Musterstadt</p>
-            <p>Telefon: +49 (0) 123 44 55 66<br />
-            E-Mail: info@beispielfirma.de</p>
+            <p>Die verantwortliche Stelle f&uuml;r die Datenverarbeitung auf dieser Website ist:</p> <p>Wolfgang Taube<br />Hochschule Furtwangen University<br />Fakultät Digitale Medien<br />78120 Furtwangen im Schwarzwald</p>
+      <p>Telefon: 07723 920-2520<br />E-Mail: <a href="mailto:Wolfgang.Taube@hs-furtwangen.de">Wolfgang.Taube@hs-furtwangen.de</a><br />Website: <a href="https://www.hs-furtwangen.de">https://www.hs-furtwangen.de</a></p>
             <p>Verantwortliche Stelle ist die nat&uuml;rliche oder juristische Person, die allein oder gemeinsam mit anderen &uuml;ber die Zwecke und Mittel der Verarbeitung von personenbezogenen Daten (z.&nbsp;B. Namen, E-Mail-Adressen o. &Auml;.) entscheidet.</p>
             <h3>Widerruf Ihrer Einwilligung zur Datenverarbeitung</h3> 
             <p>Viele Datenverarbeitungsvorg&auml;nge sind nur mit Ihrer ausdr&uuml;cklichen Einwilligung m&ouml;glich. Sie k&ouml;nnen eine bereits erteilte Einwilligung jederzeit widerrufen. Dazu reicht eine formlose Mitteilung per E-Mail an uns. Die Rechtm&auml;&szlig;igkeit der bis zum Widerruf erfolgten Datenverarbeitung bleibt vom Widerruf unber&uuml;hrt.</p>
@@ -91,4 +88,8 @@ export default {
         padding: 1rem;
         text-align: left;
     }
+    a {
+    text-decoration: none;
+    color: black;
+}
 </style>
