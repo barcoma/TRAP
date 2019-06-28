@@ -222,7 +222,7 @@ import { weather, getLastDestination } from '../shared_data/queries'
 
 <style lang="scss">
 
-h1, h2, h3, h4, p {
+h1, h2, h3, h4 {
   color: white;
 }
 h3 {
