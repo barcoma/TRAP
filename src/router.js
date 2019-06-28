@@ -7,6 +7,9 @@ import POIPage from './views/POIPage.vue'
 import lastdest from './views/lastdest.vue'
 import createPoiPage from './views/createPoiPage.vue'
 import welcome from './views/Welcome.vue'
+import Imprint from './views/Imprint.vue'
+import PrivacyPolicy from './views/PrivacyPolicy.vue'
+import Help from './views/Help.vue'
 
 Vue.use(Router)
 
@@ -46,6 +49,21 @@ export default new Router({
       path: '/welcome',
       name: 'welcome',
       component: welcome
+    },
+    {
+      path: '/imprint',
+      name: 'imprint',
+      component: Imprint
+    },
+    {
+      path: '/privacy',
+      name: 'privacy',
+      component: PrivacyPolicy
+    },
+    {
+      path: '/help',
+      name: 'help',
+      component: Help
     }
   ]
 })

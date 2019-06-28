@@ -34,7 +34,7 @@
         to="/obd"
       >
         <span>OBD</span>
-        <v-icon large>people</v-icon>
+        <v-icon large>drive_eta</v-icon>
       </v-btn>
 
     </v-bottom-nav>

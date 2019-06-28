@@ -13,15 +13,29 @@ import { ApolloClient } from 'apollo-client'
 import { HttpLink } from 'apollo-link-http'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import VueApollo from 'vue-apollo'
-import { typeDefs } from './shared_data/queries.js'
+import { typeDefs, getLastDestination } from './shared_data/queries.js'
 import { withClientState } from 'apollo-link-state';
 import { ApolloLink } from 'apollo-link'
 import { persistCache } from 'apollo-cache-persist';
+import gql from 'graphql-tag'; 
 
 const httpLink = new HttpLink({
   // URL to graphql server, you should use an absolute URL here
   uri: 'http://localhost:4000/graphql'
 })
+
+const defaults = {
+  lastDestination: [{
+      id: 0,
+      coordinates: {
+        __typename: "Coordinates"
+      },
+      name: "Keine letzten Ziele gefunden!",
+      __typename: "LastDestination"
+    }
+  ]
+};
+
 
 const cache = new InMemoryCache({
     dataIdFromObject: object => object.id
@@ -30,12 +44,14 @@ const cache = new InMemoryCache({
 const stateLink = withClientState({
   cache,
   typeDefs,
+  defaults
 })
 
 persistCache({
   cache,
   storage: window.localStorage,
 });
+
 
 const apolloClient = new ApolloClient({
   cache,
@@ -67,7 +83,47 @@ const apolloClient = new ApolloClient({
           };
           cache.writeData({data});
           return data;
-        } 
+        },
+        updateLastDestination: (_, { coordinates, name }, {cache}) => {
+          const query = getLastDestination;
+          let previous;
+          try {
+            previous = cache.readQuery({ query });
+          } catch (exception) {
+            console.log(exception);
+          }
+          coordinates.__typename = "Coordinates";
+
+          let nextDestinationId = 1;
+          var newLastDestination = {
+            name: name,
+            coordinates: coordinates,
+            __typename: "Destination"
+          }
+          var lastDestination;
+          if (previous) {
+            var lastDest = previous.lastDestination;
+            if (name.includes(lastDest[lastDest.length - 1].name)) {
+              lastDest.pop();
+            }
+            if (lastDest.length > 9) {
+              lastDest.shift();
+            }
+            if(lastDest[lastDest.length - 1]) {
+              nextDestinationId = lastDest[lastDest.length - 1].id + 1;
+            }
+            newLastDestination.id = nextDestinationId;
+            lastDestination = lastDest.concat([newLastDestination]);
+          } else {
+            lastDestination = [newLastDestination];
+          }
+          const data = {
+            lastDestination: lastDestination,
+            __typename: "LastDestination"
+          };
+          cache.writeData({data});
+          return data;
+        }
 
       }
     }

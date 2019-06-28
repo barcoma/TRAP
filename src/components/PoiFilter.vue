@@ -8,10 +8,10 @@
         <p @click="source.custom = !source.custom; getAmount()" v-bind:class="{ active: source.custom }" class="toggleButton custom">Eigene</p>
         <p class="POI-category">In welchen Kategorien soll gesucht werden?</p>
          <div class="bg category"></div>
-        <p @click="category.autorepair = !category.autorepair; getAmount()" v-bind:class="{ active: category.autorepair }" class="toggleButton autorepair">Werkstatt</p>
+        <p @click="category.autorepair = !category.autorepair; getAmount()" v-bind:class="{ active: category.autorepair }" class="toggleButton autorepair">Werkstätte</p>
         <p @click="category.food = !category.food; getAmount()" v-bind:class="{ active: category.food }" class="toggleButton food">Restaurants</p>
         <p @click="category.hotels = !category.hotels; getAmount()" v-bind:class="{ active: category.hotels }" class="toggleButton hotels">Hotels</p>
-        <p @click="category.servicestations = !category.servicestations; getAmount()" v-bind:class="{ active: category.servicestations }" class="toggleButton servicestations">Tankstelle</p>
+        <p @click="category.servicestations = !category.servicestations; getAmount()" v-bind:class="{ active: category.servicestations }" class="toggleButton servicestations">Tankstellen</p>
         <p @click="category.physicians = !category.physicians; getAmount()" v-bind:class="{ active: category.physicians }" class="toggleButton physicians">Ärzte</p>
         
         <p class="POI-slider-text">Wie viele Orte sollen maximal angezeigt werden?</p>
@@ -237,7 +237,7 @@ export default {
 
 p {
     text-align: left;
-    padding-left: 1rem;
+    // padding-left: 1rem;
     margin-bottom: 0;
 }
 .POI-container {
@@ -334,14 +334,15 @@ p {
             border-radius: 16px;
         }
         .toggleButton {
-            // background: rgba(134, 134, 134, 0.507);
-            // background: linear-gradient(0deg, rgba(134,134,134,1) 0%, rgba(85,85,85,1) 41%, rgba(0,0,0,1) 100%);
             color: white;
-            padding: 0.5rem;
             border-radius: 50px;
             width: 90%;
             text-align: center;
             place-self: center;
+            height: 90%;
+            justify-self: center;
+            align-self: center;
+            padding-top: 6px;
         }
         .yelp {
             grid-area: yelp;
@@ -410,5 +411,11 @@ p {
         background-color: dodgerblue !important;
 
     }
+
+@media (max-height: 700px) {
+    .POI-container {
+        grid-template-rows: 8% 5% 7% 5% 7% 7% 10% 7% auto;
+    }
+}
 
 </style>

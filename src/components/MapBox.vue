@@ -80,20 +80,12 @@ import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
 import { setTimeout } from 'timers';
-import { poiQueries, poiFilterQuery, toggleNaviPoi } from '../shared_data/queries'
+import { poiQueries, poiFilterQuery, toggleNaviPoi, getLastDestination } from '../shared_data/queries'
 import { getCategories } from '../shared_data/data'
 
 var markers = [];
 var userLong = 0;
 var userLat = 0;
-
-// var categoryArray = [
-//     ['food', '4d4b7105d754a06374d81259'],
-//     ['physicians', '4bf58dd8d48988d104941735'],
-//     ['autorepair', '56aa371be4b08b9a8d5734d3'],
-//     ['hotels', '4bf58dd8d48988d1fa931735'],
-//     ['servicestations', '4bf58dd8d48988d113951735']
-// ];
 
 export default {
   name: 'MapBox',
@@ -251,45 +243,38 @@ export default {
     },
     addMarker: function(pois, color) {
       for (var i = 0; i < pois.length; i++) {
-        var poi = pois[i];
+        let poi = pois[i];
+        let div = window.document.createElement('div');
+        let title = window.document.createElement('h3');
+        title.innerHTML = poi.name;
+        let button = window.document.createElement('button');
+        button.className = "poi-navigate";
+        button.innerHTML = "Navigieren";
+        button.addEventListener("click", () => {
+          this.navigateToPoi(poi.coordinates.longitude, poi.coordinates.latitude, poi.name);
+        });
+        div.appendChild(title);
+        div.appendChild(button);
         var currentMarker = new mapboxgl.Marker({
           draggable: false,
           color: color
         })
         .setLngLat([poi.coordinates.longitude, poi.coordinates.latitude])
-        .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-        .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3>'))
+        .setPopup(new mapboxgl.Popup({ offset: 25 }).setDOMContent(div)) // add popups
+        // .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3><button class="poi-navigate">Navigieren</button>'))
         .addTo(this.mainMap);
         markers.push(currentMarker);
       }
+    },
+    navigateToPoi: function(long, lat, name) {
+      this.clearMarkers();
+      this.active_el = 1;
+      this.mapControl.style.display = "block";
+      this.directions.removeRoutes();
+      this.directions.setDestination([long, lat]);
+      this.inputDestination.value = name;
+      this.showRouting();
     },  
-    // getCategories: function(category) {
-    //   var keys = Object.keys(category);
-
-    //   var filteredKeys = keys.filter(function(key) {
-    //       return category[key] && key != "__typename";
-    //   });
-
-    //   var categoryMap = new Map(categoryArray);
-
-    //   var yelpCategories = "";
-    //   var foursquareCategories = "";
-
-    //   filteredKeys.forEach(function(key) {
-    //       if (yelpCategories != "") {
-    //           yelpCategories += ",";
-    //           foursquareCategories += ",";
-    //       } 
-    //       yelpCategories += key;
-    //       foursquareCategories += categoryMap.get(key);
-    //   })
-
-    //   var categories = {
-    //       yelpCategories: yelpCategories,
-    //       foursquareCategories: foursquareCategories
-    //   }; 
-    //   return categories;
-    // },
     clearMarkers: function() {
       for (var i  = 0; i < markers.length; i++) {
         markers[i].remove();
@@ -351,11 +336,15 @@ export default {
     },
     setUserLocation: function() {
       this.directions.setDestination(this.inputStart.value);
-      if (userLong != 0 && userLat != 0) {
+      if (userLong != 0 && userLat != 0 && userLong != null && userLat != null) {
         this.directions.setOrigin([userLong, userLat]);
         this.inputStart.value = "Aktueller Standpunkt";
         return true;
       } else {
+        this.directions.removeRoutes();
+        this.inputStart.value = null;
+        this.inputStart.placeholder = "Startpunkt wählen";
+        this.directions.setDestination(this.inputStart.value);
         return false;
       }
     },
@@ -442,7 +431,7 @@ export default {
       }
       const coordinateMutation = gql`
         mutation ($coordinates: Object) {
-            coordinateMutation(coordinates: $coordinates) @client
+            coordinateMutation(coordinates: $coordinates) @client 
         }`;
       this.$apollo.mutate({
         mutation: coordinateMutation,
@@ -471,7 +460,7 @@ export default {
   beforeDestroy () {
     clearInterval(this.polling)
   },
-  created(){
+  created() {
     // eventBus.$on('toggleDirections', (isVisible) => {
     //   if(isVisible == true){
     //     this.mainMap.addControl(this.directions, 'bottom-left');
@@ -480,10 +469,8 @@ export default {
     //   }
     // });
   },
-  mounted(){
-  // eventBus.$on('locationFromHome', (newDest)=>{
-  //   this.refresh(newDest[0], newDest[1]);
-  // });    
+  mounted() {
+
   mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
   this.lat = 48.218800;
   this.long = 11.624707;
@@ -509,7 +496,33 @@ export default {
 
   this.directions.on("route", e => {
     this.routeReady = true;
-  })
+  });
+
+  this.directions.on("origin", e => {
+    var lng = e.feature.geometry.coordinates[0];
+    var lat = e.feature.geometry.coordinates[1];
+    var isDuplicate = false;
+    var name = this.inputStart.value;
+    var coordinates = {
+      latitude: lat,
+      longitude: lng
+    };
+    const mutation = gql`
+        mutation updateLastDestination ($coordinates: Object, $name: String) {
+          updateLastDestination(coordinates: $coordinates, name: $name) @client {
+            name
+            coordinates {
+              latitude
+              longitude
+            }
+          }
+        }
+      `
+    this.$apollo.mutate({
+      mutation: mutation,
+      variables: { name, coordinates }
+    }).then(response => {console.log(response)})
+  });
 
   this.userLocation = new mapboxgl.GeolocateControl({
     positionOptions: {
@@ -521,11 +534,11 @@ export default {
 
   this.mainMap
     .addControl(this.userLocation, 'bottom-right')
-    .addControl(this.directions, 'top-left')
+    .addControl(this.directions, 'top-left');
 
   this.mainMap.on("load", e => {
     this.userLocation.trigger();
-  })
+  });
 
   this.userLocation.on('geolocate', function(e) {
       userLong = e.coords.longitude;
@@ -539,12 +552,27 @@ export default {
   this.inputStart = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[0].childNodes[1];
   this.inputStart.placeholder = "Wo möchten Sie hin?";
   this.inputDestination = document.getElementsByClassName('mapboxgl-ctrl-geocoder')[1].childNodes[1];
-  this.inputDestination.placeholder = "Wo möchten Sie hin?"
+  this.inputDestination.placeholder = "Wo möchten Sie hin?";
   this.mapControl = document.getElementsByClassName('mapboxgl-ctrl-top-left')[0];
 
   // this.geocoder.on('result', this.updateMarker);
+
+  eventBus.$on('locationFromHome', (newDest, newDestName) => {
+    this.directions.removeRoutes();
+    this.directions.setOrigin([newDest[0], newDest[1]]);
+    this.inputStart.value = newDestName;
+    this.mainMap.flyTo({
+      center: [
+        newDest[0],
+        newDest[1]
+      ],
+      zoom: 15,
+      bearing: 0
+    })
+  });    
   }
 }
+
 </script>
 
 
@@ -604,6 +632,7 @@ h5 {
 .mapboxgl-ctrl-top-left {
   width: 100%;
   background-image: linear-gradient(90deg, #4285f4, #00ebff);
+  box-shadow: 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12);
 }
 
 .mapboxgl-ctrl-top-left .mapboxgl-ctrl {
@@ -920,11 +949,11 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
    
   .mapboxgl-popup {
     max-width: 200px;
+    min-width: 10rem;
   }
 
   .mapboxgl-popup-content {
     text-align: center;
-    font-family: 'Open Sans', sans-serif;
   }
   .mapbox-directions-instructions .directions-icon {
     position:absolute;
@@ -1061,7 +1090,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   }
 
 .pop-up-text {
-  color: black;
+  color: white;
 }
 
 // GPS Icon
@@ -1080,6 +1109,7 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
   z-index: 9;
   background-image: linear-gradient(90deg, #4285f4, #00ebff);
   height: 8rem;
+  box-shadow: 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12);
   .v-btn--floating.v-btn--small .v-icon {
     color: black;
   }
@@ -1170,6 +1200,16 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
     width: 100%;
     top: 0;
     z-index: 16;
+}
+
+.poi-navigate {
+    background: -moz-linear-gradient(45deg, rgba(50,234,255,1) 0%, rgba(40,115,214,1) 0%, rgba(182,125,232,1) 100%, rgba(32,124,202,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    border-radius: 50px;
+    padding: 0.3rem 0.5rem 0.3rem 0.5rem;
+    width: 100%;
+    margin-top: 0.3rem;
 }
 
 @media screen and (max-width: 372px) {
