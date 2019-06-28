@@ -287,7 +287,6 @@ h3 {
 
 .v-tabs, .v-tabs__bar {
   margin-bottom: 2rem;
-  font-family: 'Roboto Slab', serif;
 }
 
 a {
@@ -304,7 +303,6 @@ a {
 }
 
 .carousel-text{
-  font-family: 'Roboto Slab', serif;
   .carousel-tex-headline{
     font-size: 1rem;
   }

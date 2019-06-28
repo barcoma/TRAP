@@ -954,7 +954,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 
   .mapboxgl-popup-content {
     text-align: center;
-    font-family: 'Open Sans', sans-serif;
   }
   .mapbox-directions-instructions .directions-icon {
     position:absolute;

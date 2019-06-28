@@ -116,7 +116,6 @@
 
 <style lang="scss">
 div.v-list__tile__title {
-   font-family: 'Roboto Slab', serif;
    font-weight: 300;
    font-size: 20px;
    opacity: 1 !important;
