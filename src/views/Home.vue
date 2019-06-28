@@ -222,87 +222,85 @@ import { weather, getLastDestination } from '../shared_data/queries'
 
 <style lang="scss">
 
-  h1,h2,h3,h4 p {
-    color: white;
-  }
-  h3{
-    font-weight: 400;
-  }
+h1, h2, h3, h4, p {
+  color: white;
+}
+h3 {
+  font-weight: 400;
+}
 
-  .container {
-    padding: 0 !important;
-    overflow: scroll;
-  }
-
-  .top-area {
-
-    height: 20rem;
-
-    margin-bottom: 1rem;
-    border-bottom-left-radius: 7%;
-    border-bottom-right-radius: 7%;
-    // background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
-    // background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
-    // background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    background: #00d2ff;  /* fallback for old browsers */
-    background: -webkit-linear-gradient(#3a7bd5, #00d2ff);  /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(#3a7bd5, #00d2ff); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+.container {
+  padding: 0 !important;
+  overflow: scroll;
+  max-width: 900px !important;
+}
 
 
-    .flex-avatar{
-      img {
-        border: 3px solid rgb(255, 255, 255);
-      }
+.top-area {
+  height: 20rem;
+  margin-bottom: 1rem;
+  border-bottom-left-radius: 7%;
+  border-bottom-right-radius: 7%;
+  // background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
+  // background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
+  // background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  background: #00d2ff;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(#3a7bd5, #00d2ff);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(#3a7bd5, #00d2ff); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  .flex-avatar {
+    img {
+      border: 3px solid rgb(255, 255, 255);
     }
   }
+}
 
-  .main-input-autocomplete:after{
-    top: 100%;
-    left: 50%;
-    border: solid transparent;
-    content: " ";
-    height: 50px;
-    width: 50px;
-    position: absolute;
-    pointer-events: none;
-  }
+.main-input-autocomplete:after {
+  top: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 50px;
+  width: 50px;
+  position: absolute;
+  pointer-events: none;
+}
 
-  .v-input__slot{
-    border-radius: 10px !important; 
-  }
+.v-input__slot {
+  border-radius: 10px !important; 
+}
 
-  .location{
-    p{
-      margin-bottom: 0;
-      color:rgba(255, 255, 255, 0.75);
-      font-size: .75rem;
-      line-height: 1rem;
-    }
+.location {
+  p {
+    margin-bottom: 0;
+    color:rgba(255, 255, 255, 0.75);
+    font-size: .75rem;
+    line-height: 1rem;
   }
+}
 
-  .v-card {
-    border-radius: 8px !important;
-  }
-  .d-flex {
-    height: 10rem;
-  }
+.v-card {
+  border-radius: 8px !important;
+}
+.d-flex {
+  height: 10rem;
+}
 
-  .v-tabs, .v-tabs__bar{
-    margin-bottom: 2rem;
-    font-family: 'Roboto Slab', serif;
-  }
+.v-tabs, .v-tabs__bar {
+  margin-bottom: 2rem;
+  font-family: 'Roboto Slab', serif;
+}
 
-  a{
-    text-transform: none !important;
-  }
+a {
+  text-transform: none !important;
+}
 
-  .active-tab{
-    font-weight: 800;
-    border-bottom: 5px solid #ffc400;
-  }
+.active-tab {
+  font-weight: 800;
+  border-bottom: 5px solid #ffc400;
+}
 
 .VueCarousel {
-    width: 100%;
+  width: 100%;
 }
 
 .carousel-text{
@@ -378,26 +376,31 @@ import { weather, getLastDestination } from '../shared_data/queries'
 }
 
 hr.spacer {
-    height: 16rem;
-    opacity: 0;
+  height: 16rem;
+  opacity: 0;
 }
 
 .last-destinations-container {
-    // background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
-    // background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
-    // background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    background: #00d2ff;  /* fallback for old browsers */
-    background: -webkit-linear-gradient(#00d2ff, #8E54E9);  /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(#00d2ff, #8E54E9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-    border-radisu: 17px;
-    border-radius: 22px;
-    margin-top: 1rem;
-    padding-top: 1rem;
+  // background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
+  // background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
+  // background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  background: #00d2ff;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(#00d2ff, #8E54E9);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(#00d2ff, #8E54E9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  border-radisu: 17px;
+  border-radius: 22px;
+  margin-top: 1rem;
+  padding-top: 1rem;
 }
 
 .app-nav .v-card {
   border-radius: 0px !important;
+}
+
+@media (min-width: 900px) {
+  .theme--dark.v-btn {
+    color: black !important;
+  }
 }
 
 </style>
