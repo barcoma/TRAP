@@ -251,7 +251,7 @@ export default {
         button.className = "poi-navigate";
         button.innerHTML = "Navigieren";
         button.addEventListener("click", () => {
-          this.navigateToPoi(poi.coordinates.longitude, poi.coordinates.latitude);
+          this.navigateToPoi(poi.coordinates.longitude, poi.coordinates.latitude, poi.name);
         });
         div.appendChild(title);
         div.appendChild(button);
@@ -266,12 +266,14 @@ export default {
         markers.push(currentMarker);
       }
     },
-    navigateToPoi: function(long, lat) {
+    navigateToPoi: function(long, lat, name) {
       this.clearMarkers();
       this.active_el = 1;
       this.mapControl.style.display = "block";
       this.directions.removeRoutes();
-      this.directions.setOrigin([long, lat]);
+      this.directions.setDestination([long, lat]);
+      this.inputDestination.value = name;
+      this.showRouting();
     },  
     clearMarkers: function() {
       for (var i  = 0; i < markers.length; i++) {

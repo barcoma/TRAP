@@ -202,7 +202,7 @@ export const toggleNaviPoi = {
 
 export const weather = {
   location: 'Wird geladen...',
-  weatherIcon: '',
+  weatherIcon: '/img/icons/sunny_icon.png',
   temp: '',
   temp_max: '',
   temp_min: '',
