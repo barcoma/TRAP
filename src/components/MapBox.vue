@@ -68,7 +68,7 @@
     <v-btn v-if="routeReady & !navigationMode" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
   </div>
   <div id="map" ref="map"></div>
-  <v-btn v-if="active_el == 2, poisAdded == true" class="poi-offline-save" @click="showPopUp()">Orte offline speichern</v-btn>
+  <v-btn v-if="active_el == 2 && navigator.onLine" class="poi-offline-save" @click="precacheQuickSearch()">Orte offline speichern</v-btn>
 </div>
 </template>
 
@@ -82,7 +82,7 @@ import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
 import { setTimeout } from 'timers';
 import { poiQueries, poiFilterQuery, toggleNaviPoi, getLastDestination } from '../shared_data/queries'
-import { getCategories } from '../shared_data/data'
+import { getCategories, categoryArray } from '../shared_data/data'
 
 var markers = [];
 var userLong = 0;
@@ -151,49 +151,17 @@ export default {
   },
   methods: {
     querySearch: function(term = null, quickCategory = null) {
-      var source;
-      var category;
+      var filterParams = this.getFilterParams();
+      var source = filterParams.source;
+      var category = filterParams.category;
+      var query = this.getQueryBySource(source);
 
-      try {
-        const filterParams = this.$apollo.provider.defaultClient.readQuery({
-            query: poiFilterQuery
-        });
-        source = filterParams.poiFilter.source;
-        if (quickCategory == null) {
-          category = filterParams.poiFilter.category;
-        }
-      } catch (exception) {
-        source = this.source;
-      }
-
-      if (quickCategory != undefined && quickCategory != null) {
+      if (quickCategory) {
         category = {};
         category[quickCategory] = true;
       }
-      var query;
 
-      if (source.yelp) {
-          if (source.foursquare) {
-              if (source.custom) {
-                query = poiQueries.ALL_QUERY;
-              } else {
-                  query = poiQueries.FS_YELP_QUERY;
-              }
-          } else if (source.custom) {
-              query = poiQueries.CUSTOM_YELP_QUERY;
-          } else {
-              query = poiQueries.YELP_ONLY_QUERY;
-          }
-      } else if (source.foursquare) {
-        if (source.custom) {
-            query = poiQueries.FS_CUSTOM_QUERY;
-        } else {
-            query = poiQueries.FS_ONLY_QUERY;
-        }
-      } else if (source.custom) {
-          query = poiQueries.CUSTOM_ONLY_QUERY;
-      }
-      if (category != null && category != undefined) {
+      if (category) {
         var categories = getCategories(category);
       } else {
         var categories = {};
@@ -209,39 +177,55 @@ export default {
         radius: 40000
       }
 
-      if (term != undefined && term != null) {
-          variables.term = term;
+      if (term) {
+        variables.term = term;
       }
       if (this.source.yelp && categories.yelpCategories != "") {
-          variables.yelpCategories = categories.yelpCategories;
+        variables.yelpCategories = categories.yelpCategories;
       }
       if (this.source.foursquare && categories.foursquareCategories != "") {
-          variables.foursquareCategories = categories.foursquareCategories;
+        variables.foursquareCategories = categories.foursquareCategories;
       }
-      this.executeQuery(query, variables);
+
+      if (navigator.onLine){
+        this.executeQuery(query, variables);
+      } else {
+        this.executeOfflineQuery(query, variables)
+      }
     },
     executeQuery: function(query, variables) {
       this.$apollo.query({
         query: query,
         variables: variables
-      }).then((response) => {
-        this.clearMarkers();
-        var pois = response.data.getPOI;
-        if (pois.customPOI != null && pois.customPOI != undefined) {
-            this.addMarker(pois.customPOI, "#24c94d");
-        }
-        if (pois.foursquarePOI != null && pois.foursquarePOI != undefined) {
-            this.addMarker(pois.foursquarePOI, "#1ecebc");
-        }
-        if (pois.yelpPOI != null && pois.yelpPOI != undefined) {
-            this.addMarker(pois.yelpPOI, "#c64917");
-        }
-        if (pois.customPOI == null && pois.foursquarePOI.length < 1 && pois.yelpPOI.length < 1) {
-          this.showPopUp("Kein Ort gefunden", "Ihr Suchbegriff ergab leider keine Ergebnisse", "white");
-        }
-      }).catch((response) => {
+      }).then((response) => this.handleResponse(response.data.getPOI))
+      .catch((response) => {
         console.log(response);
       });
+    },
+    executeOfflineQuery: function(query, variables) {
+      variables.latitude = parseFloat(localStorage.getItem("persistedLat"));
+      variables.longitude = parseFloat(localStorage.getItem("persistedLng"));
+      const apolloClient = this.$apollo.provider.defaultClient
+      const response = apolloClient.readQuery({ 
+          query: query,
+          variables: variables
+      });
+      this.handleResponse(response.getPOI);
+    },
+    handleResponse: function(pois) {
+      this.clearMarkers();
+      if (pois.customPOI) {
+          this.addMarker(pois.customPOI, "#24c94d");
+      }
+      if (pois.foursquarePOI) {
+          this.addMarker(pois.foursquarePOI, "#1ecebc");
+      }
+      if (pois.yelpPOI) {
+          this.addMarker(pois.yelpPOI, "#c64917");
+      }
+      if (pois.customPOI == null && pois.foursquarePOI.length < 1 && pois.yelpPOI.length < 1) {
+        this.showPopUp("Kein Ort gefunden", "Ihr Suchbegriff ergab leider keine Ergebnisse", "white");
+      }
     },
     addMarker: function(pois, color) {
       for (var i = 0; i < pois.length; i++) {
@@ -267,6 +251,75 @@ export default {
         .addTo(this.mainMap);
         markers.push(currentMarker);
         this.poisAdded = true;
+      }
+    },
+    getQueryBySource: function(source) {
+      var query;
+        if (source.yelp) {
+          if (source.foursquare) {
+              if (source.custom) {
+                query = poiQueries.ALL_QUERY;
+              } else {
+                  query = poiQueries.FS_YELP_QUERY;
+              }
+          } else if (source.custom) {
+              query = poiQueries.CUSTOM_YELP_QUERY;
+          } else {
+              query = poiQueries.YELP_ONLY_QUERY;
+          }
+      } else if (source.foursquare) {
+        if (source.custom) {
+            query = poiQueries.FS_CUSTOM_QUERY;
+        } else {
+            query = poiQueries.FS_ONLY_QUERY;
+        }
+      } else if (source.custom) {
+          query = poiQueries.CUSTOM_ONLY_QUERY;
+      }
+      return query;
+    },
+    getFilterParams: function(quickCategory) {
+      var source;
+      var category;
+
+      try {
+        const filterParams = this.$apollo.provider.defaultClient.readQuery({
+            query: poiFilterQuery
+        });
+        source = filterParams.poiFilter.source;
+        if (quickCategory == null) {
+          category = filterParams.poiFilter.category;
+        }
+      } catch (exception) {
+        source = this.source;
+      }
+      return {
+        category: category,
+        source: source
+      }
+    },
+    precacheQuickSearch: function() {
+      var filterParams = this.getFilterParams(categoryArray[0][0]);
+      var source = filterParams.source;
+      var query = this.getQueryBySource(source);
+
+      var center = this.mainMap.getBounds().getCenter();
+      var lat = center.lat;
+      var lng = center.lng;
+      localStorage.setItem("persistedLat", lat);
+      localStorage.setItem("persistedLng", lng);     
+      for (var i = 0; i < categoryArray.length; i++) {
+        this.$apollo.query({
+          query: query,
+          variables: {
+            latitude: lat,
+            longitude: lng,
+            yelpCategories: categoryArray[i][0],
+            foursquareCategories: categoryArray[i][1],
+            limit: 15,
+            radius: 40000
+          }
+        }).then(response => console.log(response));
       }
     },
     navigateToPoi: function(long, lat, name) {
@@ -501,6 +554,9 @@ export default {
     this.routeReady = true;
   });
 
+  if (navigator.onLine) {
+    this.precacheQuickSearch();
+  }
   this.directions.on("origin", e => {
     var lng = e.feature.geometry.coordinates[0];
     var lat = e.feature.geometry.coordinates[1];

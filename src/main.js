@@ -55,6 +55,7 @@ persistCache({
 
 const apolloClient = new ApolloClient({
   cache,
+  connectToDevTools: true,
   link: ApolloLink.from([stateLink, httpLink]),
   resolvers: {
     Mutation: {

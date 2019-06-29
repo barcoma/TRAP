@@ -1,4 +1,4 @@
-var categoryArray = [
+export const categoryArray = [
     ['food', '4d4b7105d754a06374d81259'],
     ['physicians', '4bf58dd8d48988d104941735'],
     ['autorepair', '56aa371be4b08b9a8d5734d3'],
