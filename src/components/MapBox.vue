@@ -319,7 +319,7 @@ export default {
             limit: 15,
             radius: 40000
           }
-        }).then(response => console.log(response));
+        })
       }
     },
     navigateToPoi: function(long, lat, name) {
