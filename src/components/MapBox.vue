@@ -68,6 +68,7 @@
     <v-btn v-if="routeReady & !navigationMode" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
   </div>
   <div id="map" ref="map"></div>
+  <v-btn v-if="active_el == 2, poisAdded == true" class="poi-offline-save" @click="showPopUp()">Orte offline speichern</v-btn>
 </div>
 </template>
 
@@ -118,6 +119,7 @@ export default {
       active_el: toggleNaviPoi.state.active_el,
       active_filter: toggleNaviPoi.state.active_filter,
       display: true,
+      poisAdded: false,
       source: {
         yelp: true,
         foursquare: true,
@@ -264,6 +266,7 @@ export default {
         // .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3><button class="poi-navigate">Navigieren</button>'))
         .addTo(this.mainMap);
         markers.push(currentMarker);
+        this.poisAdded = true;
       }
     },
     navigateToPoi: function(long, lat, name) {
@@ -1242,6 +1245,18 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 
 .hidden {
   display: none !important;
+}
+
+.poi-offline-save {
+  position: absolute !important;
+  bottom: 10% !important;
+  right: 4rem !important;
+  border-radius: 50px !important;
+  text-transform: unset !important;
+  color: white !important;
+  background: -moz-linear-gradient(45deg, rgba(50,234,255,1) 0%, rgba(40,115,214,1) 0%, rgba(182,125,232,1) 100%, rgba(32,124,202,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 }
 
 </style>
