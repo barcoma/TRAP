@@ -13,6 +13,9 @@
 </template>
 
 <script>
+
+import { getLastDestination } from '../shared_data/queries'
+
 export default {
     name: "lastdest",
     data () {
@@ -22,6 +25,16 @@ export default {
             id: 0
         }],
         }
+    },
+    mounted() {
+        this.$apollo.query({
+        query: getLastDestination
+      }).then(response => {
+        console.log(response);
+        if(response.data) {
+          this.lastDestination = response.data.lastDestination;
+        }
+      })
     }
 } 
 </script> 
