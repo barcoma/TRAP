@@ -21,8 +21,7 @@ export default {
   name: 'MapPage',
   components: {
     MapBox,
-    TabNav,
-    Sidebarmenu
+    TabNav
   },
   methods: {
     removeGeocode: function(){

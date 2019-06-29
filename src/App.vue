@@ -22,7 +22,6 @@ import InstallPrompt from './components/InstallPrompt.vue'
 import Sidebarmenu from './components/Sidebarmenu.vue'
 import mapboxgl from 'mapbox-gl'
 import PopUp from './components/PopUp.vue'
-import Sidebarmenu from './components/Sidebarmenu.vue'
 
 
 

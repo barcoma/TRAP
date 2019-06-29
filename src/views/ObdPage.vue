@@ -7,29 +7,51 @@
       </v-toolbar>
       
       <h5>Fahrzeugdiagnose</h5>
-      <sidebarmenu class="sidebarmenu"/>
+      <!-- <sidebarmenu class="sidebarmenu"/> -->
     </div>   
     <div class="ObdTopmid">
      <!--<v-btn large round dark class=""><img src="../../public/img/icons/GrünerHaken.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Alles gut</p></v-btn> -->
      <!--<v-btn large round dark class=""><img style="width:40px;"src="../../public/img/icons/Danger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Werkstatt aufsuchen</p></v-btn>-->
-     <v-btn large round dark class=""><img style="width:40px;"src="../../public/img/icons/mediumdanger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Achtung</p></v-btn>
+     <v-btn v-on:click="testPopUp('Fehlermeldung', 'P0534: Kältemittelverlust', 'yellow')" large round dark class=""><img style="width:40px;"src="../../public/img/icons/mediumdanger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Achtung</p></v-btn>
      </div>
-     <div class="Grid">
+
+
+     <div class="Grid" v-if="!isConnected">
+       <div class="connection-error-field">
+         <h1 class="connection-error-header">Verbinde dich jetzt</h1>
+         <p class="connection-error-text">Schließe deinen Adapter am OBD-Ausgang deines Autos an. <br>Drücke den Button und wähle deinen Adapter aus der Liste.</p>
+         <v-btn
+            color="blue-grey"
+            class="connection-error-button"
+            @click="getDevices"
+          >
+        <img src="../../public/img/icons/newCar.svg">
+        </v-btn>
+        <!-- <img  class="connection-error-icon" src="../../public/img/icons/btConnect.svg"> -->
+       </div>
+     </div>
+
+
+     <div class="Grid" v-if="isConnected">
       <div class="fensterobd">
-        <img  class="fensterobdcontentimg" src="../../public/img/icons/Tankstand.svg">
-        <p class="fensterobdcontenttext"> Tankstand: 60% </p>
+        <v-icon color="#000" class="fensterobdcontentimg" x-large>local_gas_station</v-icon>
+        <p class="fensterobdcontenttext"> Tankstand: 60%</p>
        </div>
       <div class="fensterobd">
-        <img  class="fensterobdcontentimg" src="../../public/img/icons/speedmeter.svg">
-        <p class="fensterobdcontenttext"> Speed: 90km/h </p>
+        <v-icon color="#000" class="fensterobdcontentimg" x-large>toys</v-icon>
+        <p class="fensterobdcontenttext"> Drehzahl: 850 U/min</p>
        </div>
-      <div class="fensterobd">
-        <img  class="fensterobdcontentimg" src="../../public/img/icons/statistics.svg">
-        <p class="fensterobdcontenttext"> Verbrauch: 7l/100km</p>
+       <div class="fensterobdNEW">
+        <img  class="fensterobdcontentimgNEW" src="../../public/img/icons/oil_temperature.svg">
+        <!-- <p  class="fensterobdcontenttext_unit">°</p> -->
+        <p class="fensterobdcontenttext_value">89° </p>
+        <p class="fensterobdcontenttextNEW"> Öltemperatur</p>
        </div>
-       <div class="fensterobd">
-        <img  class="fensterobdcontentimg" src="../../public/img/icons/thermometer.svg">
-        <p class="fensterobdcontenttext"> Außentemperatur: 24° </p>
+       <div class="fensterobdNEW">
+        <img  class="fensterobdcontentimgNEW" src="../../public/img/icons/coolant_temperature.svg">
+        <!-- <p  class="fensterobdcontenttext_unit">°</p> -->
+        <p class="fensterobdcontenttext_value">43° </p>
+        <p class="fensterobdcontenttextNEW"> Kühlmitteltemperatur</p>
        </div>
        </div>
 
@@ -39,51 +61,53 @@
 </template>
 
 <script>
-
 import Sidebarmenu from '../components/Sidebarmenu.vue'
+import {eventBus} from '../main.js';
 
 var serviceUUID = "e7810a71-73ae-499d-8c15-faa9aef0c3f2";
 var charUUID = "bef8d6c9-9c21-4c9e-b632-bd58c1009f9f";
 var byteA;
 var byteB;
-var lastBuffer;
 var setupDone = false;
 var currentCommand;
 var correctReply = false;
 var commandAccepted = false;
 var numberOfBytes;
 var twoBytes = false;
- 
-import OBDLogic from '../components/OBDLogic.vue' 
-import OBDCard from '../components/OBDCard.vue' 
 
 export default {
-    name: "OBD",
+    name: "OBDPage",
     data() {
-        
         return{
+            isConnected: false,
+            writeDelay: 50,
             currentRPM: "0",
             pidResponse: [],
             byteCounter: 0,
             obdCommandInfo: [
-                {pid: "0C", bytes: 2, name: "rpm", unit: "rev/min", convertFunction: this.convertRPM(byteA, byteB)},
+                {service: "010C1\r", pid: "0C", bytes: 2, name: "Drehzahl", unit: "U/min", value: 0},
+                {service: "01051\r", pid: "05", bytes: 1, name: "Engine Coolant", unit: "Grad", value: 0},
+                // {service: "01461\r", pid: "46", bytes: 1, name: "Ambient Air Temp", unit: "Grad", value: 0},
+                {service: "015C1\r", pid: "5C", bytes: 1, name: "Oil Temp", unit: "Grad", value: 0},
+                {service: "015E1\r", pid: "5E", bytes: 1, name: "fuelRate", unit: "L/h", value: 0},
+                {service: "012F1\r", pid: "5E", bytes: 1, name: "fuelPercentage", unit: "%", value: 0},
             ],
-             }
-        },
-  data: () => ({
-      cards: [
-        { title: 'Tankstatus',  img: "../../public/img/icons/Tankstand.svg", flex: 6 },
-        { title: 'Außentemperatur',flex: 6 },
-        { title: 'Verbrauch',flex: 6 },
-        { title: 'Geschwindigkeit', flex: 6 }
-      ],
-      
-    }),
-    
-         
-     /*
+            testCount: 0,
+            lastBuffer: ArrayBuffer,
+            queue: ["010C1\r", "01051\r", "015C1\r", "015E1\r"],
+            lastCommandSent: String,
+            replyBytes: Number,
+            repliedCommand: null
+
+        }
+    },
+    computed: {
+
+    },
     methods: {
         getDevices: function() {
+               this.isConnected = true;
+                eventBus.$emit('obdConnected', this.isConnected);
             navigator.bluetooth.requestDevice({
             acceptAllDevices: true,
             optionalServices: [serviceUUID]
@@ -102,6 +126,9 @@ export default {
             })
             .then(characteristic => characteristic.startNotifications())
             .then(characteristic => {
+                this.isConnected = true;
+                eventBus.$emit('obdConnected', this.isConnected);
+              
                 let encoder = new TextEncoder('utf-8');
                 var commands = [];
                 commands.push(encoder.encode("ATD\r\n"));
@@ -112,26 +139,24 @@ export default {
                 commands.push(encoder.encode("ATH0\r\n"));
                 commands.push(encoder.encode("ATSP0\r\n"));
 
-                this.sendCommands(characteristic, commands);
-
+                this.sendCommands(characteristic, commands);                
+                
                 characteristic.addEventListener('characteristicvaluechanged',
                 this.handleCharacteristicValueChanged);
+                
+                var encodedCommands = [];
+                this.queue.forEach(el => {encodedCommands.push(this.encodeCommand(el));});
 
-                var obdCommand = "010C1\r"; 
-                var testArray = this.encodeCommand(obdCommand);  
-                //return characteristic.writeValue(testArray);
+                var queueIndex = -1;
+                this.lastCommandSent = this.queue[queueIndex];
 
                 setInterval(function(){
-                    return characteristic.writeValue(testArray);
+                    queueIndex++;
+                    if(queueIndex > 1){
+                        queueIndex = 0;
+                    }
+                    return characteristic.writeValue(encodedCommands[queueIndex]);
                 }, 3000);
-            
-
-                //var testArray = this.encodeCommand(obdCommand);
-                // new Uint8Array([zero, one, two, three, four]);
-                // test again with this textencoder, should work in theory
-                // let message = encoder.encode("010C\r");
-                // let message2 = encoder.encode("ATDP\r\n");
-                // return characteristic.writeValue(testArray);
             })
             .then(value => {
                 console.log(value);
@@ -143,90 +168,50 @@ export default {
         handleCharacteristicValueChanged: function(event) {
             let value = event.target.value;
             var decoder = new TextDecoder('ascii');
-            var command = "010C1\r";
             var currentBufferDecoded = decoder.decode(value.buffer);
+            console.log(currentBufferDecoded);
+            if(this.lastBuffer.byteLength > 0){
             var lastBufferDecoded = decoder.decode(this.lastBuffer);
-            if ( lastBufferDecoded == command){
-                this.setupDone = true;
+            } 
+            if(!this.repliedCommand){
+            this.repliedCommand = this.obdCommandInfo.find(obj =>{
+            return obj.service == currentBufferDecoded;
+            });
             }
-            // if(this.setupDone == true){
-            //     console.log(currentBufferDecoded);
-            //     this.pidResponse.push(value.buffer);
-            //     if(lastBufferDecoded == "0C"){
-            //         this.pidResponse[0] = decoder.decode(value.buffer);
-            //     }
-            //     if(lastBufferDecoded == this.pidResponse[0]){
-            //         this.pidResponse[1] = decoder.decode(value.buffer);
-            //         this.currentRPM = this.convertRPM(this.pidResponse[0], this.pidResponse[1]);
-            //     }
-            // }
-
-
-
-
-
-
-
+            //var obj = this.obdCommandInfo.find(obj => obj.service == command);
+            if (this.repliedCommand){
+                this.setupDone = true;
+                this.replyBytes = this.obdCommandInfo.find(obj =>{
+                return obj.service == this.repliedCommand.service;
+            });
+            }
             if(this.setupDone == true){
-                console.log('yeet', currentBufferDecoded);
                 if(currentBufferDecoded == "41"){
-                    this.byteCounter = this.obdCommandInfo.bytes + 2;
+                    this.byteCounter = this.replyBytes.bytes + 2;
+                    console.log(currentBufferDecoded);
                 }
                 if (this.byteCounter > 0){
                     this.pidResponse.push(currentBufferDecoded);
                     this.byteCounter--;
                     if(this.byteCounter == 0){
-                    this.obdCommandInfo.convertFunction(this.pidResponse[3], this.pidResponse[4])
-                    this.currentRPM = this.convertRPM(this.pidResponse[3], this.pidResponse[4]);
+                        this.pidResponse.splice(0,2);
+                        var reply = this.convertValue(this.pidResponse);
+                        console.log("pid: " +this.repliedCommand.name + '  value: ' +reply);
+                        this.pidResponse = [];
+                        this.repliedCommand = null;
                     }
                 }
             }
             this.lastBuffer = value.buffer;
-            // var firstByte = value.buffer.getUint8(0);
-            // try {
-            //     var secondByte = value.buffer.getUint8(1);
-            // } catch {
-            //     var secondByte = null;
-            // }
-            // if (secondByte != null) {
-            //     var reply = parseInt(firstByte + secondByte);
-            // } else {
-            //     var reply = parseInt(firstByte);
-            // }
-
-            // if (twoBytes) {
-            //     byteB = reply;
-            //     this.parseCommand();
-            // }
-
-            // if (commandAccepted) {
-            //     numberOfBytes = obdCommandInfo.find(function(element) {
-            //         return element.pid == currentCommand;
-            //     });
-            //     if (numberOfBytes == 1) {
-            //         byteA = reply;
-            //         this.parseCommand();
-            //     } else {
-            //         twoBytes = true;
-            //     }
-            // }
-
-            // if (correctReply) {
-            //     currentCommand = reply;
-            //     commandAccepted = true;
-            // }    
-            // numberOfBytes = 0;
-            // commandAccepted = false
-            // correctReply = false;
-            // twoBytes = false;
-
-            // if (reply == 41) {
-            //     correctReply = true;
-            // }
         },
         sleep: function(delay) {
             var start = new Date().getTime();
             while (new Date().getTime() < start + delay);
+
+            //return new Promise(resolve => setTimeout(resolve, delay));
+            // const sleep = (delay) => {
+            //     return new Promise(resolve => setTimeout(resolve, delay))
+            // }
         },    
         sendCommands: function(char, commands) {
             let encoder = new TextEncoder('utf-8');
@@ -243,6 +228,7 @@ export default {
                     char.writeValue(commands[i]);
                     i++;
                     this.sleep(500);
+                    //await this.sleep(500) wenn mit sleep-Funktion mit Promise 
                 //})
                 //this.sleep(1000);
             }
@@ -262,9 +248,34 @@ export default {
         },
         convertRPM: function(byteA, byteB) {
             return ((parseInt(byteA, 16) * 256) + parseInt(byteB, 16)) / 4;
+        },
+        convertRate: function(byteA, byteB) {
+            return ((parseInt(byteA, 16) * 256) + parseInt(byteB, 16)) / 20;
+        },
+        convertTemp: function(byteA){
+            return byteA - 40;
+        },
+        convertValue: function(response){
+            var reply;
+            switch(response.length){
+                case 1:
+                    reply = parseInt(response[0], 16) - 40;
+                    break;
+                case 2:
+                    reply = ((parseInt(response[0], 16) * 256) + parseInt(response[1], 16)) / 4;
+                    break;
+            }
+            return reply;
+        },
+        startWorker: function(){
+            this.$worker.run(this.getDevices(), [this.$data])
+        },
+        testPopUp: function(title, text, color){
+            eventBus.$emit('showPopUp', title, text, color);
         }
     },
     mounted() {
+
     // this.$http.get('http://192.168.0.10:35000').then(response => {
 
     // // get body data
@@ -274,11 +285,8 @@ export default {
   //}, response => {
     // error callback
   //});
-    }, */
-    components:{
-    Sidebarmenu
-    },
-} 
+}
+}
 </script> 
 <style lang="scss">
 
@@ -331,6 +339,8 @@ opacity: 0.7;
   height:100%;
 
 }
+
+///OLD
 .fensterobd{
   display: grid;
   grid-template-columns: 25% 50% 25%;
@@ -348,7 +358,7 @@ opacity: 0.7;
   grid-row-start: 2;
   grid-row-end: 3;
   width:100%;
-  height:70%;
+  height:90%;
   justify-self: center;
 
 }
@@ -360,6 +370,133 @@ opacity: 0.7;
   margin-bottom:0%;
   justify-self: center;
 }
+
+//NEW
+.fensterobdNEW{
+  display: grid;
+  grid-template-columns: 50% 50%;
+  border-radius: 10px;
+  grid-template-rows: 25% 25% 25% 25%;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  //background-color: rgba(255, 255, 255, 0.95);
+  background-image: linear-gradient(120deg, #ffffff 0%, #dfdfdf 100%);  margin: 5% 5%;
+  opacity: 1;
+  height: 90%;
+}
+.fensterobdcontentimgNEW{
+  grid-column-start: 1;
+  grid-column-end: 1;
+  grid-row-start: 1;
+  grid-row-end: 3;
+  width:100%;
+  height:60%;
+  justify-self: center;
+  align-self: end;
+}
+
+.fensterobdcontenttextNEW{
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-row-start: 4;
+  grid-row-end: 4;
+  margin-bottom:0%;
+  justify-self: center;
+  align-self: center;
+}
+.fensterobdcontenttext_value{
+  grid-column-start: 2;
+  grid-column-end: 2;
+  grid-row-start: 2;
+  grid-row-end: 3;
+  margin-bottom:0%;
+  justify-self: center;
+  font-size: 4em;
+  color: #000;
+  font-weight: 800;
+  margin-right: .4em;
+}
+
+.fensterobdcontenttext_unit{
+    font-size: 2em;
+    grid-column-start: 3;
+    grid-column-end: 3;
+    grid-row-start: 2;
+    grid-row-end: 3;
+    width:100%;
+    height:40%;
+    justify-self: center;
+    align-self: end;
+  }
+
+  //CONNECTION ERROR
+  .connection-error-field{
+    display: grid;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    grid-row-start: 1;
+    grid-row-end: 3;
+    grid-template-columns: 10% 80% 10%;
+    border-radius: 10px;
+    grid-template-rows: 30% 40% 30%;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+    background-color: rgba(32, 141, 204, 0.631);
+    opacity: 1;
+    height: 100%;
+    width: 90%;
+    justify-self: center;
+   }
+
+  .connection-error-text{
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 2;
+    grid-row-end: 2;
+    height: 80%;
+    width:100%;
+    justify-self: center;
+    align-self: center;
+    color: #fff;
+    font-size: 1.1em;
+    text-align: left;
+  }
+  .connection-error-header{
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 1;
+    height: 80%;
+    width:100%;
+    justify-self: center;
+    align-self: end;
+    line-height: 2;
+    font-size: 1.7em;
+  }
+
+  .connection-error-button{
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 3;
+    grid-row-end: 3;
+    width:100%;
+    height:70% !important;
+    justify-self: center;
+    align-self: center;
+    margin: 0 !important;
+    padding: 0 !important;
+    .v-btn__content{
+      height: 100%;
+    }
+    img{
+      object-fit: contain;
+      max-height: 60%;
+      height: auto;
+      width: 80%;
+    }
+  }
+
+
+
+
 
 button.v-btn.v-btn--large.v-btn--round.theme--dark{
   height: 80%;
