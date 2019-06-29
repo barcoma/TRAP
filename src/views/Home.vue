@@ -396,7 +396,7 @@ hr.spacer {
 }
 
 @media (min-width: 900px) {
-  .theme--dark.v-btn {
+ .burger.theme--dark.v-btn {
     color: black !important;
   }
 }
