@@ -135,7 +135,7 @@ import { weather, getLastDestination } from '../shared_data/queries'
         getWeather: function(position) {
           let lat = position.coords.latitude
           let lon = position.coords.longitude
-          axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
+          axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
               this.weather = true;
               this.currentLocation = response.data.name;
               this.weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
