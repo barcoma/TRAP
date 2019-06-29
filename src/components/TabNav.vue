@@ -31,7 +31,7 @@
         value="4"
       >
         <span>OBD</span>
-        <v-icon :class="{ 'obd_active' : obdState }" large>directions_car</v-icon>
+        <v-icon :class="{ 'obd_active' : obdState }" large>drive_eta</v-icon>
       </v-btn>
 
     </v-bottom-nav>

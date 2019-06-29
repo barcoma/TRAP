@@ -8,10 +8,10 @@
         <p @click="source.custom = !source.custom; getAmount()" v-bind:class="{ active: source.custom }" class="toggleButton custom">Eigene</p>
         <p class="POI-category">In welchen Kategorien soll gesucht werden?</p>
          <div class="bg category"></div>
-        <p @click="category.autorepair = !category.autorepair; getAmount()" v-bind:class="{ active: category.autorepair }" class="toggleButton autorepair">Werkstatt</p>
+        <p @click="category.autorepair = !category.autorepair; getAmount()" v-bind:class="{ active: category.autorepair }" class="toggleButton autorepair">Werkstätte</p>
         <p @click="category.food = !category.food; getAmount()" v-bind:class="{ active: category.food }" class="toggleButton food">Restaurants</p>
         <p @click="category.hotels = !category.hotels; getAmount()" v-bind:class="{ active: category.hotels }" class="toggleButton hotels">Hotels</p>
-        <p @click="category.servicestations = !category.servicestations; getAmount()" v-bind:class="{ active: category.servicestations }" class="toggleButton servicestations">Tankstelle</p>
+        <p @click="category.servicestations = !category.servicestations; getAmount()" v-bind:class="{ active: category.servicestations }" class="toggleButton servicestations">Tankstellen</p>
         <p @click="category.physicians = !category.physicians; getAmount()" v-bind:class="{ active: category.physicians }" class="toggleButton physicians">Ärzte</p>
         
         <p class="POI-slider-text">Wie viele Orte sollen maximal angezeigt werden?</p>

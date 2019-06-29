@@ -41,22 +41,30 @@
             solo
           >
             <template slot="append">
-                <!-- <v-icon v-on:click="locationSearch()">check</v-icon> -->
                 <v-icon v-on:click="locationSearch()">directions</v-icon>
             </template>
           </v-autocomplete>      
           </v-flex>
+
     </v-layout>
-    <div v-if="weather" class="weather-container">
-      <h3 class="weather-location">{{ currentLocation }}</h3>
-      <p class="weather-temp"><span class="weather-temp-current">{{ temp }}&deg;C</span><br>{{ temp_max }}&deg;C / {{ temp_min }}&deg;C</p>
-      <!-- <p>Regen: {{ rain }}%</p> -->
-      <div class="weather-icon-container"><img :src="weatherIcon" class="weather-icon" alt="Weather icon"></div>
+
+    <div class="last-destinations-container">
+      <div v-if="weather" class="weather-container">
+        <h3 class="weather-location">{{ currentLocation }}</h3>
+        <p class="weather-temp"><span class="weather-temp-current">{{ temp }}&deg;C</span><br>{{ temp_max }}&deg;C / {{ temp_min }}&deg;C</p>
+        <div v-if="weather.weatherIcon != ''" class="weather-icon-container"><img :src="weatherIcon" class="weather-icon" alt="Weather icon"></div>
+      </div>
+      <div v-else>
+        <p>Wetter konnte nicht geladen werden</p>
+      </div>
+      <h3 class="last-destinations">Letzte Ziele</h3>
+      <ul class="last-locations-list">
+        <li v-for="destination in lastDestination" :key="destination.id">
+          <v-icon color="white">near_me</v-icon> {{ destination.name }}
+        </li>
+      </ul>
+      <hr class="spacer"/>
     </div>
-    <div v-else>
-      <p>Wetter konnte nicht geladen werden</p>
-    </div>
-   
   </v-container>  
   </v-app>
 </template>
@@ -68,7 +76,8 @@ import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import HomeSlider from '../components/HomeSlider.vue'
-
+import Sidebarmenu from '../components/Sidebarmenu.vue'
+import { weather, getLastDestination } from '../shared_data/queries'
 
   export default {
     components: {
@@ -86,13 +95,16 @@ import HomeSlider from '../components/HomeSlider.vue'
       search: null,
       newDestination: Object,
       newDestName: '',
-      currentLocation: '',
+      currentLocation: weather.location,
       weather: true,
-      weatherIcon: '',
-      temp: '',
-      temp_max: '',
-      temp_min: '',
-      rain: ''
+      weatherIcon: weather.weatherIcon,
+      temp: weather.temp,
+      temp_max: weather.temp_max,
+      temp_min: weather.temp_min,
+      lastDestination: [{
+        "name": "Keine letzten Ziele gefunden!",
+        id: 0
+      }]
     }),
     methods: {
       locationSearch: function(event){ 
@@ -100,11 +112,8 @@ import HomeSlider from '../components/HomeSlider.vue'
         var newDest = this.newDestination
         var newDestName = this.newDestName;
         setTimeout(function(){
-          eventBus.$emit('locationFromHome', newDest, newDestName); 
-        }, 4000);
-        },
-        locationSearch2: function(){
-         // console.log('B')
+            eventBus.$emit('locationFromHome', newDest, newDestName); 
+          }, 4000);
         },
         getDestination: function(event){
           this.items.map(item => {
@@ -125,40 +134,45 @@ import HomeSlider from '../components/HomeSlider.vue'
           let lon = position.coords.longitude
           axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
               this.weather = true;
-              this.weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
               this.currentLocation = response.data.name;
+              this.weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
               this.temp = Math.round(response.data.main.temp);
               this.temp_max = Math.round(response.data.main.temp_max);
               this.temp_min = Math.round(response.data.main.temp_min);
-              // this.rain = response.data.clouds.all;
-              console.log(response);
+              var weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
+              var temp = Math.round(response.data.main.temp);
+              var temp_max = Math.round(response.data.main.temp_max);
+              var temp_min = Math.round(response.data.main.temp_min);
+              weather.updateWeatherData(response.data.name, weatherIcon, temp, temp_max, temp_min);
             }, error => {
               this.weather = false;
               console.log("Weater API error");
             })
         }
       },
-    beforeCreate() {
+    mounted() {
       if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
           this.getWeather(position)
-          // this.startClock()
-          console.log(position.coords.latitude);
-          console.log(position.coords.longitude);
         }, (error) => {
           console.log("location error");
         }
       )
     } else console.log("Your browser does not support me.")
-    },
-    mounted() {
-    
+      this.$apollo.query({
+        query: getLastDestination
+      }).then(response => {
+        console.log(response);
+        if(response.data) {
+          this.lastDestination = response.data.lastDestination;
+        }
+      })
     },
     computed: {
       items () {
         return this.entries.map(entry => {
           if(entry.relevance > .1){
-          return  Object.assign({}, entry);
+            return  Object.assign({}, entry);
           }
         })
       }
@@ -204,59 +218,95 @@ import HomeSlider from '../components/HomeSlider.vue'
 
 
 <style lang="scss">
-  h1,h2,h3,h4 p {
-    color: white;
-    font-family: 'Roboto Slab', serif;
-  }
-  h3{
-    font-weight: 400;
-  }
 
-  .container {
-    padding: 0 !important;
-  }
+h1, h2, h3, h4 {
+  color: white;
+}
+h3 {
+  font-weight: 400;
+}
 
-  .top-area {
+.container {
+  padding: 0 !important;
+  overflow: scroll;
+  max-width: 900px !important;
+}
 
-    height: 20rem;
 
-    margin-bottom: 1rem;
-    border-bottom-left-radius: 7%;
-    border-bottom-right-radius: 7%;
-    background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-
-    .flex-avatar{
-      img {
-        border: 3px solid rgb(255, 255, 255);
-      }
+.top-area {
+  height: 20rem;
+  margin-bottom: 1rem;
+  border-bottom-left-radius: 7%;
+  border-bottom-right-radius: 7%;
+  // background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
+  // background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
+  // background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  background: #00d2ff;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(#3a7bd5, #00d2ff);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(#3a7bd5, #00d2ff); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  .flex-avatar {
+    img {
+      border: 3px solid rgb(255, 255, 255);
     }
   }
+}
 
-  .main-input-autocomplete:after{
-    top: 100%;
-    left: 50%;
-    border: solid transparent;
-    content: " ";
-    height: 50px;
-    width: 50px;
-    position: absolute;
-    pointer-events: none;
-  }
+.main-input-autocomplete:after {
+  top: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 50px;
+  width: 50px;
+  position: absolute;
+  pointer-events: none;
+}
 
-  .v-input__slot{
-    border-radius: 10px !important; 
-  }
+.v-input__slot {
+  border-radius: 10px !important; 
+}
 
-  .location{
-    p{
-      margin-bottom: 0;
-      color:rgba(255, 255, 255, 0.75);
-      font-size: .75rem;
-      line-height: 1rem;
-    }
+.location {
+  p {
+    margin-bottom: 0;
+    color:rgba(255, 255, 255, 0.75);
+    font-size: .75rem;
+    line-height: 1rem;
   }
+}
+
+.v-card {
+  border-radius: 8px !important;
+}
+.d-flex {
+  height: 10rem;
+}
+
+.v-tabs, .v-tabs__bar {
+  margin-bottom: 2rem;
+}
+
+a {
+  text-transform: none !important;
+}
+
+.active-tab {
+  font-weight: 800;
+  border-bottom: 5px solid #ffc400;
+}
+
+.VueCarousel {
+  width: 100%;
+}
+
+.carousel-text{
+  .carousel-tex-headline{
+    font-size: 1rem;
+  }
+  .carousel-tex-subheader{
+    font-size: .75rem
+  }
+} 
 
 
 .v-list__tile__title, .theme--light.v-list .v-list__tile__mask{
@@ -270,7 +320,7 @@ import HomeSlider from '../components/HomeSlider.vue'
     color: white;
     margin-bottom: 0;
   }
-  background-color: rgba(0,0,0, 0.6);
+  background-color: rgba(0,0,0, 0.4);
   margin-left: 1rem;
   margin-right: 1rem;
   border-radius: 16px;
@@ -298,5 +348,54 @@ import HomeSlider from '../components/HomeSlider.vue'
 }
 
 
+.last-locations-list {
+  margin-left: 1rem;
+  margin-right: 1rem;
+  padding-left: 0;
+  li {
+    background-color: rgba(0,0,0, 0.4);
+    border-radius: 17px;
+    margin-bottom: 0.2rem;
+    margin-top: 0.2rem;
+    padding: 2rem;
+    list-style: none;
+    color: white;
+  }
+}
+
+.last-destinations {
+  color: white;
+  text-align: left;
+  padding-left: 2rem;
+  padding-top: 1rem;
+}
+
+hr.spacer {
+  height: 16rem;
+  opacity: 0;
+}
+
+.last-destinations-container {
+  // background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
+  // background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
+  // background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  background: #00d2ff;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(#00d2ff, #8E54E9);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(#00d2ff, #8E54E9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  border-radisu: 17px;
+  border-radius: 22px;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.app-nav .v-card {
+  border-radius: 0px !important;
+}
+
+@media (min-width: 900px) {
+  .theme--dark.v-btn {
+    color: black !important;
+  }
+}
 
 </style>
