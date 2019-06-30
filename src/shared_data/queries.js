@@ -209,6 +209,15 @@ export const OBDStatus = {
   }
 };
 
+export const OBDCommands = [
+  {service: "010C1\r", pid: "0C", bytes: 2, name: "Drehzahl", unit: "U/min", value: 0},
+  {service: "01051\r", pid: "05", bytes: 1, name: "Engine Coolant", unit: "Grad", value: 0},
+  // {service: "01461\r", pid: "46", bytes: 1, name: "Ambient Air Temp", unit: "Grad", value: 0},
+  {service: "015C1\r", pid: "5C", bytes: 1, name: "Oil Temp", unit: "Grad", value: 0},
+  {service: "012F1\r", pid: "5E", bytes: 1, name: "fuelPercentage", unit: "%", value: 0},
+  {service: "015E1\r", pid: "5E", bytes: 1, name: "fuelRate", unit: "L/h", value: 0}
+  ];
+
 export const weather = {
   location: 'Wird geladen...',
   weatherIcon: '/img/icons/sunny_icon.png',

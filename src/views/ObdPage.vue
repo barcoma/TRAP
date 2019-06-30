@@ -26,7 +26,7 @@
          <v-btn
             color="blue-grey"
             class="connection-error-button"
-            @click="getDevices"
+            @click="startWorker"
           >
         <img src="../../public/img/icons/newCar.svg">
         </v-btn>
@@ -44,7 +44,7 @@
 
       <div class="fensterobdNEW">
         <img  class="fensterobdcontentimgNEW" src="../../public/img/icons/speedometer.svg">
-        <p class="fensterobdcontenttext_value">2450</p>
+        <p class="fensterobdcontenttext_value">{{ obdCommandInfo[0].value }}</p>
         <p class="fensterobdcontenttextNEW"> Drehzahl</p>        
        </div>
 
@@ -57,7 +57,7 @@
        <div class="fensterobdNEW">
         <img  class="fensterobdcontentimgNEW" src="../../public/img/icons/coolant_temperature.svg">
         <!-- <p  class="fensterobdcontenttext_unit">°</p> -->
-      <p class="fensterobdcontenttext_value">43° </p>
+      <p class="fensterobdcontenttext_value">{{ obdCommandInfo[1].value }}° </p>
         <p class="fensterobdcontenttextNEW"> Kühlmitteltemperatur</p>
        </div>
        </div>
@@ -70,7 +70,7 @@
 <script>
 import Sidebarmenu from '../components/Sidebarmenu.vue'
 import {eventBus} from '../main.js';
-import { OBDStatus } from '../shared_data/queries'
+import { OBDStatus, OBDCommands } from '../shared_data/queries'
 
 var serviceUUID = "e7810a71-73ae-499d-8c15-faa9aef0c3f2";
 var charUUID = "bef8d6c9-9c21-4c9e-b632-bd58c1009f9f";
@@ -92,17 +92,10 @@ export default {
             currentRPM: "0",
             pidResponse: [],
             byteCounter: 0,
-            obdCommandInfo: [
-                {service: "010C1\r", pid: "0C", bytes: 2, name: "Drehzahl", unit: "U/min", value: 0},
-                {service: "01051\r", pid: "05", bytes: 1, name: "Engine Coolant", unit: "Grad", value: 0},
-                // {service: "01461\r", pid: "46", bytes: 1, name: "Ambient Air Temp", unit: "Grad", value: 0},
-                {service: "015C1\r", pid: "5C", bytes: 1, name: "Oil Temp", unit: "Grad", value: 0},
-                {service: "015E1\r", pid: "5E", bytes: 1, name: "fuelRate", unit: "L/h", value: 0},
-                {service: "012F1\r", pid: "5E", bytes: 1, name: "fuelPercentage", unit: "%", value: 0},
-            ],
+            obdCommandInfo: OBDCommands,
             testCount: 0,
             lastBuffer: ArrayBuffer,
-            queue: ["010C1\r", "01051\r", "015C1\r", "015E1\r"],
+            queue: ["010C1\r", "01051\r", "015C1\r", "012F1\r"],
             lastCommandSent: String,
             replyBytes: Number,
             repliedCommand: null,
@@ -135,10 +128,7 @@ export default {
                 return service.getCharacteristic(charUUID);
             })
             .then(characteristic => characteristic.startNotifications())
-            .then(characteristic => {
-                this.isConnected = true;
-                eventBus.$emit('obdConnected', this.isConnected);
-              
+            .then(characteristic => {        
                 let encoder = new TextEncoder('utf-8');
                 var commands = [];
                 commands.push(encoder.encode("ATD\r\n"));
@@ -188,7 +178,6 @@ export default {
             return obj.service == currentBufferDecoded;
             });
             }
-            //var obj = this.obdCommandInfo.find(obj => obj.service == command);
             if (this.repliedCommand){
                 this.setupDone = true;
                 this.replyBytes = this.obdCommandInfo.find(obj =>{
@@ -205,7 +194,8 @@ export default {
                     this.byteCounter--;
                     if(this.byteCounter == 0){
                         this.pidResponse.splice(0,2);
-                        var reply = this.convertValue(this.pidResponse);
+                        var reply = this.convertValue(this.pidResponse, 'fuel');
+                        this.updateValue(reply);
                         console.log("pid: " +this.repliedCommand.name + '  value: ' +reply);
                         this.pidResponse = [];
                         this.repliedCommand = null;
@@ -289,7 +279,12 @@ export default {
           } else {
             this.infoIndex++;
           }
-        }
+        },
+        updateValue( newValue){
+          var pid = this.repliedCommand.service;
+          var index = this.obdCommandInfo.findIndex(obd => obd.service == pid);
+          this.obdCommandInfo[index].value = newValue;
+        } 
     },
     mounted() {
 
