@@ -84,17 +84,9 @@ import { OBDStatus } from '../shared_data/queries'
 }
 
 .obd_active{
-
     .v-btn__content{
-  color: green !important;
+  color: green ;
   }
-
-  .v-btn--active{
-    .v-btn__content{
-    color: yellow !important;
-    }
-  }
-
 }
 
 .test{}

@@ -3,7 +3,7 @@
         <v-btn dark icon v-on:click="showPopUp=false" class="popUp-close-btn">
             <v-icon dark>close</v-icon>
         </v-btn>
-        <v-icon  v-bind:style="{ color: warningColor }" dark class="popUp-warning-icon">warning</v-icon>
+        <v-icon v-bind:style="{ color: warningColor }" dark class="popUp-warning-icon">warning</v-icon>
         <h2 class="popUp-title">{{ popUp.title }}</h2>
         <p class="popUp-description">{{ popUp.text }}</p>
     </div>
@@ -12,7 +12,6 @@
 
 <script>
 import { eventBus } from '../main.js';
-
 export default {
   name: 'PopUp',
   data() {
@@ -39,11 +38,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
-
-//OBD_Warnung_Idee
 .popUp-container {
     position: relative;
-    background-color: rgba(37, 37, 37, 0.95);
+    background-color: rgba(0, 0, 0, 0.8);
     top: 9.5rem;
     z-index: 9999999999999;
     width: 96%;
@@ -52,7 +49,7 @@ export default {
     height: 9rem;
     margin-top: -9rem;
     border-radius: 12px;
-    //box-shadow: 3px 4px 42px black;
+    box-shadow: 3px 4px 42px black;
     .popUp-close-btn {
         position: absolute;
         right: 0rem;
@@ -64,72 +61,21 @@ export default {
         top: 31%;
     }
     .popUp-title {
-        color: rgb(255, 255, 255);
+        color: white;
         margin-top: 1rem;
         font-size: 16px;
         position: absolute;
-        left: 7rem;
-        top: 2rem;
+        left: 5.5rem;
+        top: 1rem;
     }
     .popUp-description {
         position: absolute;
-        color: rgb(185, 185, 185);
-        margin-top: 3.7em;  
-        left: 7rem; 
+        color: white;
+        margin-top: 3rem;  
+        left: 5.5rem; 
         top: 1rem;
         text-align: left;
         margin-right: 1rem;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-// .popUp-container {
-//     position: relative;
-//     background-color: rgba(0, 0, 0, 0.8);
-//     top: 9.5rem;
-//     z-index: 9999999999999;
-//     width: 96%;
-//     margin-left: 2%;
-//     margin-right: 2%;
-//     height: 9rem;
-//     margin-top: -9rem;
-//     border-radius: 12px;
-//     box-shadow: 3px 4px 42px black;
-//     .popUp-close-btn {
-//         position: absolute;
-//         right: 0rem;
-//     }
-//     .popUp-warning-icon {
-//         font-size: 50px;
-//         position: absolute;
-//         left: 1rem;
-//         top: 31%;
-//     }
-//     .popUp-title {
-//         color: white;
-//         margin-top: 1rem;
-//         font-size: 16px;
-//         position: absolute;
-//         left: 5.5rem;
-//         top: 1rem;
-//     }
-//     .popUp-description {
-//         position: absolute;
-//         color: white;
-//         margin-top: 3rem;  
-//         left: 5.5rem; 
-//         top: 1rem;
-//         text-align: left;
-//         margin-right: 1rem;
-//     }
-// }
 </style>
