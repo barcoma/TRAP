@@ -10,7 +10,7 @@
             
           ></v-text-field>
         </v-flex>
-<v-btn round large class="weiterbtn"> Weiter </v-btn>
+<v-btn round large class="weiterbtn" style="color:white;"> Weiter </v-btn>
 
  </div>     
  
@@ -57,6 +57,7 @@ export default {
   grid-row-start: 5;
   grid-column-start: 2;
   grid-column-end:3;
+  color:white;
 }
 
 </style>

@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <welcome v-if="showWelcome"> </welcome>
     <sidebarmenu class="sidebarmenu"/>
     <install-prompt></install-prompt>
     <pop-up></pop-up>
