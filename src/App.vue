@@ -1,5 +1,14 @@
 <template>
   <div id="app">
+    <cookie-law>
+      <!-- <div slot="message">
+        
+      </div> -->
+      <div slot-scope="props">
+        <p>Diese Website verwendet Cookies – nähere Informationen dazu und zu Ihren Rechten als Benutzer finden Sie in unserer <router-link to="/privacy">Datenschutzerklärung</router-link> am Ende der Seite. Klicken Sie auf „Ich stimme zu“, um Cookies zu akzeptieren und direkt unsere Website besuchen zu können.</p>
+        <button class="Cookie__button" @click="props.accept"><span>Aktzeptieren</span></button>
+      </div>
+    </cookie-law>
     <welcome></welcome>
     <sidebarmenu class="sidebarmenu"/>
     <install-prompt></install-prompt>
@@ -24,7 +33,7 @@ import Sidebarmenu from './components/Sidebarmenu.vue'
 import mapboxgl from 'mapbox-gl'
 import PopUp from './components/PopUp.vue'
 import Welcome from './views/Welcome.vue'
-
+import CookieLaw from 'vue-cookie-law'
 
 
 
@@ -36,7 +45,8 @@ export default {
     InstallPrompt,
     PopUp,
     Sidebarmenu,
-    Welcome
+    Welcome,
+    CookieLaw
   },
   methods: {
     removeGeocode: function(){
@@ -92,6 +102,12 @@ body{
 // Hamburger Icon
 .burger.v-btn {
  top: 5px;
+}
+.Cookie__button {
+  border-radius: 50px !important;
+  background: -moz-linear-gradient(45deg, rgba(50,234,255,1) 0%, rgba(40,115,214,1) 0%, rgba(182,125,232,1) 100%, rgba(32,124,202,1) 100%) !important; /* FF3.6-15 */
+  background: -webkit-linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%) !important; /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%) !important; /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 }
 
 </style>

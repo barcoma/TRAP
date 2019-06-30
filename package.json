@@ -36,6 +36,7 @@
     "vue-apollo": "^3.0.0-beta.28",
     "vue-carousel": "^0.18.0-alpha",
     "vue-cookie": "^1.1.4",
+    "vue-cookie-law": "^1.10.0",
     "vue-hamburger": "^0.1.2",
     "vue-router": "^3.0.2",
     "vue-tiny-slider": "^0.1.34",
