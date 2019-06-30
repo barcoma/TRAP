@@ -6,7 +6,7 @@
         <v-toolbar class="topbar"> 
       </v-toolbar>
       
-      <h5>Fahrzeugdiagnose</h5>
+      <h5 @click="testPopUp('Werkstatt aufsuchen!','P0524: Motoröldruck zu niedrig','yellow')">Fahrzeugdiagnose</h5>
       <!-- <sidebarmenu class="sidebarmenu"/> -->
     </div>   
     <div 
@@ -14,8 +14,16 @@
     @click="cycleButtons"
     >
      <v-btn v-if="infoIndex==0" large round dark class=""><img src="../../public/img/icons/GrünerHaken.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Alles gut</p></v-btn>
-     <v-btn v-if="infoIndex==1" large round dark class=""><img style="width:40px;"src="../../public/img/icons/mediumdanger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Werkstatt aufsuchen</p></v-btn>
-     <v-btn v-if="infoIndex==2" large round dark class=""><img style="width:40px;"src="../../public/img/icons/mediumdanger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Achtung</p></v-btn>
+     <v-btn v-if="infoIndex==1" large round dark class=""><img style="width:40px;"src="../../public/img/icons/mediumdanger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">
+       Werkstatt aufsuchen
+       <br><span class="errorDescription">P0524: Motoröldruck zu niedrig</span>
+        </p>
+       </v-btn>
+     <v-btn v-if="infoIndex==2" large round dark class=""><img style="width:40px;"src="../../public/img/icons/danger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">
+       Sofort anhalten!
+       <br><span class="errorDescription">P0217: Motor-Überhitzung</span>
+        </p>
+       </v-btn>
      </div>
 
 
@@ -95,12 +103,12 @@ export default {
             obdCommandInfo: OBDCommands,
             testCount: 0,
             lastBuffer: ArrayBuffer,
-            queue: ["010C1\r", "01051\r", "015C1\r", "012F1\r"],
+            queue: ["010C1\r", "01051\r"],
             lastCommandSent: String,
             replyBytes: Number,
             repliedCommand: null,
-            infoIndex: 0
-
+            infoIndex: 0,
+            char: null
         }
     },
     computed: {
@@ -128,7 +136,8 @@ export default {
                 return service.getCharacteristic(charUUID);
             })
             .then(characteristic => characteristic.startNotifications())
-            .then(characteristic => {        
+            .then(characteristic => {   
+                this.char = characteristic     
                 let encoder = new TextEncoder('utf-8');
                 var commands = [];
                 commands.push(encoder.encode("ATD\r\n"));
@@ -271,7 +280,9 @@ export default {
             this.$worker.run(this.getDevices(), [this.$data])
         },
         testPopUp: function(title, text, color){
-            eventBus.$emit('showPopUp', title, text, color);
+          setTimeout(function () {
+              eventBus.$emit('showPopUp', title, text, color);
+          }, 5000);
         },
         cycleButtons: function(){
           if(this.infoIndex == 2){
@@ -280,11 +291,24 @@ export default {
             this.infoIndex++;
           }
         },
-        updateValue( newValue){
+        updateValue: function(newValue){
           var pid = this.repliedCommand.service;
           var index = this.obdCommandInfo.findIndex(obd => obd.service == pid);
           this.obdCommandInfo[index].value = newValue;
-        } 
+        },
+        closeBTConnection: function(){
+          if (this.char) {
+            this.char.stopNotifications()
+            .then(_ => {
+              log('> Notifications stopped');
+              this.char.removeEventListener('characteristicvaluechanged',
+                  this.handleCharacteristicValueChanged);
+            })
+            .catch(error => {
+              log('Argh! ' + error);
+            });
+          }
+        }
     },
     mounted() {
 
@@ -551,4 +575,10 @@ div.v-card.theme--light.white{
 .obdicons{
   opacity: 1;
 }
+
+.errorDescription{
+  font-size: .7em;
+  color: #505050;
+}
+
 </style>

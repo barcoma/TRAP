@@ -3,7 +3,7 @@
         <v-btn dark icon v-on:click="showPopUp=false" class="popUp-close-btn">
             <v-icon dark>close</v-icon>
         </v-btn>
-        <v-icon v-bind:style="{ color: warningColor }" dark class="popUp-warning-icon">warning</v-icon>
+        <v-icon  v-bind:style="{ color: warningColor }" dark class="popUp-warning-icon">warning</v-icon>
         <h2 class="popUp-title">{{ popUp.title }}</h2>
         <p class="popUp-description">{{ popUp.text }}</p>
     </div>
@@ -43,7 +43,7 @@ export default {
 //OBD_Warnung_Idee
 .popUp-container {
     position: relative;
-    background-color: rgba(233, 230, 32, 0.95);
+    background-color: rgba(37, 37, 37, 0.95);
     top: 9.5rem;
     z-index: 9999999999999;
     width: 96%;
@@ -64,7 +64,7 @@ export default {
         top: 31%;
     }
     .popUp-title {
-        color: black;
+        color: rgb(255, 255, 255);
         margin-top: 1rem;
         font-size: 16px;
         position: absolute;
@@ -73,7 +73,7 @@ export default {
     }
     .popUp-description {
         position: absolute;
-        color: rgb(85, 85, 85);
+        color: rgb(185, 185, 185);
         margin-top: 3.7em;  
         left: 7rem; 
         top: 1rem;
