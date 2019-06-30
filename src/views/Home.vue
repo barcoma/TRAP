@@ -70,21 +70,18 @@
 </template>
 
 <script>
-
-import { Carousel, Slide } from 'vue-carousel';
 import {eventBus} from '../main.js';
 
 import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
+import HomeSlider from '../components/HomeSlider.vue'
 import Sidebarmenu from '../components/Sidebarmenu.vue'
 import { weather, getLastDestination } from '../shared_data/queries'
 
   export default {
     components: {
-      Carousel,
-      Slide,
-      Sidebarmenu
+      HomeSlider
     },
     data: () => ({
       lorem: `Lorem ipsum dolor sit amet, mel at clita quando. Te sit oratio vituperatoribus, nam ad ipsum posidonium mediocritatem, explicari dissentiunt cu mea. Repudiare disputationi vim in, mollis iriure nec cu, alienum argumentum ius ad. Pri eu justo aeque torquatos.`,

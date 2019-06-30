@@ -15,7 +15,8 @@ export default {
   name: 'installPrompt',
   data() {
     return {
-      showInstallBanner: false
+      showInstallBanner: false,
+      showWelcome: false
     };
   },
   created() {
@@ -23,6 +24,7 @@ export default {
       e.preventDefault();
       installEvent = e;
       this.showInstallBanner = true;
+      this.showWelcome = true;
     });
   },
   methods: {

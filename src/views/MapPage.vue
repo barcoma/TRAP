@@ -12,7 +12,6 @@
 <script>
 import MapBox from '../components/MapBox.vue'
 import TabNav from '../components/TabNav.vue'
-import Sidebarmenu from '../components/Sidebarmenu.vue'
 import mapboxgl from 'mapbox-gl'
 
 
@@ -22,8 +21,7 @@ export default {
   name: 'MapPage',
   components: {
     MapBox,
-    TabNav,
-    Sidebarmenu
+    TabNav
   },
   methods: {
     removeGeocode: function(){
@@ -34,7 +32,7 @@ export default {
 
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 
 button:focus{
   border: none !important;
