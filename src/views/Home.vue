@@ -70,21 +70,18 @@
 </template>
 
 <script>
-
-import { Carousel, Slide } from 'vue-carousel';
 import {eventBus} from '../main.js';
 
 import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
+import HomeSlider from '../components/HomeSlider.vue'
 import Sidebarmenu from '../components/Sidebarmenu.vue'
 import { weather, getLastDestination } from '../shared_data/queries'
 
   export default {
     components: {
-      Carousel,
-      Slide,
-      Sidebarmenu
+      HomeSlider
     },
     data: () => ({
       lorem: `Lorem ipsum dolor sit amet, mel at clita quando. Te sit oratio vituperatoribus, nam ad ipsum posidonium mediocritatem, explicari dissentiunt cu mea. Repudiare disputationi vim in, mollis iriure nec cu, alienum argumentum ius ad. Pri eu justo aeque torquatos.`,
@@ -135,7 +132,7 @@ import { weather, getLastDestination } from '../shared_data/queries'
         getWeather: function(position) {
           let lat = position.coords.latitude
           let lon = position.coords.longitude
-          axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
+          axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
               this.weather = true;
               this.currentLocation = response.data.name;
               this.weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
@@ -396,7 +393,7 @@ hr.spacer {
 }
 
 @media (min-width: 900px) {
-  .theme--dark.v-btn {
+ .burger.theme--dark.v-btn {
     color: black !important;
   }
 }

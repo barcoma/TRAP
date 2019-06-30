@@ -10,7 +10,6 @@
       <v-btn
         color= #126DFF
         flat
-        value="recent"
         to="/map"
       >
         <span>Maps</span>
@@ -20,7 +19,6 @@
       <v-btn
         color= #126DFF
         flat
-        value="favorites"
         to="/"
       >
         <span>Home</span>
@@ -28,13 +26,13 @@
       </v-btn>
 
       <v-btn
-        color= #126DFF
         flat
-        value="nearby"
         to="/obd"
+        value="4"
+        :class="{ 'obd_active' : obdState }"
       >
         <span>OBD</span>
-        <v-icon large>drive_eta</v-icon>
+        <v-icon  large>drive_eta</v-icon>
       </v-btn>
 
     </v-bottom-nav>
@@ -43,16 +41,20 @@
 
 <script>
 import {eventBus} from '../main.js';
+import { OBDStatus } from '../shared_data/queries'
 
   export default  {
     name: 'TabNav',
     props: [],
     data() {
       return {
-
+        obdState: OBDStatus.state.connected
       }
     },
     mounted() {
+      eventBus.$on('obdConnected', (state) =>{
+        this.obdState = OBDStatus.state.connected;
+      });
     },
     methods: {
         
@@ -80,4 +82,13 @@ import {eventBus} from '../main.js';
 .tabnav-wrapper{
   height: 100% !important;
 }
+
+.obd_active{
+    .v-btn__content{
+  color: green ;
+  }
+}
+
+.test{}
+
 </style>

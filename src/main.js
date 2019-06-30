@@ -3,6 +3,7 @@ import App from './App.vue'
 import './registerServiceWorker'
 import mapboxgl from 'mapbox-gl'
 import VueRouter from 'vue-router'
+import VueWorker from 'vue-worker'
 import router from './router'
 
 import Vuetify from 'vuetify'
@@ -132,6 +133,7 @@ const apolloClient = new ApolloClient({
 Vue.use(VueApollo)
 Vue.use(VueRouter)
 Vue.use(Vuetify)
+Vue.use(VueWorker)
 
 const apolloProvider = new VueApollo({
   defaultClient: apolloClient

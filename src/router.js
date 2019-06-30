@@ -27,7 +27,7 @@ export default new Router({
     },
     {
       path: '/obd',
-      name: 'obd',
+      name: 'OBD',
       component: ObdPage
     },
     {
