@@ -205,7 +205,7 @@ export const OBDStatus = {
     connected: false
   },
   setValue(value) {
-    this.state.connected = !value;
+    this.state.connected = value;
   }
 };
 

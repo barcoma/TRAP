@@ -44,7 +44,7 @@
 
 
      <div class="Grid" v-if="isConnected">
-      <div class="fensterobdNEW">
+      <div @click="closeBTConnection" class="fensterobdNEW">
         <v-icon color="#000" class="fensterobdcontentimgNEW" x-large>local_gas_station</v-icon>
         <p class="fensterobdcontenttext_value">60%</p>
         <p class="fensterobdcontenttextNEW"> Tankstand</p>
@@ -116,7 +116,7 @@ export default {
     },
     methods: {
         getDevices: function() {
-            OBDStatus.setValue();
+            OBDStatus.setValue(true);
             this.isConnected = OBDStatus.state.connected
             eventBus.$emit('obdConnected', this.isConnected);
             navigator.bluetooth.requestDevice({
@@ -297,6 +297,9 @@ export default {
           this.obdCommandInfo[index].value = newValue;
         },
         closeBTConnection: function(){
+           this.isConnected = false;
+           OBDStatus.setValue(false);
+            eventBus.$emit('obdConnected', this.isConnected);
           if (this.char) {
             this.char.stopNotifications()
             .then(_ => {
