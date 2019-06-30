@@ -68,6 +68,7 @@
     <v-btn v-if="routeReady & !navigationMode" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
   </div>
   <div id="map" ref="map"></div>
+  <v-btn v-if="active_el == 2 && navigator.onLine" class="poi-offline-save" @click="precacheQuickSearch()">Orte offline speichern</v-btn>
 </div>
 </template>
 
@@ -81,7 +82,7 @@ import MapboxGeocoder from 'mapbox-gl-geocoder'
 import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions'
 import { setTimeout } from 'timers';
 import { poiQueries, poiFilterQuery, toggleNaviPoi, getLastDestination } from '../shared_data/queries'
-import { getCategories } from '../shared_data/data'
+import { getCategories, categoryArray } from '../shared_data/data'
 
 var markers = [];
 var userLong = 0;
@@ -118,6 +119,7 @@ export default {
       active_el: toggleNaviPoi.state.active_el,
       active_filter: toggleNaviPoi.state.active_filter,
       display: true,
+      poisAdded: false,
       source: {
         yelp: true,
         foursquare: true,
@@ -149,28 +151,111 @@ export default {
   },
   methods: {
     querySearch: function(term = null, quickCategory = null) {
-      var source;
-      var category;
+      var filterParams = this.getFilterParams();
+      var source = filterParams.source;
+      var category = filterParams.category;
+      var query = this.getQueryBySource(source);
 
-      try {
-        const filterParams = this.$apollo.provider.defaultClient.readQuery({
-            query: poiFilterQuery
-        });
-        source = filterParams.poiFilter.source;
-        if (quickCategory == null) {
-          category = filterParams.poiFilter.category;
-        }
-      } catch (exception) {
-        source = this.source;
-      }
-
-      if (quickCategory != undefined && quickCategory != null) {
+      if (quickCategory) {
         category = {};
         category[quickCategory] = true;
       }
-      var query;
 
-      if (source.yelp) {
+      if (category) {
+        var categories = getCategories(category);
+      } else {
+        var categories = {};
+      }
+      var center = this.mainMap.getBounds().getCenter();
+      var lat = center.lat;
+      var lng = center.lng;
+
+      var variables = {
+        latitude: lat,
+        longitude: lng,
+        limit: 15,
+        radius: 40000
+      }
+
+      if (term) {
+        variables.term = term;
+      }
+      if (this.source.yelp && categories.yelpCategories != "") {
+        variables.yelpCategories = categories.yelpCategories;
+      }
+      if (this.source.foursquare && categories.foursquareCategories != "") {
+        variables.foursquareCategories = categories.foursquareCategories;
+      }
+
+      if (navigator.onLine){
+        this.executeQuery(query, variables);
+      } else {
+        this.executeOfflineQuery(query, variables)
+      }
+    },
+    executeQuery: function(query, variables) {
+      this.$apollo.query({
+        query: query,
+        variables: variables
+      }).then((response) => this.handleResponse(response.data.getPOI))
+      .catch((response) => {
+        console.log(response);
+      });
+    },
+    executeOfflineQuery: function(query, variables) {
+      variables.latitude = parseFloat(localStorage.getItem("persistedLat"));
+      variables.longitude = parseFloat(localStorage.getItem("persistedLng"));
+      const apolloClient = this.$apollo.provider.defaultClient
+      const response = apolloClient.readQuery({ 
+          query: query,
+          variables: variables
+      });
+      this.handleResponse(response.getPOI);
+    },
+    handleResponse: function(pois) {
+      this.clearMarkers();
+      if (pois.customPOI) {
+          this.addMarker(pois.customPOI, "#24c94d");
+      }
+      if (pois.foursquarePOI) {
+          this.addMarker(pois.foursquarePOI, "#1ecebc");
+      }
+      if (pois.yelpPOI) {
+          this.addMarker(pois.yelpPOI, "#c64917");
+      }
+      if (pois.customPOI == null && pois.foursquarePOI.length < 1 && pois.yelpPOI.length < 1) {
+        this.showPopUp("Kein Ort gefunden", "Ihr Suchbegriff ergab leider keine Ergebnisse", "white");
+      }
+    },
+    addMarker: function(pois, color) {
+      for (var i = 0; i < pois.length; i++) {
+        let poi = pois[i];
+        let div = window.document.createElement('div');
+        let title = window.document.createElement('h3');
+        title.innerHTML = poi.name;
+        let button = window.document.createElement('button');
+        button.className = "poi-navigate";
+        button.innerHTML = "Navigieren";
+        button.addEventListener("click", () => {
+          this.navigateToPoi(poi.coordinates.longitude, poi.coordinates.latitude, poi.name);
+        });
+        div.appendChild(title);
+        div.appendChild(button);
+        var currentMarker = new mapboxgl.Marker({
+          draggable: false,
+          color: color
+        })
+        .setLngLat([poi.coordinates.longitude, poi.coordinates.latitude])
+        .setPopup(new mapboxgl.Popup({ offset: 25 }).setDOMContent(div)) // add popups
+        // .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3><button class="poi-navigate">Navigieren</button>'))
+        .addTo(this.mainMap);
+        markers.push(currentMarker);
+        this.poisAdded = true;
+      }
+    },
+    getQueryBySource: function(source) {
+      var query;
+        if (source.yelp) {
           if (source.foursquare) {
               if (source.custom) {
                 query = poiQueries.ALL_QUERY;
@@ -191,87 +276,60 @@ export default {
       } else if (source.custom) {
           query = poiQueries.CUSTOM_ONLY_QUERY;
       }
-      if (category != null && category != undefined) {
-        var categories = getCategories(category);
-      } else {
-        var categories = {};
+      return query;
+    },
+    getFilterParams: function(quickCategory) {
+      var source;
+      var category;
+
+      try {
+        const filterParams = this.$apollo.provider.defaultClient.readQuery({
+            query: poiFilterQuery
+        });
+        source = filterParams.poiFilter.source;
+        if (quickCategory == null) {
+          category = filterParams.poiFilter.category;
+        }
+      } catch (exception) {
+        source = this.source;
       }
+      return {
+        category: category,
+        source: source
+      }
+    },
+    precacheQuickSearch: function() {
+      var filterParams = this.getFilterParams(categoryArray[0][0]);
+      var source = filterParams.source;
+      var query = this.getQueryBySource(source);
+
       var center = this.mainMap.getBounds().getCenter();
       var lat = center.lat;
       var lng = center.lng;
-
-      var variables = {
-        latitude: lat,
-        longitude: lng,
-        limit: 15,
-        radius: 40000
-      }
-
-      if (term != undefined && term != null) {
-          variables.term = term;
-      }
-      if (this.source.yelp && categories.yelpCategories != "") {
-          variables.yelpCategories = categories.yelpCategories;
-      }
-      if (this.source.foursquare && categories.foursquareCategories != "") {
-          variables.foursquareCategories = categories.foursquareCategories;
-      }
-      this.executeQuery(query, variables);
-    },
-    executeQuery: function(query, variables) {
-      this.$apollo.query({
-        query: query,
-        variables: variables
-      }).then((response) => {
-        this.clearMarkers();
-        var pois = response.data.getPOI;
-        if (pois.customPOI != null && pois.customPOI != undefined) {
-            this.addMarker(pois.customPOI, "#24c94d");
-        }
-        if (pois.foursquarePOI != null && pois.foursquarePOI != undefined) {
-            this.addMarker(pois.foursquarePOI, "#1ecebc");
-        }
-        if (pois.yelpPOI != null && pois.yelpPOI != undefined) {
-            this.addMarker(pois.yelpPOI, "#c64917");
-        }
-        if (pois.customPOI == null && pois.foursquarePOI.length < 1 && pois.yelpPOI.length < 1) {
-          this.showPopUp("Kein Ort gefunden", "Ihr Suchbegriff ergab leider keine Ergebnisse", "white");
-        }
-      }).catch((response) => {
-        console.log(response);
-      });
-    },
-    addMarker: function(pois, color) {
-      for (var i = 0; i < pois.length; i++) {
-        let poi = pois[i];
-        let div = window.document.createElement('div');
-        let title = window.document.createElement('h3');
-        title.innerHTML = poi.name;
-        let button = window.document.createElement('button');
-        button.className = "poi-navigate";
-        button.innerHTML = "Navigieren";
-        button.addEventListener("click", () => {
-          this.navigateToPoi(poi.coordinates.longitude, poi.coordinates.latitude);
-        });
-        div.appendChild(title);
-        div.appendChild(button);
-        var currentMarker = new mapboxgl.Marker({
-          draggable: false,
-          color: color
+      localStorage.setItem("persistedLat", lat);
+      localStorage.setItem("persistedLng", lng);     
+      for (var i = 0; i < categoryArray.length; i++) {
+        this.$apollo.query({
+          query: query,
+          variables: {
+            latitude: lat,
+            longitude: lng,
+            yelpCategories: categoryArray[i][0],
+            foursquareCategories: categoryArray[i][1],
+            limit: 15,
+            radius: 40000
+          }
         })
-        .setLngLat([poi.coordinates.longitude, poi.coordinates.latitude])
-        .setPopup(new mapboxgl.Popup({ offset: 25 }).setDOMContent(div)) // add popups
-        // .setHTML('<h3 class="pop-up-text">' + poi.name + '</h3><button class="poi-navigate">Navigieren</button>'))
-        .addTo(this.mainMap);
-        markers.push(currentMarker);
       }
     },
-    navigateToPoi: function(long, lat) {
+    navigateToPoi: function(long, lat, name) {
       this.clearMarkers();
       this.active_el = 1;
       this.mapControl.style.display = "block";
       this.directions.removeRoutes();
-      this.directions.setOrigin([long, lat]);
+      this.directions.setDestination([long, lat]);
+      this.inputDestination.value = name;
+      this.showRouting();
     },  
     clearMarkers: function() {
       for (var i  = 0; i < markers.length; i++) {
@@ -496,6 +554,9 @@ export default {
     this.routeReady = true;
   });
 
+  if (navigator.onLine) {
+    this.precacheQuickSearch();
+  }
   this.directions.on("origin", e => {
     var lng = e.feature.geometry.coordinates[0];
     var lat = e.feature.geometry.coordinates[1];
@@ -952,7 +1013,6 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 
   .mapboxgl-popup-content {
     text-align: center;
-    font-family: 'Open Sans', sans-serif;
   }
   .mapbox-directions-instructions .directions-icon {
     position:absolute;
@@ -1241,6 +1301,18 @@ button.directions-icon.directions-icon-reverse.directions-reverse.js-reverse-inp
 
 .hidden {
   display: none !important;
+}
+
+.poi-offline-save {
+  position: absolute !important;
+  bottom: 10% !important;
+  right: 4rem !important;
+  border-radius: 50px !important;
+  text-transform: unset !important;
+  color: white !important;
+  background: -moz-linear-gradient(45deg, rgba(50,234,255,1) 0%, rgba(40,115,214,1) 0%, rgba(182,125,232,1) 100%, rgba(32,124,202,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 }
 
 </style>

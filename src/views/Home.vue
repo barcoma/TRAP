@@ -41,7 +41,6 @@
             solo
           >
             <template slot="append">
-                <!-- <v-icon v-on:click="locationSearch()">check</v-icon> -->
                 <v-icon v-on:click="locationSearch()">directions</v-icon>
             </template>
           </v-autocomplete>      
@@ -49,214 +48,23 @@
 
     </v-layout>
 
-    <v-layout row>
-      <div>
-        <li v-for="destination in lastDestination" v-bind:key="destination.id">
-          {{destination.name}} 
+    <div class="last-destinations-container">
+      <div v-if="weather" class="weather-container">
+        <h3 class="weather-location">{{ currentLocation }}</h3>
+        <p class="weather-temp"><span class="weather-temp-current">{{ temp }}&deg;C</span><br>{{ temp_max }}&deg;C / {{ temp_min }}&deg;C</p>
+        <div v-if="weather.weatherIcon != ''" class="weather-icon-container"><img :src="weatherIcon" class="weather-icon" alt="Weather icon"></div>
+      </div>
+      <div v-else>
+        <p>Wetter konnte nicht geladen werden</p>
+      </div>
+      <h3 class="last-destinations">Letzte Ziele</h3>
+      <ul class="last-locations-list">
+        <li v-for="destination in lastDestination" :key="destination.id">
+          <v-icon color="white">near_me</v-icon> {{ destination.name }}
         </li>
-
-      </div>
-
-      <div>
-        <v-tabs
-          v-model="active"
-          color="white"
-          light
-          centered
-          grow
-          active-class="active-tab"
-        >
-          <v-tab href="#tab-1">
-            Letzte Ziele
-          </v-tab>
-          <v-tab href="#tab-2">
-            Favoriten
-          </v-tab>
-          <v-tab href="#tab-3">
-            Entdecken
-          </v-tab>
-          <v-tab-item
-                v-for="i in 3"
-                :key="i"
-                :value="'tab-' + i"
-                lazy
-          >
-
-            <carousel v-if="i == 1"
-            :paginationEnabled="false"
-            >
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://images.unsplash.com/photo-1436637706755-81d219b36e29?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Eifelturm</div>
-                        <div class="carousel-tex-subheader">Paris, France</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://images.unsplash.com/photo-1486247496048-cc4ed929f7cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Louvre</div>
-                        <div class="carousel-tex-subheader">Paris, France</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://picsum.photos/510/300?random"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Martin</div>
-                        <div class="carousel-tex-subheader">Paris, France</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-            </carousel>
-
-
-
-
-            <carousel v-if="i == 2"
-            :paginationEnabled="false"
-            >
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Uhrenmuseum</div>
-                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Kebab-Treff</div>
-                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://picsum.photos/510/300?random"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Martin</div>
-                        <div class="carousel-tex-subheader">Paris, France</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-            </carousel>
-
-            <carousel v-if="i == 3"
-            :paginationEnabled="false"
-            >
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Uhrenmuseum</div>
-                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://www.schwarzwald-geniessen.de/eip/clips/lightbox_eingang.jpg?fl=18139758"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Kebab-Treff</div>
-                        <div class="carousel-tex-subheader">Furtwangen, Germany</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-              <slide>
-                <v-flex mr-1 ml-1>
-                  <v-card dark tile flat
-                  img="https://picsum.photos/510/300?random"
-                  height="30vh"
-                  >        
-                    <v-card-title>
-                      <v-icon medium>location_on</v-icon>
-                      <div class="carousel-text">
-                        <div class="carousel-tex-headline">Martin</div>
-                        <div class="carousel-tex-subheader">Paris, France</div>
-                      </div>
-                    </v-card-title>                
-                  </v-card>
-                </v-flex>
-              </slide>
-            </carousel>
-
-          </v-tab-item>
-        </v-tabs>
-      </div>
-    </v-layout>
-    <div v-if="weather" class="weather-container">
-      <h3 class="weather-location">{{ currentLocation }}</h3>
-      <p class="weather-temp"><span class="weather-temp-current">{{ temp }}&deg;C</span><br>{{ temp_max }}&deg;C / {{ temp_min }}&deg;C</p>
-      <div class="weather-icon-container"><img :src="weatherIcon" class="weather-icon" alt="Weather icon"></div>
+      </ul>
+      <hr class="spacer"/>
     </div>
-    <div v-else>
-      <p>Wetter konnte nicht geladen werden</p>
-    </div>
-   
   </v-container>  
   </v-app>
 </template>
@@ -270,8 +78,7 @@ import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import MapboxGeocoder from 'mapbox-gl-geocoder'
 import Sidebarmenu from '../components/Sidebarmenu.vue'
-import { weather } from '../shared_data/queries'
-import { getLastDestination } from '../shared_data/queries'
+import { weather, getLastDestination } from '../shared_data/queries'
 
   export default {
     components: {
@@ -297,7 +104,6 @@ import { getLastDestination } from '../shared_data/queries'
       temp: weather.temp,
       temp_max: weather.temp_max,
       temp_min: weather.temp_min,
-      rain: '',
       lastDestination: [{
         "name": "Keine letzten Ziele gefunden!",
         id: 0
@@ -309,11 +115,8 @@ import { getLastDestination } from '../shared_data/queries'
         var newDest = this.newDestination
         var newDestName = this.newDestName;
         setTimeout(function(){
-          eventBus.$emit('locationFromHome', newDest, newDestName); 
-        }, 4000);
-        },
-        locationSearch2: function(){
-         // console.log('B')
+            eventBus.$emit('locationFromHome', newDest, newDestName); 
+          }, 4000);
         },
         getDestination: function(event){
           this.items.map(item => {
@@ -332,7 +135,7 @@ import { getLastDestination } from '../shared_data/queries'
         getWeather: function(position) {
           let lat = position.coords.latitude
           let lon = position.coords.longitude
-          axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
+          axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
               this.weather = true;
               this.currentLocation = response.data.name;
               this.weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
@@ -354,9 +157,6 @@ import { getLastDestination } from '../shared_data/queries'
       if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
           this.getWeather(position)
-          // this.startClock()
-          // console.log(position.coords.latitude);
-          // console.log(position.coords.longitude);
         }, (error) => {
           console.log("location error");
         }
@@ -421,87 +221,88 @@ import { getLastDestination } from '../shared_data/queries'
 
 
 <style lang="scss">
-  h1,h2,h3,h4 p {
-    color: white;
-    font-family: 'Roboto Slab', serif;
-  }
-  h3{
-    font-weight: 400;
-  }
 
-  .container {
-    padding: 0 !important;
-  }
+h1, h2, h3, h4 {
+  color: white;
+}
+h3 {
+  font-weight: 400;
+}
 
-  .top-area {
+.container {
+  padding: 0 !important;
+  overflow: scroll;
+  max-width: 900px !important;
+}
 
-    height: 20rem;
 
-    margin-bottom: 1rem;
-    border-bottom-left-radius: 7%;
-    border-bottom-right-radius: 7%;
-    background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-
-    .flex-avatar{
-      img {
-        border: 3px solid rgb(255, 255, 255);
-      }
+.top-area {
+  height: 20rem;
+  margin-bottom: 1rem;
+  border-bottom-left-radius: 7%;
+  border-bottom-right-radius: 7%;
+  // background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
+  // background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
+  // background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  background: #00d2ff;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(#3a7bd5, #00d2ff);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(#3a7bd5, #00d2ff); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  .flex-avatar {
+    img {
+      border: 3px solid rgb(255, 255, 255);
     }
   }
+}
 
-  .main-input-autocomplete:after{
-    top: 100%;
-    left: 50%;
-    border: solid transparent;
-    content: " ";
-    height: 50px;
-    width: 50px;
-    position: absolute;
-    pointer-events: none;
-  }
+.main-input-autocomplete:after {
+  top: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 50px;
+  width: 50px;
+  position: absolute;
+  pointer-events: none;
+}
 
-  .v-input__slot{
-    border-radius: 10px !important; 
-  }
+.v-input__slot {
+  border-radius: 10px !important; 
+}
 
-  .location{
-    p{
-      margin-bottom: 0;
-      color:rgba(255, 255, 255, 0.75);
-      font-size: .75rem;
-      line-height: 1rem;
-    }
+.location {
+  p {
+    margin-bottom: 0;
+    color:rgba(255, 255, 255, 0.75);
+    font-size: .75rem;
+    line-height: 1rem;
   }
+}
 
-  .v-card {
-    border-radius: 8px !important;
-  }
-  .d-flex {
-    height: 10rem;
-  }
+.v-card {
+  border-radius: 8px !important;
+}
+.d-flex {
+  height: 10rem;
+}
 
-  .v-tabs, .v-tabs__bar{
-    margin-bottom: 2rem;
-    font-family: 'Roboto Slab', serif;
-  }
+.v-tabs, .v-tabs__bar {
+  margin-bottom: 2rem;
+}
 
-  a{
-    text-transform: none !important;
-  }
+a {
+  text-transform: none !important;
+}
 
-  .active-tab{
-    font-weight: 800;
-    border-bottom: 5px solid #ffc400;
-  }
+.active-tab {
+  font-weight: 800;
+  border-bottom: 5px solid #ffc400;
+}
 
 .VueCarousel {
-    width: 100%;
+  width: 100%;
 }
 
 .carousel-text{
-  font-family: 'Roboto Slab', serif;
   .carousel-tex-headline{
     font-size: 1rem;
   }
@@ -522,7 +323,7 @@ import { getLastDestination } from '../shared_data/queries'
     color: white;
     margin-bottom: 0;
   }
-  background-color: rgba(0,0,0, 0.6);
+  background-color: rgba(0,0,0, 0.4);
   margin-left: 1rem;
   margin-right: 1rem;
   border-radius: 16px;
@@ -550,5 +351,54 @@ import { getLastDestination } from '../shared_data/queries'
 }
 
 
+.last-locations-list {
+  margin-left: 1rem;
+  margin-right: 1rem;
+  padding-left: 0;
+  li {
+    background-color: rgba(0,0,0, 0.4);
+    border-radius: 17px;
+    margin-bottom: 0.2rem;
+    margin-top: 0.2rem;
+    padding: 2rem;
+    list-style: none;
+    color: white;
+  }
+}
+
+.last-destinations {
+  color: white;
+  text-align: left;
+  padding-left: 2rem;
+  padding-top: 1rem;
+}
+
+hr.spacer {
+  height: 16rem;
+  opacity: 0;
+}
+
+.last-destinations-container {
+  // background: -moz-linear-gradient(-60deg, #4285f4 0%, #00ebff 100%); /* FF3.6-15 */
+  // background: -webkit-linear-gradient(-60deg, #4285f4 0%,#00ebff 100%); /* Chrome10-25,Safari5.1-6 */
+  // background: linear-gradient(135deg, #4285f4 0%,#00ebff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  background: #00d2ff;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(#00d2ff, #8E54E9);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(#00d2ff, #8E54E9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  border-radisu: 17px;
+  border-radius: 22px;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.app-nav .v-card {
+  border-radius: 0px !important;
+}
+
+@media (min-width: 900px) {
+ .burger.theme--dark.v-btn {
+    color: black !important;
+  }
+}
 
 </style>
