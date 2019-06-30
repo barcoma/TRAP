@@ -47,16 +47,16 @@
         <v-list-tile >
           
         <v-list-tile-content >
-            <v-list-tile-title >Hi, Lisa</v-list-tile-title>
+            <v-list-tile-title >Hi, {{ username }}</v-list-tile-title>
           </v-list-tile-content>
-           <v-flex row class="flex-avatar">
+           <!-- <v-flex row class="flex-avatar">
             <v-avatar
           :size="64"
           color="grey lighten-4"
         >
           <img src="https://cdn.pixabay.com/photo/2017/06/05/11/01/airport-2373727_1280.jpg" alt="avatar">
         </v-avatar>
-        </v-flex>
+        </v-flex> -->
          
             </v-list-tile>
        
@@ -107,10 +107,18 @@
           // { title: 'Einstellungen', icon: 'settings', href:"/map" },
           { title: 'Impressum', icon: 'perm_identity', href:"/imprint" },
           { title: 'Datenschutz', icon: 'lock', href:"/privacy" }
-        ]
+        ],
+        username: ''
       }
     },
-    
+    created() {
+      eventBus.$on('updateName', () => {
+        this.username = this.$cookie.get('Username');
+      })
+    },
+    mounted() {
+      this.username = this.$cookie.get('Username');
+    }
   }
 </script>
 
