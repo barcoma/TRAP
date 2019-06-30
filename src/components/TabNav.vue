@@ -29,9 +29,10 @@
         flat
         to="/obd"
         value="4"
+        :class="{ 'obd_active' : obdState }"
       >
         <span>OBD</span>
-        <v-icon :class="{ 'obd_active' : obdState }" large>drive_eta</v-icon>
+        <v-icon  large>drive_eta</v-icon>
       </v-btn>
 
     </v-bottom-nav>
@@ -40,18 +41,19 @@
 
 <script>
 import {eventBus} from '../main.js';
+import { OBDStatus } from '../shared_data/queries'
 
   export default  {
     name: 'TabNav',
     props: [],
     data() {
       return {
-        obdState: false
+        obdState: OBDStatus.state.connected
       }
     },
     mounted() {
       eventBus.$on('obdConnected', (state) =>{
-        this.obdState = state;
+        this.obdState = OBDStatus.state.connected;
       });
     },
     methods: {
@@ -82,7 +84,17 @@ import {eventBus} from '../main.js';
 }
 
 .obd_active{
-      color: green !important;
+
+    .v-btn__content{
+  color: green !important;
+  }
+
+  .v-btn--active{
+    .v-btn__content{
+    color: yellow !important;
+    }
+  }
+
 }
 
 .test{}

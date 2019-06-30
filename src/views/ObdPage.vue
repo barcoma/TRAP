@@ -9,10 +9,13 @@
       <h5>Fahrzeugdiagnose</h5>
       <!-- <sidebarmenu class="sidebarmenu"/> -->
     </div>   
-    <div class="ObdTopmid">
-     <!--<v-btn large round dark class=""><img src="../../public/img/icons/GrünerHaken.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Alles gut</p></v-btn> -->
-     <!--<v-btn large round dark class=""><img style="width:40px;"src="../../public/img/icons/Danger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Werkstatt aufsuchen</p></v-btn>-->
-     <v-btn v-on:click="testPopUp('Fehlermeldung', 'P0534: Kältemittelverlust', 'yellow')" large round dark class=""><img style="width:40px;"src="../../public/img/icons/mediumdanger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Achtung</p></v-btn>
+    <div 
+    class="ObdTopmid"
+    @click="cycleButtons"
+    >
+     <v-btn v-if="infoIndex==0" large round dark class=""><img src="../../public/img/icons/GrünerHaken.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Alles gut</p></v-btn>
+     <v-btn v-if="infoIndex==1" large round dark class=""><img style="width:40px;"src="../../public/img/icons/mediumdanger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Werkstatt aufsuchen</p></v-btn>
+     <v-btn v-if="infoIndex==2" large round dark class=""><img style="width:40px;"src="../../public/img/icons/mediumdanger.svg"></img><p style="justify-self:center; margin-left:15px;margin-bottom:0;">Achtung</p></v-btn>
      </div>
 
 
@@ -33,14 +36,18 @@
 
 
      <div class="Grid" v-if="isConnected">
-      <div class="fensterobd">
-        <v-icon color="#000" class="fensterobdcontentimg" x-large>local_gas_station</v-icon>
-        <p class="fensterobdcontenttext"> Tankstand: 60%</p>
+      <div class="fensterobdNEW">
+        <v-icon color="#000" class="fensterobdcontentimgNEW" x-large>local_gas_station</v-icon>
+        <p class="fensterobdcontenttext_value">60%</p>
+        <p class="fensterobdcontenttextNEW"> Tankstand</p>
        </div>
-      <div class="fensterobd">
-        <v-icon color="#000" class="fensterobdcontentimg" x-large>toys</v-icon>
-        <p class="fensterobdcontenttext"> Drehzahl: 850 U/min</p>
+
+      <div class="fensterobdNEW">
+        <img  class="fensterobdcontentimgNEW" src="../../public/img/icons/speedometer.svg">
+        <p class="fensterobdcontenttext_value">2450</p>
+        <p class="fensterobdcontenttextNEW"> Drehzahl</p>        
        </div>
+
        <div class="fensterobdNEW">
         <img  class="fensterobdcontentimgNEW" src="../../public/img/icons/oil_temperature.svg">
         <!-- <p  class="fensterobdcontenttext_unit">°</p> -->
@@ -50,7 +57,7 @@
        <div class="fensterobdNEW">
         <img  class="fensterobdcontentimgNEW" src="../../public/img/icons/coolant_temperature.svg">
         <!-- <p  class="fensterobdcontenttext_unit">°</p> -->
-        <p class="fensterobdcontenttext_value">43° </p>
+      <p class="fensterobdcontenttext_value">43° </p>
         <p class="fensterobdcontenttextNEW"> Kühlmitteltemperatur</p>
        </div>
        </div>
@@ -63,6 +70,7 @@
 <script>
 import Sidebarmenu from '../components/Sidebarmenu.vue'
 import {eventBus} from '../main.js';
+import { OBDStatus } from '../shared_data/queries'
 
 var serviceUUID = "e7810a71-73ae-499d-8c15-faa9aef0c3f2";
 var charUUID = "bef8d6c9-9c21-4c9e-b632-bd58c1009f9f";
@@ -79,7 +87,7 @@ export default {
     name: "OBDPage",
     data() {
         return{
-            isConnected: false,
+            isConnected: OBDStatus.state.connected,
             writeDelay: 50,
             currentRPM: "0",
             pidResponse: [],
@@ -97,7 +105,8 @@ export default {
             queue: ["010C1\r", "01051\r", "015C1\r", "015E1\r"],
             lastCommandSent: String,
             replyBytes: Number,
-            repliedCommand: null
+            repliedCommand: null,
+            infoIndex: 0
 
         }
     },
@@ -106,8 +115,9 @@ export default {
     },
     methods: {
         getDevices: function() {
-               this.isConnected = true;
-                eventBus.$emit('obdConnected', this.isConnected);
+            OBDStatus.setValue();
+            this.isConnected = OBDStatus.state.connected
+            eventBus.$emit('obdConnected', this.isConnected);
             navigator.bluetooth.requestDevice({
             acceptAllDevices: true,
             optionalServices: [serviceUUID]
@@ -272,6 +282,13 @@ export default {
         },
         testPopUp: function(title, text, color){
             eventBus.$emit('showPopUp', title, text, color);
+        },
+        cycleButtons: function(){
+          if(this.infoIndex == 2){
+            this.infoIndex = 0;
+          } else {
+            this.infoIndex++;
+          }
         }
     },
     mounted() {
@@ -303,7 +320,10 @@ grid-row-start:2;
 grid-row-end:3;
 height:100%;
 display:grid;
-grid-template-columns: 10% 80% 10%;
+grid-template-columns: 5% 90% 5%;
+  button{
+    margin: 0;
+  }
 }
 .Obdcards{
  color: white;
@@ -374,15 +394,21 @@ opacity: 0.7;
 //NEW
 .fensterobdNEW{
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: 35% 65%;
   border-radius: 10px;
   grid-template-rows: 25% 25% 25% 25%;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
   //background-color: rgba(255, 255, 255, 0.95);
-  background-image: linear-gradient(120deg, #ffffff 0%, #dfdfdf 100%);  margin: 5% 5%;
+  background-image: linear-gradient(120deg, #ffffff 0%, #fdfdfd 100%);
+  margin: 10% 5% 10% 10%;
   opacity: 1;
   height: 90%;
 }
+
+.fensterobdNEW:nth-of-type(2n){
+    margin: 10% 10% 10% 5%;
+}
+
 .fensterobdcontentimgNEW{
   grid-column-start: 1;
   grid-column-end: 1;
@@ -407,10 +433,11 @@ opacity: 0.7;
   grid-column-start: 2;
   grid-column-end: 2;
   grid-row-start: 2;
-  grid-row-end: 3;
+  grid-row-end: 4;
   margin-bottom:0%;
   justify-self: center;
-  font-size: 4em;
+  align-self: center;
+  font-size: 3em;
   color: #000;
   font-weight: 800;
   margin-right: .4em;

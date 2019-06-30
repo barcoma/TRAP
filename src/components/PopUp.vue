@@ -39,9 +39,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+
+//OBD_Warnung_Idee
 .popUp-container {
     position: relative;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(233, 230, 32, 0.95);
     top: 9.5rem;
     z-index: 9999999999999;
     width: 96%;
@@ -50,7 +52,7 @@ export default {
     height: 9rem;
     margin-top: -9rem;
     border-radius: 12px;
-    box-shadow: 3px 4px 42px black;
+    //box-shadow: 3px 4px 42px black;
     .popUp-close-btn {
         position: absolute;
         right: 0rem;
@@ -62,21 +64,72 @@ export default {
         top: 31%;
     }
     .popUp-title {
-        color: white;
+        color: black;
         margin-top: 1rem;
         font-size: 16px;
         position: absolute;
-        left: 5.5rem;
-        top: 1rem;
+        left: 7rem;
+        top: 2rem;
     }
     .popUp-description {
         position: absolute;
-        color: white;
-        margin-top: 3rem;  
-        left: 5.5rem; 
+        color: rgb(85, 85, 85);
+        margin-top: 3.7em;  
+        left: 7rem; 
         top: 1rem;
         text-align: left;
         margin-right: 1rem;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+// .popUp-container {
+//     position: relative;
+//     background-color: rgba(0, 0, 0, 0.8);
+//     top: 9.5rem;
+//     z-index: 9999999999999;
+//     width: 96%;
+//     margin-left: 2%;
+//     margin-right: 2%;
+//     height: 9rem;
+//     margin-top: -9rem;
+//     border-radius: 12px;
+//     box-shadow: 3px 4px 42px black;
+//     .popUp-close-btn {
+//         position: absolute;
+//         right: 0rem;
+//     }
+//     .popUp-warning-icon {
+//         font-size: 50px;
+//         position: absolute;
+//         left: 1rem;
+//         top: 31%;
+//     }
+//     .popUp-title {
+//         color: white;
+//         margin-top: 1rem;
+//         font-size: 16px;
+//         position: absolute;
+//         left: 5.5rem;
+//         top: 1rem;
+//     }
+//     .popUp-description {
+//         position: absolute;
+//         color: white;
+//         margin-top: 3rem;  
+//         left: 5.5rem; 
+//         top: 1rem;
+//         text-align: left;
+//         margin-right: 1rem;
+//     }
+// }
 </style>

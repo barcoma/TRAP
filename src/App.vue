@@ -46,6 +46,10 @@ export default {
 
 <style lang="scss">
 
+html {
+  scroll-behavior: smooth;
+}
+
 button:focus{
   border: none !important;
 }

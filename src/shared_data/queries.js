@@ -200,6 +200,15 @@ export const toggleNaviPoi = {
   }
 };
 
+export const OBDStatus = {
+  state:{
+    connected: false
+  },
+  setValue(value) {
+    this.state.connected = !value;
+  }
+};
+
 export const weather = {
   location: 'Wird geladen...',
   weatherIcon: '/img/icons/sunny_icon.png',
