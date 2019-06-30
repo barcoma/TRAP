@@ -14,7 +14,7 @@
         </v-avatar>
       </v-flex>
       <v-flex class="text-xs-left" xs12 offset-xs1>
-        <h1>Hi, Lisa!</h1>
+        <h1>Hi, {{ username }}</h1>
         <h3>Wo soll deine Reise hingehen?</h3>
       </v-flex>
 
@@ -101,6 +101,7 @@ import { weather, getLastDestination } from '../shared_data/queries'
       temp: weather.temp,
       temp_max: weather.temp_max,
       temp_min: weather.temp_min,
+      username: '',
       lastDestination: [{
         "name": "Keine letzten Ziele gefunden!",
         id: 0
@@ -135,11 +136,11 @@ import { weather, getLastDestination } from '../shared_data/queries'
           axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
               this.weather = true;
               this.currentLocation = response.data.name;
-              this.weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
+              this.weatherIcon = 'https://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
               this.temp = Math.round(response.data.main.temp);
               this.temp_max = Math.round(response.data.main.temp_max);
               this.temp_min = Math.round(response.data.main.temp_min);
-              var weatherIcon = 'http://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
+              var weatherIcon = 'https://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
               var temp = Math.round(response.data.main.temp);
               var temp_max = Math.round(response.data.main.temp_max);
               var temp_min = Math.round(response.data.main.temp_min);
@@ -150,6 +151,11 @@ import { weather, getLastDestination } from '../shared_data/queries'
             })
         }
       },
+    created() {
+      eventBus.$on('updateName', () => {
+        this.username = this.$cookie.get('Username');
+      })
+    },
     mounted() {
       if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
@@ -167,6 +173,8 @@ import { weather, getLastDestination } from '../shared_data/queries'
           this.lastDestination = response.data.lastDestination;
         }
       })
+
+      this.username = this.$cookie.get('Username');
     },
     computed: {
       items () {
