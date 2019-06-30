@@ -68,7 +68,7 @@
     <v-btn v-if="routeReady & !navigationMode" v-on:click="startRoute" round color="blue" dark class="start-navigation-button">Start</v-btn>
   </div>
   <div id="map" ref="map"></div>
-  <v-btn v-if="active_el == 2 && navigator.onLine" class="poi-offline-save" @click="precacheQuickSearch()">Orte offline speichern</v-btn>
+  <v-btn v-if="active_el == 2 && isOnline" class="poi-offline-save" @click="precacheQuickSearch()">Orte offline speichern</v-btn>
 </div>
 </template>
 
@@ -132,21 +132,22 @@ export default {
         servicestations: false,
         physicians: false
       },
-      foursquareQuery: gql` query foursquarePOI ($latitude: Float!, $longitude: Float!, $term: String, $categories: String) 
-      {
-        foursquarePOI (latitude: $latitude, longitude: $longitude, term: $term, categories: $categories) 
-          ${poiQueries.BODY_QUERY}
-      }`,
-      yelpQuery: gql` query yelpPOI ($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $categories: String) 
-      {
-        yelpPOI (latitude: $latitude, longitude: $longitude, term: $term, radius: $radius, limit: $limit, categories: $categories)
-          ${poiQueries.BODY_QUERY}      
-        }`,
-      customQuery: gql` query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) 
-      {
-        customPOI (latitude: $latitude, longitude: $longitude, term: $term)
-          ${poiQueries.BODY_QUERY}      
-      }`
+      isOnline: false
+      // foursquareQuery: gql` query foursquarePOI ($latitude: Float!, $longitude: Float!, $term: String, $categories: String) 
+      // {
+      //   foursquarePOI (latitude: $latitude, longitude: $longitude, term: $term, categories: $categories) 
+      //     ${poiQueries.BODY_QUERY}
+      // }`,
+      // yelpQuery: gql` query yelpPOI ($latitude: Float!, $longitude: Float!, $term: String, $radius: Int, $limit: Int, $categories: String) 
+      // {
+      //   yelpPOI (latitude: $latitude, longitude: $longitude, term: $term, radius: $radius, limit: $limit, categories: $categories)
+      //     ${poiQueries.BODY_QUERY}      
+      //   }`,
+      // customQuery: gql` query customPOI ($latitude: Float!, $longitude: Float!, $term: String!) 
+      // {
+      //   customPOI (latitude: $latitude, longitude: $longitude, term: $term)
+      //     ${poiQueries.BODY_QUERY}      
+      // }`
     }
   },
   methods: {
@@ -556,6 +557,7 @@ export default {
 
   if (navigator.onLine) {
     this.precacheQuickSearch();
+    this.isOnline = true;
   }
   this.directions.on("origin", e => {
     var lng = e.feature.geometry.coordinates[0];
