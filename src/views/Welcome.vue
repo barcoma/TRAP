@@ -1,8 +1,8 @@
 <template lang="html">
 <div class="welcomebackground" v-if="noName">
 
-<h3 class="Willkommen">Wilkommen bei TRAPP - deine Travel App </h3>
-<v-flex xs12 sm6 class="Nametext">
+<h3 class="Willkommen">Willkommen bei TRAPP - deine Travel App </h3>
+<v-flex class="Nametext">
           <v-text-field 
             label="Name"
             single-line
@@ -50,9 +50,10 @@ export default {
  background: url('../../public/img/backgroundobd.png') no-repeat center center fixed; 
   background-size: cover;
   height:100%;
+  width: 100%;
   display:grid;
   grid-template-rows: 20% 20% 20% 20% 20%;
-  z-index: 10000;
+  z-index: 999;
   position:absolute;
   grid-template-columns: 15% 70% 15%;
 }
@@ -60,6 +61,9 @@ export default {
     grid-row: 3;
     grid-column: 2;
     align-self: end;
+    justify-self: center;
+    width: 100%;
+    max-width: 25rem;
 }
 .Willkommen{
   font-size: 30px;
@@ -75,6 +79,9 @@ export default {
   grid-column-start: 2;
   grid-column-end:3;
   color:white;
+  width: 100%;
+  justify-self: center;
+  max-width: 25rem;
   background: -moz-linear-gradient(45deg, rgba(50,234,255,1) 0%, rgba(40,115,214,1) 0%, rgba(182,125,232,1) 100%, rgba(32,124,202,1) 100%); /* FF3.6-15 */
   background: -webkit-linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* Chrome10-25,Safari5.1-6 */
   background: linear-gradient(45deg, rgba(50,234,255,1) 0%,rgba(40,115,214,1) 0%,rgba(182,125,232,1) 100%,rgba(32,124,202,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
