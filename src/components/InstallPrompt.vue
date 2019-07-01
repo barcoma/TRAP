@@ -1,5 +1,5 @@
 <template>
-<div class="install-prompt" v-if="showInstallBanner == true && neverShowAgain == false">
+<div class="install-prompt" v-if="showInstallBanner == true && neverAgain == false">
     <v-btn fab dark small color="white" v-on:click="showInstallBanner=false" class="install-prompt-btn black--text" data-dismiss="alert">
       <v-icon dark @click="neverShowAgain()">close</v-icon>
     </v-btn>
@@ -27,6 +27,14 @@ export default {
       this.showInstallBanner = true;
       this.showWelcome = true;
     });
+
+    if (this.$cookie.get('neverShowAgain')) {
+      if (this.$cookie.get('neverShowAgain') == true) {
+        this.neverAgain = true;
+      } else {
+        this.neverAgain = false;
+      }
+    }
   },
   methods: {
     install: function() {
@@ -40,13 +48,6 @@ export default {
       this.neverAgain = true;
       this.$cookie.set('neverShowAgain', this.neverAgain, { expires: '10Y' });
     }
-  },
-  created() {
-    if(this.$cookie.get('neverShowAgain') == true) {
-        this.neverAgain = true;
-      } else {
-        this.neverAgain = false;
-      }
   }
 };
 </script>
