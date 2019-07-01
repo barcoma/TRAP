@@ -15,7 +15,7 @@ export default {
   name: 'installPrompt',
   data() {
     return {
-      showInstallBanner: true,
+      showInstallBanner: false,
       showWelcome: false,
       neverAgain: false
     };
