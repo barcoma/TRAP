@@ -4,9 +4,9 @@
       <!-- <div slot="message">
         
       </div> -->
-      <div slot-scope="props">
-        <p>Diese Website verwendet Cookies – nähere Informationen dazu und zu Ihren Rechten als Benutzer finden Sie in unserer <router-link to="/privacy">Datenschutzerklärung</router-link> am Ende der Seite. Klicken Sie auf „Ich stimme zu“, um Cookies zu akzeptieren und direkt unsere Website besuchen zu können.</p>
-        <button class="Cookie__button" @click="props.accept"><span>Aktzeptieren</span></button>
+      <div class="cookie-law" slot-scope="props">
+        <p>Diese Website verwendet Cookies – nähere Informationen dazu und zu Ihren Rechten als Benutzer finden Sie in unserer <router-link to="/privacy">Datenschutzerklärung</router-link> am Ende der Seite. Klicken Sie auf „Akzeptieren“, um Cookies zu akzeptieren und direkt unsere Website besuchen zu können.</p>
+        <button class="Cookie__button" @click="props.accept"><span>Akzeptieren</span></button>
       </div>
     </cookie-law>
     <welcome></welcome>

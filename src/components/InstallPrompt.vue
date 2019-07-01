@@ -15,10 +15,20 @@ export default {
   name: 'installPrompt',
   data() {
     return {
-      showInstallBanner: false,
+      showInstallBanner: true,
       showWelcome: false,
       neverAgain: false
     };
+  },
+  beforeCreate() {
+    console.log(this.$cookie.get('neverShowAgain'));
+    if (this.$cookie.get('neverShowAgain')) {
+      if (this.$cookie.get('neverShowAgain') == true) {
+        this.neverAgain = true;
+      } else {
+        this.neverAgain = false;
+      }
+    }
   },
   created() {
     window.addEventListener('beforeinstallprompt', e => {
@@ -27,14 +37,6 @@ export default {
       this.showInstallBanner = true;
       this.showWelcome = true;
     });
-
-    if (this.$cookie.get('neverShowAgain')) {
-      if (this.$cookie.get('neverShowAgain') == true) {
-        this.neverAgain = true;
-      } else {
-        this.neverAgain = false;
-      }
-    }
   },
   methods: {
     install: function() {
