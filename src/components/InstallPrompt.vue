@@ -1,7 +1,7 @@
 <template>
-<div class="install-prompt" v-if="showInstallBanner">
+<div class="install-prompt" v-if="showInstallBanner == true && neverShowAgain == false">
     <v-btn fab dark small color="white" v-on:click="showInstallBanner=false" class="install-prompt-btn black--text" data-dismiss="alert">
-      <v-icon dark>close</v-icon>
+      <v-icon dark @click="neverShowAgain()">close</v-icon>
     </v-btn>
     <a href="#" @click.prevent="install">App zum Homescreen hinzufügen</a>
 </div>
@@ -16,7 +16,8 @@ export default {
   data() {
     return {
       showInstallBanner: false,
-      showWelcome: false
+      showWelcome: false,
+      neverAgain: false
     };
   },
   created() {
@@ -28,13 +29,24 @@ export default {
     });
   },
   methods: {
-    install() {
+    install: function() {
       this.showInstallBanner = false;
       installEvent.prompt();
       installEvent.userChoice.then(() => {
         installEvent = null;
       });
+    },
+    neverShowAgain: function() {
+      this.neverAgain = true;
+      this.$cookie.set('neverShowAgain', this.neverAgain, { expires: '10Y' });
     }
+  },
+  created() {
+    if(this.$cookie.get('neverShowAgain') == true) {
+        this.neverAgain = true;
+      } else {
+        this.neverAgain = false;
+      }
   }
 };
 </script>

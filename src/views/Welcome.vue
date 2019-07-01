@@ -49,12 +49,13 @@ export default {
 .welcomebackground{
  background: url('../../public/img/backgroundobd.png') no-repeat center center fixed; 
   background-size: cover;
-  height:112%;
+  height:100%;
   display:grid;
   grid-template-rows: 20% 20% 20% 20% 20%;
   z-index: 10000;
-  position:relative;
+  position:absolute;
   grid-template-columns: 15% 70% 15%;
+  z-index: 9999999999999999;
 }
 .Nametext{
     grid-row: 3;
