@@ -123,12 +123,14 @@ import {eventBus} from '../main.js';
   }
 </script>
 
-<style lang="scss">
-div.v-list__tile__title {
+<style  lang="scss">
+.menulist{
+.v-list__tile__title {
    font-weight: 300;
    font-size: 20px;
    opacity: 1 !important;
    color:white !important;
+}
 }
 .burger.v-btn{
  top : 5px;
