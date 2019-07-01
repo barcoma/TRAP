@@ -21,6 +21,7 @@
         <ul>
             <li>Julien Bick</li>
             <li>Marco Balzer</li>
+            <li>Henri Joß</li>
             <li>Robin Schwab</li>
             <li>Jan Schultis</li>
         </ul>
