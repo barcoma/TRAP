@@ -33,9 +33,11 @@
       <v-btn v-if="display" color="blue" dark fab class="POI-suggestion-icon" v-on:click="querySearch(null, 'hotels')">
           <v-icon dark>hotel</v-icon>
       </v-btn>
-      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click='querySearch("food")'> <!-- v-on:click='' -->
+      <!--
+      <v-btn v-if="display" color="orange" dark fab class="POI-suggestion-icon" v-on:click='querySearch("food")'>v-on:click='' 
           <v-icon dark>shopping_cart</v-icon>
       </v-btn>
+      -->
       <v-btn v-if="display" color="green darken-1" dark fab class="POI-suggestion-icon" v-on:click="querySearch(null, 'servicestations')">
           <v-icon dark>local_gas_station</v-icon>
       </v-btn>
