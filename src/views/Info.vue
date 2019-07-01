@@ -12,7 +12,7 @@
         
         <h3>Betreuer:</h3>
         <ul>
-            <li>Prof. Wolfgang Taube</li>
+            <li>Prof. Dr. Wolfgang Taube</li>
         </ul>
     <!-- </div> -->
     <br>
