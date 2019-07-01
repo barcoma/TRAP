@@ -103,7 +103,7 @@
           // { title: 'Offline Karten', icon: 'map', href:"/map" },
           { title: 'Fahrzeug Diagnose', icon: 'directions_car', href:"/obd" },
           { title: 'Hilfe', icon: 'help', href:"/help" },
-          { title: 'Info', icon: 'info', href:"/welcome" },
+          { title: 'Info', icon: 'info', href:"/info" },
           // { title: 'Einstellungen', icon: 'settings', href:"/map" },
           { title: 'Impressum', icon: 'perm_identity', href:"/imprint" },
           { title: 'Datenschutz', icon: 'lock', href:"/privacy" }
