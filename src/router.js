@@ -10,6 +10,7 @@ import welcome from './views/Welcome.vue'
 import Imprint from './views/Imprint.vue'
 import PrivacyPolicy from './views/PrivacyPolicy.vue'
 import Help from './views/Help.vue'
+import Info from './views/Info.vue'
 
 Vue.use(Router)
 
@@ -64,6 +65,11 @@ export default new Router({
       path: '/help',
       name: 'help',
       component: Help
+    },
+    {
+      path: '/info',
+      name: 'info',
+      component: Info
     }
   ]
 })

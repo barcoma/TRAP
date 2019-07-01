@@ -5,6 +5,7 @@ import mapboxgl from 'mapbox-gl'
 import VueRouter from 'vue-router'
 import VueWorker from 'vue-worker'
 import router from './router'
+import VueCookie from 'vue-cookie'
 
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
@@ -134,6 +135,8 @@ Vue.use(VueApollo)
 Vue.use(VueRouter)
 Vue.use(Vuetify)
 Vue.use(VueWorker)
+Vue.use(VueCookie)
+
 
 const apolloProvider = new VueApollo({
   defaultClient: apolloClient
