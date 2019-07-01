@@ -12,7 +12,7 @@
         
         <h3>Betreuer:</h3>
         <ul>
-            <li>Prof. Wolfgang Taube</li>
+            <li>Prof. Dr. Wolfgang Taube</li>
         </ul>
     <!-- </div> -->
     <br>
@@ -21,6 +21,7 @@
         <ul>
             <li>Julien Bick</li>
             <li>Marco Balzer</li>
+            <li>Henri Joß</li>
             <li>Robin Schwab</li>
             <li>Jan Schultis</li>
         </ul>
