@@ -52,7 +52,8 @@
       <div v-if="weather" class="weather-container">
         <h3 class="weather-location">{{ currentLocation }}</h3>
         <p class="weather-temp"><span class="weather-temp-current">{{ temp }}&deg;C</span><br>{{ temp_max }}&deg;C / {{ temp_min }}&deg;C</p>
-        <div v-if="weather.weatherIcon != ''" class="weather-icon-container"><img :src="weatherIcon" class="weather-icon" alt="Weather icon"></div>
+        <!-- <div v-if="weather.weatherIcon != ''" class="weather-icon-container"><img :src="weatherIcon" class="weather-icon" alt="Weather icon"></div> -->
+        <div v-if="weather.weatherIcon != ''" class="weather-icon-container"><i :class="weatherIcon" class="weather-icon"></i></div>
       </div>
       <div v-else>
         <p>Wetter konnte nicht geladen werden</p>
@@ -136,15 +137,18 @@ import { weather, getLastDestination } from '../shared_data/queries'
           axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=fe3cea1e7566ca588e162814917a216f&units=metric`).then(response => {
               this.weather = true;
               this.currentLocation = response.data.name;
-              this.weatherIcon = 'https://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
+              // this.weatherIcon = 'https://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
+              this.weatherIcon = 'owi owi-' +  response.data.weather[0].icon;
               this.temp = Math.round(response.data.main.temp);
               this.temp_max = Math.round(response.data.main.temp_max);
               this.temp_min = Math.round(response.data.main.temp_min);
-              var weatherIcon = 'https://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
+              // var weatherIcon = 'https://openweathermap.org/img/w/' + response.data.weather[0].icon + '.png';
+              var weatherIcon = 'owi owi-' +  response.data.weather[0].icon;
               var temp = Math.round(response.data.main.temp);
               var temp_max = Math.round(response.data.main.temp_max);
               var temp_min = Math.round(response.data.main.temp_min);
               weather.updateWeatherData(response.data.name, weatherIcon, temp, temp_max, temp_min);
+              console.log(response.data);
             }, error => {
               this.weather = false;
               console.log("Weater API error");
@@ -404,6 +408,11 @@ hr.spacer {
  .burger.theme--dark.v-btn {
     color: black !important;
   }
+}
+
+.weather-icon {
+  font-size: 24pt;
+  color: white;
 }
 
 </style>

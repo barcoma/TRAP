@@ -20,7 +20,7 @@
             <p class="slider-value">Anzahl: <span id="demo"></span></p>
         </div>
         <div class="POI-search-amount">
-        {{amount.yelpAmount + amount.foursquareAmount}} Treffer!
+        {{amount.yelpAmount + amount.foursquareAmount}} Treffer
         </div>
         <button class="POI-filter-search" v-on:click="startSearch">Suche starten</button>
         <button class="POI-filter-cancel" @click="resetFilter(), $router.push('map');">Abbrechen</button>
