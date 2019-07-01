@@ -55,7 +55,6 @@ export default {
   z-index: 10000;
   position:absolute;
   grid-template-columns: 15% 70% 15%;
-  z-index: 9999999999999999;
 }
 .Nametext{
     grid-row: 3;
