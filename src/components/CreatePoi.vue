@@ -102,8 +102,8 @@ export default {
   },
   mounted(){
     mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyY29tYSIsImEiOiJjam9xM3gwYWYwMHlpM3ZrZmY4NWNwam9kIn0.TE3Zma1nEd5mbbdVCfQGMA';
-    this.lat = 48.218800;
-    this.long = 11.624707;
+    this.lat = 48.050010;
+    this.long = 8.210653;
     this.mainMap = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/streets-v9',
